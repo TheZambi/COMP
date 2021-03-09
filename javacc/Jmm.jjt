@@ -1,0 +1,203 @@
+options
+{
+    LOOKAHEAD=1;
+}
+
+PARSER_BEGIN(Jmm)
+
+
+public class Jmm
+{
+    public static void main(String args[]) throws ParseException {
+      	System.out.println("Write an arithmetic expression:");
+		Jmm myJmm = new Jmm(System.in);
+		SimpleNode root = myJmm.Program(); // returns reference to root node
+        	
+		root.dump(""); // prints the tree on the screen
+
+		//System.out.println("Expression value: "+myCalc.eval(root));
+    }
+	
+}
+
+PARSER_END(Jmm)
+
+SKIP :
+{
+	" " | "\r" | "\t" | "\n"
+}
+
+/*
+ * Comments
+ */
+<DEFAULT> MORE : { "//" : IN_SINGLE_LINE_COMMENT
+                 | <"/**" ~["/"]> : IN_FORMAL_COMMENT
+                 | "/*" : IN_MULTI_LINE_COMMENT
+}
+
+<IN_SINGLE_LINE_COMMENT> SPECIAL_TOKEN : {
+  <SINGLE_LINE_COMMENT: "\n" | "\r" | "\r\n"> : DEFAULT
+}
+
+<IN_FORMAL_COMMENT> SPECIAL_TOKEN : {
+  <FORMAL_COMMENT: "*/"> : DEFAULT
+}
+
+<IN_MULTI_LINE_COMMENT> SPECIAL_TOKEN : {
+  <MULTI_LINE_COMMENT: "*/"> : DEFAULT
+}
+
+<IN_SINGLE_LINE_COMMENT,IN_FORMAL_COMMENT,IN_MULTI_LINE_COMMENT> MORE : {
+  <~[]>
+}
+
+TOKEN:
+{
+        <IntegerLiteral: <DECIMAL_LITERAL> (["l","L"])?
+        | <HEX_LITERAL> (["l","L"])?
+        | <OCTAL_LITERAL> (["l","L"])?
+        | <BINARY_LITERAL> (["l","L"])?>
+        | <#DECIMAL_LITERAL: ["1"-"9"] (("_")* ["0"-"9"])*>
+        | <#HEX_LITERAL: "0" ["x","X"] ["0"-"9","a"-"f","A"-"F"] (("_")* ["0"-"9","a"-"f","A"-"F"])*>
+        | <#OCTAL_LITERAL: "0" (("_")* ["0"-"7"])*>
+        | <#BINARY_LITERAL: "0" ["b","B"] ["0","1"] (("_")* ["0","1"])*>
+        |   < Import: "import" >
+        |   < Class: "class" >
+        |   < Extends: "extends" >
+        |   < Public: "public" >
+        |   < Boolean: "boolean" >
+        |   < Static: "static" >
+        |   < Void: "void" >
+        |   < If: "if" >
+        |   < Else: "else" >
+        |   < While: "while" >
+        |   < String: "String" >
+        |   < True: "true" >
+        |   < False: "false" >
+        |   < This: "this" >
+        |   < New: "new" >
+        |   < And: "&&" >
+        |   < Length: "length" >
+        |   < Main: "main" >
+        |   < Int: "int" >
+        |   < Return: "return" >
+        |   < Identifier: (["a"-"z","A"-"Z","$"](["a"-"z","A"-"Z","0"-"9","_","$"])* | ("_")(["a"-"z","A"-"Z","0"-"9","_","$"])+) >
+}
+
+// ImportDeclaration, ClassDeclaration, EOF
+SimpleNode Program() #Program : {}
+{
+   ImportDeclaration()
+   ClassDeclaration()
+   <EOF> {return jjtThis;}
+}
+
+// {"import", Identifier,{”.”,Identifier },";"}
+void ImportDeclaration() #ImportDeclaration : {}
+{
+   (<Import> <Identifier> ("." <Identifier>)* ";" )*
+}
+
+//"class",Identifier,["extends",Identifier],"{",{VarDeclaration},{MethodDeclarationPublic}"}"
+void ClassDeclaration() #ClassDeclaration : {}
+{
+   <Class> <Identifier> [<Extends> <Identifier>] "{" (VarDeclaration())* (MethodDeclarationPublic())*"}"
+}
+
+//Type,Identifier,";"
+void VarDeclaration() #VarDeclaration : {}
+{
+   Type() <Identifier> ";"
+}
+//"public",MethodDeclaration
+void MethodDeclarationPublic() #VarDeclaration : {}
+{
+   <Public> MethodDeclaration()
+}
+
+//Type,Identifier,"(",[Type,Identifier,{",",Type,Identifier},],")","{",{VarDeclaration},{Statement},"return",Expression,";","}"
+//"static","void","main","(","String","[","]",Identifier,")","{",{VarDeclaration}, {Statement},"}";
+void MethodDeclaration() #MethodDeclaration : {}
+{
+   Type() <Identifier> "(" [Type() <Identifier> ("," Type() <Identifier> )*] ")"
+   "{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* <Return> Expression() ";" "}"
+   |
+   <Static> <Void> <Main> "(" <String> "[" "]" <Identifier> ")" "{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* "}"
+}
+
+//Statement =
+//     "{",{Statement},"}"
+//    |"if","(",Expression,")",Statement,"else",Statement
+//    |"while","(",Expression,")",Statement
+//    |Expression,";"
+//    |Identifier,StatementIdentifier
+//;
+
+void Statement() #Statement : {}
+{
+        "{" (Statement())* "}"
+       | "if" "(" Expression() ")" Statement() "else" Statement()
+       | "while" "(" Expression() ")" Statement()
+       | LOOKAHEAD(5) Expression() ";"
+       | <Identifier> StatementIdentifier()
+}
+
+//StatementIdentifier =
+//    "=",Expression,";"
+//    |"[",Expression,"]","=",Expression,";"
+//;
+
+void StatementIdentifier() #StatementIdentifier : {}
+{
+        "=" Expression() ";"
+        |
+        "[" Expression() "]" "=" Expression() ";"
+}
+
+// "int","[","]" | "boolean" | "int" | Identifier
+void Type() #Type: {}
+{
+
+    <Int> ["[" "]"] | <Boolean> | <Identifier>
+}
+
+void Expression() #Expression: {}
+{
+    ExpTerm() Expression2()
+}
+
+
+//    ("&&" | "<" | "+" | "-" | "*"| "/"),Expression,Expression2
+//    |"[",Expression,"]",Expression2
+//    |".","length",Expression2
+//    |".",Identifier,"(",[Expression{",",Expression}],")",Expression2
+void Expression2() #Expression2: {}
+{
+        [
+        (LOOKAHEAD(2) <And> | "<" | "+" | "-" | "*"| "/") Expression() Expression2()
+        |"[" Expression() "]" Expression2()
+        |"." ( <Length> Expression2() | <Identifier> "(" [Expression() ("," Expression())*] ")" Expression2()) //. Identifier generates lookahead
+        ]
+}
+
+//ExpTerm =
+//      IntegerLiteral
+//    | "true"
+//    | "false"
+//    | Identifier
+//    | "this"
+//    | "new",Identifier,"(",")"
+//	  | "new","int","[",Expression,"]"
+//    | "!",Expression
+//    | "(",Expression,")"
+void ExpTerm() #ExpTerm: {}
+{
+    <IntegerLiteral>
+    | <True>
+    | <False>
+    | <This>
+    | <New> (<Identifier> "(" ")" | <Int> "[" Expression() "]")
+    | "!" Expression()
+    | "(" Expression() ")"
+    | <Identifier>
+}
