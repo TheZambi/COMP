@@ -170,16 +170,6 @@ void Type() #Type: {}
 
 void Expression() #Expression: {}
 {
-    Expression2()
-}
-
-
-//    ("&&" | "<" | "+" | "-" | "*"| "/"),Expression,Expression2
-//    |"[",Expression,"]",Expression2
-//    |".","length",Expression2
-//    |".",Identifier,"(",[Expression{",",Expression}],")",Expression2
-void Expression2() #Expression2: {}
-{
     LogicalANDExpression()
 }
 
@@ -190,7 +180,7 @@ void LogicalANDExpression() : {}
 
 void RelationalExpression() : {}
 {
-	AdditiveExpression() [LOOKAHEAD(2) ( "<" ) RelationalExpression() ]
+	AdditiveExpression() [LOOKAHEAD(2) "<" RelationalExpression() ]
 }
 void AdditiveExpression() : {}
 {
@@ -207,13 +197,13 @@ void PostfixExpression() : {}
 {
 	ExpTerm() ( "[" Expression() "]" |
 	                      "(" [ LOOKAHEAD(ArgumentExpressionList()) ArgumentExpressionList() ] ")" |
-	  					  "." ( <Length>  | <Identifier> "(" [ArgumentExpressionList() ] ")" )
+	  					  "." ( <Length> | <Identifier> "(" [ArgumentExpressionList() ] ")" )
 	  					  )*
 }
 
 void ArgumentExpressionList() : {}
 {
-	Expression2() ( "," Expression2() )*
+	Expression() ( "," Expression() )*
 }
 
 //ExpTerm =
