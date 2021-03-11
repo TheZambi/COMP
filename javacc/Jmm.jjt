@@ -170,7 +170,7 @@ void Type() #Type: {}
 
 void Expression() #Expression: {}
 {
-    ExpTerm() Expression2()
+    Expression2()
 }
 
 
@@ -207,7 +207,7 @@ void PostfixExpression() : {}
 {
 	ExpTerm() ( "[" Expression() "]" |
 	                      "(" [ LOOKAHEAD(ArgumentExpressionList()) ArgumentExpressionList() ] ")" |
-	  					  "." <Identifier>
+	  					  "." ( <Length>  | <Identifier> "(" [ArgumentExpressionList() ] ")" )
 	  					  )*
 }
 

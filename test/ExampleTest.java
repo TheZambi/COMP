@@ -16,7 +16,7 @@ public class ExampleTest {
     @Test
     public void testExpression() {
 //        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-        var fileContents = SpecsIo.read("./test/fixtures/public/Life.jmm");
+        var fileContents = SpecsIo.read("./test/fixtures/public/Lazysort.jmm");
         System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
     }
 
