@@ -138,7 +138,7 @@ void Statement() #Statement : {}
         CompoundStatement()|
         SelectionStatement()|
         IterationStatement()|
-        [LOOKAHEAD(5) <Identifier> [ "[" Expression() "]"  ] "="] Expression() ";"
+        [LOOKAHEAD(<Identifier> ["[" Expression() "]"] "=") <Identifier> ["[" Expression() "]"] "=" ]Expression() ";"
 
 }
 
@@ -157,16 +157,12 @@ void IterationStatement() #IterationStatement : {}
     "while" "(" Expression() ")" Statement()
 }
 
-
-
 // "int","[","]" | "boolean" | "int" | Identifier
 void Type() #Type: {}
 {
 
     <Int> ["[" "]"] | <Boolean> | <Identifier>
 }
-
-
 
 void Expression() #Expression: {}
 {
@@ -175,13 +171,14 @@ void Expression() #Expression: {}
 
 void LogicalANDExpression() : {}
 {
-	RelationalExpression() [LOOKAHEAD(2) "&&" LogicalANDExpression() ]
+	RelationalExpression() [LOOKAHEAD(2) <And> LogicalANDExpression() ]
 }
 
 void RelationalExpression() : {}
 {
 	AdditiveExpression() [LOOKAHEAD(2) "<" RelationalExpression() ]
 }
+
 void AdditiveExpression() : {}
 {
 	MultiplicativeExpression() [LOOKAHEAD(2) ( "+" | "-" ) AdditiveExpression() ]
@@ -196,10 +193,10 @@ void MultiplicativeExpression() : {}
 void PostfixExpression() : {}
 {
 	ExpTerm() ( "[" Expression() "]" |
-	                      "(" [ LOOKAHEAD(ArgumentExpressionList()) ArgumentExpressionList() ] ")" |
-	  					  "." ( <Length> | <Identifier> "(" [ArgumentExpressionList() ] ")" )
-	  					  )*
-}
+                  "(" [ LOOKAHEAD(ArgumentExpressionList()) ArgumentExpressionList() ] ")" |
+                  "." ( <Length> | <Identifier> "(" [ArgumentExpressionList() ] ")" )
+                  )*
+    }
 
 void ArgumentExpressionList() : {}
 {
