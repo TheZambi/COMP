@@ -135,24 +135,29 @@ void MethodDeclaration() #MethodDeclaration : {}
 
 void Statement() #Statement : {}
 {
-        "{" (Statement())* "}"
-       | "if" "(" Expression() ")" Statement() "else" Statement()
-       | "while" "(" Expression() ")" Statement()
-       | LOOKAHEAD(5) Expression() ";"
-       | <Identifier> StatementIdentifier()
+        CompoundStatement()|
+        SelectionStatement()|
+        IterationStatement()|
+        [LOOKAHEAD(5) <Identifier> [ "[" Expression() "]"  ] "="] Expression() ";"
+
 }
 
-//StatementIdentifier =
-//    "=",Expression,";"
-//    |"[",Expression,"]","=",Expression,";"
-//;
-
-void StatementIdentifier() #StatementIdentifier : {}
+void CompoundStatement() #CompoundStatement : {}
 {
-        "=" Expression() ";"
-        |
-        "[" Expression() "]" "=" Expression() ";"
+    "{" (Statement())* "}"
 }
+
+void SelectionStatement() #SelectionStatement : {}
+{
+    "if" "(" Expression() ")" Statement() "else" Statement()
+}
+
+void IterationStatement() #IterationStatement : {}
+{
+    "while" "(" Expression() ")" Statement()
+}
+
+
 
 // "int","[","]" | "boolean" | "int" | Identifier
 void Type() #Type: {}
@@ -160,6 +165,8 @@ void Type() #Type: {}
 
     <Int> ["[" "]"] | <Boolean> | <Identifier>
 }
+
+
 
 void Expression() #Expression: {}
 {
@@ -173,11 +180,40 @@ void Expression() #Expression: {}
 //    |".",Identifier,"(",[Expression{",",Expression}],")",Expression2
 void Expression2() #Expression2: {}
 {
-        [
-        (LOOKAHEAD(2) <And> | "<" | "+" | "-" | "*"| "/") Expression() Expression2()
-        |"[" Expression() "]" Expression2()
-        |"." ( <Length> Expression2() | <Identifier> "(" [Expression() ("," Expression())*] ")" Expression2()) //. Identifier generates lookahead
-        ]
+    LogicalANDExpression()
+}
+
+void LogicalANDExpression() : {}
+{
+	RelationalExpression() [LOOKAHEAD(2) "&&" LogicalANDExpression() ]
+}
+
+void RelationalExpression() : {}
+{
+	AdditiveExpression() [LOOKAHEAD(2) ( "<" ) RelationalExpression() ]
+}
+void AdditiveExpression() : {}
+{
+	MultiplicativeExpression() [LOOKAHEAD(2) ( "+" | "-" ) AdditiveExpression() ]
+}
+
+void MultiplicativeExpression() : {}
+{
+	 PostfixExpression() [LOOKAHEAD(2) ( "*" | "/" ) MultiplicativeExpression() ]
+}
+
+
+void PostfixExpression() : {}
+{
+	ExpTerm() ( "[" Expression() "]" |
+	                      "(" [ LOOKAHEAD(ArgumentExpressionList()) ArgumentExpressionList() ] ")" |
+	  					  "." <Identifier>
+	  					  )*
+}
+
+void ArgumentExpressionList() : {}
+{
+	Expression2() ( "," Expression2() )*
 }
 
 //ExpTerm =
