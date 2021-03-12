@@ -120,7 +120,7 @@ void MethodDeclarationPublic() #VarDeclaration : {}
 void MethodDeclaration() #MethodDeclaration : {}
 {
    Type() <Identifier> "(" [Type() <Identifier> ("," Type() <Identifier> )*] ")"
-   "{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* <Return> Expression() ";" "}"
+       "{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* <Return> Expression() ";" "}"
    |
    <Static> <Void> <Main> "(" <String> "[" "]" <Identifier> ")" "{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* "}"
 }
@@ -171,29 +171,34 @@ void Expression() #Expression: {}
 
 void LogicalANDExpression() : {}
 {
-	RelationalExpression() [LOOKAHEAD(2) <And> LogicalANDExpression() ]
+	RelationalExpression() [ <And> LogicalANDExpression() ]
 }
 
 void RelationalExpression() : {}
 {
-	AdditiveExpression() [LOOKAHEAD(2) "<" RelationalExpression() ]
+	AdditiveExpression() [ "<" RelationalExpression() ]
 }
 
 void AdditiveExpression() : {}
 {
-	MultiplicativeExpression() [LOOKAHEAD(2) ( "+" | "-" ) AdditiveExpression() ]
+	MultiplicativeExpression() [( "+" | "-" ) AdditiveExpression() ]
 }
 
 void MultiplicativeExpression() : {}
 {
-	 PostfixExpression() [LOOKAHEAD(2) ( "*" | "/" ) MultiplicativeExpression() ]
+	 NotExpression() [( "*" | "/" ) MultiplicativeExpression() ]
+}
+
+void NotExpression() #NotExpression : {}
+{
+    [ "!" ] PostfixExpression()
 }
 
 
 void PostfixExpression() : {}
 {
 	ExpTerm() ( "[" Expression() "]" |
-                  "(" [ LOOKAHEAD(ArgumentExpressionList()) ArgumentExpressionList() ] ")" |
+                  "(" [ ArgumentExpressionList() ] ")" |
                   "." ( <Length> | <Identifier> "(" [ArgumentExpressionList() ] ")" )
                   )*
     }
@@ -220,7 +225,6 @@ void ExpTerm() #ExpTerm: {}
     | <False>
     | <This>
     | <New> (<Identifier> "(" ")" | <Int> "[" Expression() "]")
-    | "!" Expression()
     | "(" Expression() ")"
     | <Identifier>
 }
