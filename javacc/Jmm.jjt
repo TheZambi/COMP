@@ -176,6 +176,8 @@ void error_skipto(int kind) {
         System.out.println(t.image);
         Token wtv = getToken(1);
     }
+
+
 }
 
 
