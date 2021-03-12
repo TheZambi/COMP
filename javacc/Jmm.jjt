@@ -62,6 +62,7 @@ TOKEN:
         | <#OCTAL_LITERAL: "0" (("_")* ["0"-"7"])*>
         | <#BINARY_LITERAL: "0" ["b","B"] ["0","1"] (("_")* ["0","1"])*>
         |   < Import: "import" >
+        |   < Open_Bracket: "{" >
         |   < Class: "class" >
         |   < Extends: "extends" >
         |   < Public: "public" >
@@ -101,7 +102,7 @@ void ImportDeclaration() #ImportDeclaration : {}
 //"class",Identifier,["extends",Identifier],"{",{VarDeclaration},{MethodDeclarationPublic}"}"
 void ClassDeclaration() #ClassDeclaration : {}
 {
-   <Class> <Identifier> [<Extends> <Identifier>] "{" (VarDeclaration())* (MethodDeclarationPublic())*"}"
+   <Class> <Identifier> [<Extends> <Identifier>] "{" (VarDeclaration())* (MethodDeclarationPublic())* "}"
 }
 
 //Type,Identifier,";"
@@ -138,7 +139,7 @@ void Statement() #Statement : {}
         CompoundStatement()|
         SelectionStatement()|
         IterationStatement()|
-        [LOOKAHEAD(<Identifier> ["[" Expression() "]"] "=") <Identifier> ["[" Expression() "]"] "=" ]Expression() ";"
+        [LOOKAHEAD(<Identifier> ["[" Expression() "]"] "=") <Identifier> ["[" Expression() "]"] "=" ] Expression() ";"
 
 }
 
@@ -154,8 +155,29 @@ void SelectionStatement() #SelectionStatement : {}
 
 void IterationStatement() #IterationStatement : {}
 {
-    "while" "(" Expression() ")" Statement()
+    "while"
+    try
+    {
+       "(" Expression() ")"
+    }
+    catch(ParseException e){
+        System.out.println(e.toString());
+        error_skipto(Open_Bracket);
+    }
+    Statement()
 }
+
+JAVACODE
+void error_skipto(int kind) {
+    Token t = getToken(0);
+    System.out.println(t.image);
+    while (t.next.kind != EOF && t.next.kind != kind) {
+        t = getNextToken();
+        System.out.println(t.image);
+        Token wtv = getToken(1);
+    }
+}
+
 
 // "int","[","]" | "boolean" | "int" | Identifier
 void Type() #Type: {}
