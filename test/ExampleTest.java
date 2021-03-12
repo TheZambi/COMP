@@ -76,4 +76,14 @@ public class ExampleTest {
         System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
     }
 
+<<<<<<< HEAD
+=======
+
+    @Test
+    public void failCompleteWhileTest() {
+//        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
+        var fileContents = SpecsIo.read("./test/fixtures/public/fail/syntactical/CompleteWhileTest.jmm");
+        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
+    }
+>>>>>>> merge
 }
