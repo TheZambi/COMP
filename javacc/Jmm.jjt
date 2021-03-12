@@ -63,6 +63,7 @@ TOKEN:
         | <#BINARY_LITERAL: "0" ["b","B"] ["0","1"] (("_")* ["0","1"])*>
         |   < Import: "import" >
         |   < Open_Bracket: "{" >
+        |   < Close_Parenthesis: ")" >
         |   < Class: "class" >
         |   < Extends: "extends" >
         |   < Public: "public" >
@@ -162,19 +163,25 @@ void IterationStatement() #IterationStatement : {}
     }
     catch(ParseException e){
         System.out.println(e.toString());
-        error_skipto(Open_Bracket);
+        error_skipto(Close_Parenthesis);
     }
     Statement()
+
 }
 
 JAVACODE
 void error_skipto(int kind) {
+
     Token t = getToken(0);
     System.out.println(t.image);
     while (t.next.kind != EOF && t.next.kind != kind) {
         t = getNextToken();
         System.out.println(t.image);
         Token wtv = getToken(1);
+    }
+
+    while (getToken(1).kind == kind) {
+        t = getNextToken();
     }
 
 

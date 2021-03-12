@@ -45,6 +45,6 @@ class Worker extends Person {
             1;
         }
 
-        while(else;) 1;
+        while(else;)  1+1;
     }
 }
