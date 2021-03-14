@@ -3,9 +3,7 @@
 import pt.up.fe.comp.jmm.JmmNode;
 
 import java.lang.RuntimeException;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 
 public
@@ -17,16 +15,19 @@ class SimpleNode implements Node, JmmNode {
   protected Object value;
   protected Jmm parser;
 
-    // added
-    public int val;
-    public Operator op = null;
+  // added
+  public Map<String, String> info;
+  public int val;
+  public Operator op = null;
 
   public SimpleNode(int i) {
+    info = new HashMap<>();
     id = i;
   }
 
   public SimpleNode(Jmm p, int i) {
     this(i);
+    info = new HashMap<>();
     parser = p;
   }
 
@@ -36,19 +37,25 @@ class SimpleNode implements Node, JmmNode {
   }
   
   public List<String> getAttributes() {
-	throw new RuntimeException("Not implemented yet");
+    return new ArrayList<String>(info.keySet());
   }
 
   public void put(String attribute, String value) {
-	throw new RuntimeException("Not implemented yet");	  
+    this.info.put(attribute,value);
   }
 
   public String get(String attribute) {
-	throw new RuntimeException("Not implemented yet");
+	return this.info.get(attribute);
   }
   
   public List<JmmNode> getChildren() {
-    return (children == null) ? new ArrayList<>() : Arrays.asList((JmmNode[])children);
+    List a = new ArrayList();
+    if(children!=null)
+      for(int i=0;i<children.length;i++)
+      {
+        a.add((JmmNode)children[i]);
+      }
+    return (children == null) ? new ArrayList<>() : a;
   }
   
   public int getNumChildren() {
@@ -111,6 +118,7 @@ class SimpleNode implements Node, JmmNode {
 
   public void dump(String prefix) {
     System.out.println(toString(prefix));
+
     if (children != null) {
       for (int i = 0; i < children.length; ++i) {
         SimpleNode n = (SimpleNode)children[i];

@@ -95,36 +95,34 @@ SimpleNode Program() #Program : {}
 }
 
 // {"import", Identifier,{”.”,Identifier },";"}
-void ImportDeclaration() #ImportDeclaration : {}
+void ImportDeclaration() #void : {Token t; String acc;}
 {
-   (<Import> <Identifier> ("." <Identifier>)* ";" )*
+   ((<Import> t=<Identifier>{acc = t.image;} ("." t=<Identifier>{acc += "." + t.image;})* ";" {jjtThis.put("import",acc);}) #Import )*
 }
 
 //"class",Identifier,["extends",Identifier],"{",{VarDeclaration},{MethodDeclarationPublic}"}"
-void ClassDeclaration() #ClassDeclaration : {}
+void ClassDeclaration() #Class : {Token t, t2;}
 {
-   <Class> <Identifier> [<Extends> <Identifier>] "{" (VarDeclaration())* (MethodDeclarationPublic())* "}"
+  <Class> t=<Identifier>{jjtThis.put("className",t.image);}#ClassName
+  [<Extends> t2=<Identifier>{jjtThis.put("extends",t2.image);} #Extends]
+  "{" (VarDeclaration())* (<Public> MethodDeclaration())* "}"
 }
 
+
 //Type,Identifier,";"
-void VarDeclaration() #VarDeclaration : {}
+void VarDeclaration() #VarDeclaration : {Token t;}
 {
-   Type() <Identifier> ";"
-}
-//"public",MethodDeclaration
-void MethodDeclarationPublic() #VarDeclaration : {}
-{
-   <Public> MethodDeclaration()
+   Type() t=<Identifier>{jjtThis.put("varName",t.image);} #Identifier ";"
 }
 
 //Type,Identifier,"(",[Type,Identifier,{",",Type,Identifier},],")","{",{VarDeclaration},{Statement},"return",Expression,";","}"
 //"static","void","main","(","String","[","]",Identifier,")","{",{VarDeclaration}, {Statement},"}";
-void MethodDeclaration() #MethodDeclaration : {}
+void MethodDeclaration() #MethodDeclaration : {Token t;}
 {
-   Type() <Identifier> "(" [Type() <Identifier> ("," Type() <Identifier> )*] ")"
+   Type() t=<Identifier>{jjtThis.put("methodName",t.image);}#Method "(" [Type() <Identifier> ("," Type() <Identifier> )*] ")"
        "{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* <Return> Expression() ";" "}"
    |
-   <Static> <Void> <Main> "(" <String> "[" "]" <Identifier> ")" "{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* "}"
+   (<Static> <Void> <Main>)#Main "(" <String> "[" "]" <Identifier> ")" "{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* "}"
 }
 
 //Statement =
@@ -189,52 +187,62 @@ void error_skipto(int kind) {
 
 
 // "int","[","]" | "boolean" | "int" | Identifier
-void Type() #Type: {}
+void Type() #Type: {Token t;String acc;}
 {
-
-    <Int> ["[" "]"] | <Boolean> | <Identifier>
+    <Int>{acc="int";} ["[" "]" {acc+="Array";}]{jjtThis.put("type",acc);}
+    | <Boolean> {jjtThis.put("type","Boolean");}
+    | t=<Identifier>{jjtThis.put("type",t.image);}
 }
 
-void Expression() #Expression: {}
+void Expression() #void: {}
 {
     LogicalANDExpression()
 }
 
-void LogicalANDExpression() #LogicalANDExpression : {}
+void LogicalANDExpression() #void : {}
 {
-	RelationalExpression() [ <And> LogicalANDExpression() ]
+	RelationalExpression() [ <And>  LogicalANDExpression() #And(2) ]
 }
 
-void RelationalExpression() #RelationalExpression : {}
+void RelationalExpression() #void : {}
 {
-	AdditiveExpression() [ "<" RelationalExpression() ]
+	AdditiveExpression() [ "<" RelationalExpression() #Lesser(2)]
 }
 
-void AdditiveExpression() #AdditiveExpression : {}
+void AdditiveExpression() #void : {}
 {
-	MultiplicativeExpression() [( "+" | "-" ) AdditiveExpression() ]
+	MultiplicativeExpression() [ "+" AdditiveExpression() #Add(2)
+	                            | "-" AdditiveExpression() #Sub(2)]
 }
 
-void MultiplicativeExpression() #MultiplicativeExpression : {}
+void MultiplicativeExpression() #void : {}
 {
-	 NotExpression() [( "*" | "/" ) MultiplicativeExpression() ]
+	 NotExpression() [ "*" MultiplicativeExpression() #Mul(2)
+	                   | "/" MultiplicativeExpression() #Div(2)]
 }
 
-void NotExpression() #NotExpression : {}
+void NotExpression() #void : {}
 {
-    [ "!" ] PostfixExpression()
+    [ "!" #Not] PostfixExpression()
 
 }
 
-void PostfixExpression() #PostfixExpression : {}
+void PostfixExpression() #void : {Token t;}
 {
-	ExpTerm() ( "[" Expression() "]" |
-                  "(" [ ArgumentExpressionList() ] ")" |
-                  "." ( <Length> | <Identifier> "(" [ArgumentExpressionList() ] ")" )
+	ExpTerm() ( "[" Expression() #Indexing(2) "]" |
+                  ("(" [ ArgumentExpressionList()]#Args ")")#FunctionCall(2) |
+                  "." (<Length> #Length(1)
+                      | MethodCall() #MethodCall(2) )
                   )*
 }
 
-void ArgumentExpressionList() #ArgumentExpressionList : {}
+void MethodCall() #FunctionCall : {Token t;}
+{
+	t=<Identifier> "(" [ArgumentExpressionList()] #Args")"{jjtThis.put("methodName",t.image);}
+
+}
+
+void ArgumentExpressionList() #void : {}
 {
 	Expression() ( "," Expression() )*
 }
@@ -249,13 +257,13 @@ void ArgumentExpressionList() #ArgumentExpressionList : {}
 //	  | "new","int","[",Expression,"]"
 //    | "!",Expression
 //    | "(",Expression,")"
-void ExpTerm() #ExpTerm: {}
+void ExpTerm() #Value: {Token t;}
 {
-    <IntegerLiteral>
-    | <True>
-    | <False>
-    | <This>
+    t=<IntegerLiteral>{jjtThis.put("int",t.image);}
+    | t=<True>{jjtThis.put("boolean",t.image);}
+    | t=<False>{jjtThis.put("boolean",t.image);}
+    | t=<This>{jjtThis.put("this",t.image);}
     | <New> (<Identifier> "(" ")" | <Int> "[" Expression() "]")
     | "(" Expression() ")"
-    | <Identifier>
+    | t=<Identifier>{jjtThis.put("object",t.image);}
 }
