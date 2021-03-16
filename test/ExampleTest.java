@@ -8,6 +8,8 @@ import java.util.Properties;
 import java.io.StringReader;
 
 import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jmm.JmmParserResult;
+import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.specs.util.SpecsIo;
 
 public class ExampleTest {
@@ -27,13 +29,12 @@ public class ExampleTest {
 //        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
 //    }
 
-    @Test
-    public void testHelloWorld() {
-//        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-        var fileContents = SpecsIo.read("./test/fixtures/public/HelloWorld.jmm");
-        System.out.println( TestUtils.parse(fileContents).getRootNode().toJson());
-
-    }
+//    @Test
+//    public void testHelloWorld() {
+//        var fileContents = SpecsIo.read("./test/fixtures/public/HelloWorld.jmm");
+//        System.out.println( TestUtils.parse(fileContents).getRootNode().toJson());
+//
+//    }
 //
 //    @Test
 //    public void testLazysort() {
@@ -77,10 +78,14 @@ public class ExampleTest {
 //        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
 //    }
 //
-//    @Test
-//    public void failCompleteWhileTest() {
-////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-//        var fileContents = SpecsIo.read("./test/fixtures/public/fail/syntactical/CompleteWhileTest.jmm");
-//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-//    }
+    @Test
+    public void failCompleteWhileTest() {
+        var fileContents = SpecsIo.read("./test/fixtures/public/fail/syntactical/CompleteWhileTest.jmm");
+        JmmParserResult result = TestUtils.parse(fileContents);
+
+//        System.out.println( result.getRootNode().toJson()); //prints ast in json format
+
+//        for(Report r: result.getReports()) //prints errors in json format
+//            System.out.println(r.toJson());
+    }
 }

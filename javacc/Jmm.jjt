@@ -5,19 +5,24 @@ options
 
 PARSER_BEGIN(Jmm)
 
-
+import pt.up.fe.comp.jmm.report.*;
+import java.util.ArrayList;
+import java.util.List;
 public class Jmm
 {
+    public List<Report> reports = new ArrayList<Report>();
+
     public static void main(String args[]) throws ParseException {
       	System.out.println("Write an arithmetic expression:");
 		Jmm myJmm = new Jmm(System.in);
-		SimpleNode root = myJmm.Program(); // returns reference to root node
-        	
-		root.dump(""); // prints the tree on the screen
 
-		//System.out.println("Expression value: "+myCalc.eval(root));
+		SimpleNode root = myJmm.Program(); // returns reference to root node
+
+//		root.dump(""); // prints the tree on the screen
+
+
+//		System.out.println("Expression value: ");
     }
-	
 }
 
 PARSER_END(Jmm)
@@ -89,6 +94,7 @@ TOKEN:
 // ImportDeclaration, ClassDeclaration, EOF
 SimpleNode Program() #Program : {}
 {
+
    ImportDeclaration()
    ClassDeclaration()
    <EOF> {return jjtThis;}
@@ -103,8 +109,8 @@ void ImportDeclaration() #void : {Token t; String acc;}
 //"class",Identifier,["extends",Identifier],"{",{VarDeclaration},{MethodDeclarationPublic}"}"
 void ClassDeclaration() #Class : {Token t, t2;}
 {
-  <Class> t=<Identifier>{jjtThis.put("className",t.image);}#ClassName
-  [<Extends> t2=<Identifier>{jjtThis.put("extends",t2.image);} #Extends]
+  <Class> t=<Identifier>{jjtThis.put("className",t.image);}
+  [<Extends> t2=<Identifier>{jjtThis.put("extends",t2.image);}]
   "{" (VarDeclaration())* (<Public> MethodDeclaration())* "}"
 }
 
@@ -160,7 +166,11 @@ void IterationStatement() #IterationStatement : {}
        "(" Expression() ")"
     }
     catch(ParseException e){
-        System.out.println(e.toString());
+        String exception = e.toString();
+//        System.out.println(e);
+        int line = Integer.parseInt(exception.split("line ")[1].split(",")[0]); //gets error line
+
+        this.reports.add(new Report(ReportType.ERROR,Stage.SYNTATIC,line, "Error parsing while expression" ));
         error_skipto(Close_Parenthesis);
     }
     Statement()
@@ -171,10 +181,8 @@ JAVACODE
 void error_skipto(int kind) {
 
     Token t = getToken(0);
-    System.out.println(t.image);
     while (t.next.kind != EOF && t.next.kind != kind) {
         t = getNextToken();
-        System.out.println(t.image);
         Token wtv = getToken(1);
     }
 
@@ -236,7 +244,7 @@ void PostfixExpression() #void : {Token t;}
                   )*
 }
 
-void MethodCall() #FunctionCall : {Token t;}
+void MethodCall() #MethodCall : {Token t;}
 {
 	t=<Identifier> "(" [ArgumentExpressionList()] #Args")"{jjtThis.put("methodName",t.image);}
 
@@ -247,16 +255,6 @@ void ArgumentExpressionList() #void : {}
 	Expression() ( "," Expression() )*
 }
 
-//ExpTerm =
-//      IntegerLiteral
-//    | "true"
-//    | "false"
-//    | Identifier
-//    | "this"
-//    | "new",Identifier,"(",")"
-//	  | "new","int","[",Expression,"]"
-//    | "!",Expression
-//    | "(",Expression,")"
 void ExpTerm() #Value: {Token t;}
 {
     t=<IntegerLiteral>{jjtThis.put("int",t.image);}
