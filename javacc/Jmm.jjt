@@ -144,7 +144,7 @@ void Statement() #Statement : {}
         CompoundStatement()|
         SelectionStatement()|
         IterationStatement()|
-        [LOOKAHEAD(<Identifier> ["[" Expression() "]"] "=") <Identifier> ["[" Expression() "]"] "=" ] Expression() ";"
+        [LOOKAHEAD(2) <Identifier> ["[" Expression() "]"] "=" ] Expression() ";"
 
 }
 
