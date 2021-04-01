@@ -1,14 +1,6 @@
 import ioPlus;
-class HelloWorld extends a{
-
-public boolean init() {
-    return true;
-  }
+class HelloWorld {
 	public static void main(String[] args) {
-	    ola(arg1,arg2);
-	    lengthTeste.length;
-	    teste.call(arg1, arg2);
-	    1+1*2-a[1];
 		ioPlus.printHelloWorld();
 	}
 }

@@ -14,75 +14,67 @@ import pt.up.fe.specs.util.SpecsIo;
 
 public class ExampleTest {
 
+    private void testParse(String filename) {
+        testParse(filename, false);
+    }
 
-//    @Test
-//    public void testWhileAndIF() {
-////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-//        var fileContents = SpecsIo.read("./test/fixtures/public/WhileAndIF.jmm");
-//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-//    }
-//
-//    @Test
-//    public void testFindMaximum() {
-////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-//        var fileContents = SpecsIo.read("./test/fixtures/public/FindMaximum.jmm");
-//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-//    }
-//
-//    @Test
-//    public void testHelloWorld() {
-//        var fileContents = SpecsIo.read("./test/fixtures/public/HelloWorld.jmm");
-//        System.out.println( TestUtils.parse(fileContents).getRootNode().toJson());
-//
-//    }
-//
-//    @Test
-//    public void testLazysort() {
-////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-//        var fileContents = SpecsIo.read("./test/fixtures/public/Lazysort.jmm");
-//        JmmParserResult result = TestUtils.parse(fileContents);
-//
-//        System.out.println( result.getRootNode().toJson()); //prints ast in json format
-////
-//    }
-//
-//    @Test
-//    public void testLife() {
-////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-//        var fileContents = SpecsIo.read("./test/fixtures/public/Life.jmm");
-//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-//    }
-//
-//    @Test
-//    public void testMonteCarloPi() {
-////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-//        var fileContents = SpecsIo.read("./test/fixtures/public/MonteCarloPi.jmm");
-//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-//    }
-//
-//    @Test
-//    public void testQuickSort() {
-////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-//        var fileContents = SpecsIo.read("./test/fixtures/public/QuickSort.jmm");
-//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-//    }
-//
-//    @Test
-//    public void testSimple() {
-////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-//        var fileContents = SpecsIo.read("./test/fixtures/public/Simple.jmm");
-//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-//    }
-//
+    private void testParse(String filename, Boolean print) {
+        var fileContents = SpecsIo.read("./test/fixtures/public/WhileAndIF.jmm");
+        JmmParserResult parserResult = TestUtils.parse(fileContents);
+
+        if (print)
+            System.out.println(parserResult.getRootNode().getKind());
+    }
+
+    @Test
+    public void testWhileAndIF() {
+        testParse("./test/fixtures/public/WhileAndIF.jmm");
+    }
+
+    @Test
+    public void testFindMaximum() {
+        testParse("./test/fixtures/public/FindMaximum.jmm");
+    }
+
+    @Test
+    public void testHelloWorld() {
+        testParse("./test/fixtures/public/HelloWorld.jmm");
+
+    }
+
+    @Test
+    public void testLazysort() {
+        testParse("./test/fixtures/public/Lazysort.jmm");
+    }
+
+    @Test
+    public void testLife() {
+        testParse("./test/fixtures/public/Life.jmm");
+    }
+
+    @Test
+    public void testMonteCarloPi() {
+        testParse("./test/fixtures/public/MonteCarloPi.jmm");
+    }
+
+    @Test
+    public void testQuickSort() {
+        testParse("./test/fixtures/public/QuickSort.jmm");
+    }
+
+    @Test
+    public void testSimple() {
+        testParse("./test/fixtures/public/Simple.jmm");
+    }
+
     @Test
     public void testTicTacToe() {
-//        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-        var fileContents = SpecsIo.read("./test/fixtures/public/TicTacToe.jmm");
-        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
+        testParse("./test/fixtures/public/TicTacToe.jmm");
     }
 
 //    @Test
 //    public void failCompleteWhileTest() {
+//
 //        var fileContents = SpecsIo.read("./test/fixtures/public/fail/syntactical/CompleteWhileTest.jmm");
 //        JmmParserResult result = TestUtils.parse(fileContents);
 //

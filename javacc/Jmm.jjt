@@ -203,29 +203,29 @@ void Expression() #void: {}
 
 void LogicalANDExpression() #void : {}
 {
-	RelationalExpression() [ <And>  LogicalANDExpression() #And(2) ]
+	RelationalExpression() [ <And>  LogicalANDExpression() {jjtThis.put("op", "AND");} #BinaryOp(2) ]
 }
 
 void RelationalExpression() #void : {}
 {
-	AdditiveExpression() [ "<" RelationalExpression() #Lesser(2)]
+	AdditiveExpression() [ "<" RelationalExpression() {jjtThis.put("op", "LESSER");} #BinaryOp(2) ]
 }
 
 void AdditiveExpression() #void : {}
 {
-	MultiplicativeExpression() [ "+" AdditiveExpression() #Add(2)
-	                            | "-" AdditiveExpression() #Sub(2)]
+	MultiplicativeExpression() [ "+" AdditiveExpression() {jjtThis.put("op", "ADD");} #BinaryOp(2)
+	                            | "-" AdditiveExpression() {jjtThis.put("op", "SUBTRACT");} #BinaryOp(2)]
 }
 
 void MultiplicativeExpression() #void : {}
 {
-	 NotExpression() [ "*" MultiplicativeExpression() #Mul(2)
-	                   | "/" MultiplicativeExpression() #Div(2)]
+	 NotExpression() [ "*" MultiplicativeExpression() {jjtThis.put("op", "MULTIPLY");} #BinaryOp(2)
+	                   | "/" MultiplicativeExpression() {jjtThis.put("op", "DIVIDE");} #BinaryOp(2)]
 }
 
 void NotExpression() #void : {}
 {
-    [ "!" #Not] PostfixExpression()
+    [ "!" {jjtThis.put("op", "NEG");} #UnaryOp] PostfixExpression()
 
 }
 
@@ -249,13 +249,13 @@ void ArgumentExpressionList() #void : {}
 	Expression() ( "," Expression() )*
 }
 
-void ExpTerm() #Value: {Token t;}
+void ExpTerm() #void: {Token t;}
 {
-    t=<IntegerLiteral>{jjtThis.put("int",t.image);}
-    | t=<True>{jjtThis.put("boolean",t.image);}
-    | t=<False>{jjtThis.put("boolean",t.image);}
-    | t=<This>{jjtThis.put("this",t.image);}
-    | <New> (<Identifier> "(" ")" | <Int> "[" Expression() "]")
-    | "(" Expression() ")"
-    | t=<Identifier>{jjtThis.put("object",t.image);}
+    t=<IntegerLiteral>{jjtThis.put("int",t.image);} #Value
+    | t=<True>{jjtThis.put("boolean",t.image);} #Value
+    | t=<False>{jjtThis.put("boolean",t.image);} #Value
+    | t=<This>{jjtThis.put("this",t.image);} #Value
+    | <New> (<Identifier> "(" ")" | <Int> "[" Expression() "]") {jjtThis.put("op", "NEW");} #UnaryOp
+    | "(" Expression() ")" #Value
+    | t=<Identifier>{jjtThis.put("object",t.image);} #Value
 }
