@@ -15,65 +15,65 @@ import pt.up.fe.specs.util.SpecsIo;
 public class ExampleTest {
 
 
-    @Test
-    public void testWhileAndIF() {
-//        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-        var fileContents = SpecsIo.read("./test/fixtures/public/WhileAndIF.jmm");
-        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-    }
-
-    @Test
-    public void testFindMaximum() {
-//        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-        var fileContents = SpecsIo.read("./test/fixtures/public/FindMaximum.jmm");
-        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-    }
-
-    @Test
-    public void testHelloWorld() {
-        var fileContents = SpecsIo.read("./test/fixtures/public/HelloWorld.jmm");
-        System.out.println( TestUtils.parse(fileContents).getRootNode().toJson());
-
-    }
-
-    @Test
-    public void testLazysort() {
-//        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-        var fileContents = SpecsIo.read("./test/fixtures/public/Lazysort.jmm");
-        JmmParserResult result = TestUtils.parse(fileContents);
-
-        System.out.println( result.getRootNode().toJson()); //prints ast in json format
+//    @Test
+//    public void testWhileAndIF() {
+////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
+//        var fileContents = SpecsIo.read("./test/fixtures/public/WhileAndIF.jmm");
+//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
+//    }
 //
-    }
-
-    @Test
-    public void testLife() {
-//        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-        var fileContents = SpecsIo.read("./test/fixtures/public/Life.jmm");
-        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-    }
-
-    @Test
-    public void testMonteCarloPi() {
-//        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-        var fileContents = SpecsIo.read("./test/fixtures/public/MonteCarloPi.jmm");
-        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-    }
-
-    @Test
-    public void testQuickSort() {
-//        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-        var fileContents = SpecsIo.read("./test/fixtures/public/QuickSort.jmm");
-        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-    }
-
-    @Test
-    public void testSimple() {
-//        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
-        var fileContents = SpecsIo.read("./test/fixtures/public/Simple.jmm");
-        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
-    }
-
+//    @Test
+//    public void testFindMaximum() {
+////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
+//        var fileContents = SpecsIo.read("./test/fixtures/public/FindMaximum.jmm");
+//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
+//    }
+//
+//    @Test
+//    public void testHelloWorld() {
+//        var fileContents = SpecsIo.read("./test/fixtures/public/HelloWorld.jmm");
+//        System.out.println( TestUtils.parse(fileContents).getRootNode().toJson());
+//
+//    }
+//
+//    @Test
+//    public void testLazysort() {
+////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
+//        var fileContents = SpecsIo.read("./test/fixtures/public/Lazysort.jmm");
+//        JmmParserResult result = TestUtils.parse(fileContents);
+//
+//        System.out.println( result.getRootNode().toJson()); //prints ast in json format
+////
+//    }
+//
+//    @Test
+//    public void testLife() {
+////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
+//        var fileContents = SpecsIo.read("./test/fixtures/public/Life.jmm");
+//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
+//    }
+//
+//    @Test
+//    public void testMonteCarloPi() {
+////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
+//        var fileContents = SpecsIo.read("./test/fixtures/public/MonteCarloPi.jmm");
+//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
+//    }
+//
+//    @Test
+//    public void testQuickSort() {
+////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
+//        var fileContents = SpecsIo.read("./test/fixtures/public/QuickSort.jmm");
+//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
+//    }
+//
+//    @Test
+//    public void testSimple() {
+////        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
+//        var fileContents = SpecsIo.read("./test/fixtures/public/Simple.jmm");
+//        System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
+//    }
+//
     @Test
     public void testTicTacToe() {
 //        assertEquals("Expression", TestUtils.parse("2+3\n").getRootNode().getKind());
@@ -81,14 +81,14 @@ public class ExampleTest {
         System.out.println( TestUtils.parse(fileContents).getRootNode().getKind());
     }
 
-    @Test
-    public void failCompleteWhileTest() {
-        var fileContents = SpecsIo.read("./test/fixtures/public/fail/syntactical/CompleteWhileTest.jmm");
-        JmmParserResult result = TestUtils.parse(fileContents);
-
-        System.out.println( result.getRootNode().toJson()); //prints ast in json format
-
-        for(Report r: result.getReports()) //prints errors in json format
-            System.out.println(r.toJson());
-    }
+//    @Test
+//    public void failCompleteWhileTest() {
+//        var fileContents = SpecsIo.read("./test/fixtures/public/fail/syntactical/CompleteWhileTest.jmm");
+//        JmmParserResult result = TestUtils.parse(fileContents);
+//
+////        System.out.println( result.getRootNode().toJson()); //prints ast in json format
+////
+////        for(Report r: result.getReports()) //prints errors in json format
+////            System.out.println(r.toJson());
+//    }
 }

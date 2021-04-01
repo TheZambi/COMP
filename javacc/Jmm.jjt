@@ -17,11 +17,6 @@ public class Jmm
 		Jmm myJmm = new Jmm(System.in);
 
 		SimpleNode root = myJmm.Program(); // returns reference to root node
-
-//		root.dump(""); // prints the tree on the screen
-
-
-//		System.out.println("Expression value: ");
     }
 }
 
@@ -167,10 +162,9 @@ void IterationStatement() #IterationStatement : {}
     }
     catch(ParseException e){
         String exception = e.toString();
-//        System.out.println(e);
         int line = Integer.parseInt(exception.split("line ")[1].split(",")[0]); //gets error line
-
-        this.reports.add(new Report(ReportType.ERROR,Stage.SYNTATIC,line, "Error parsing while expression" ));
+        int column =  Integer.parseInt(exception.split("column ")[1].split("\\.")[0]); //gets error column
+        this.reports.add(new Report(ReportType.ERROR,Stage.SYNTATIC,line,column , "Error parsing while expression" ));
         error_skipto(Close_Parenthesis);
     }
     Statement()
