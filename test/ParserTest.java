@@ -12,18 +12,32 @@ import pt.up.fe.comp.jmm.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.specs.util.SpecsIo;
 
-public class ExampleTest {
+public class ParserTest {
 
     private void testParse(String filename) {
         testParse(filename, false);
     }
 
     private void testParse(String filename, Boolean print) {
-        var fileContents = SpecsIo.read("./test/fixtures/public/WhileAndIF.jmm");
+        var fileContents = SpecsIo.read(filename);
         JmmParserResult parserResult = TestUtils.parse(fileContents);
 
         if (print)
             System.out.println(parserResult.getRootNode().getKind());
+    }
+
+    private void testParseFail(String filename) {
+        testParseFail(filename, false);
+    }
+
+    private void testParseFail(String filename, Boolean print) {
+        var fileContents = SpecsIo.read(filename);
+        JmmParserResult parserResult = TestUtils.parse(fileContents);
+
+        if (print)
+            System.out.println("Total Reports: " + parserResult.getReports().size());
+
+        TestUtils.mustFail(parserResult.getReports());
     }
 
     @Test
@@ -72,15 +86,35 @@ public class ExampleTest {
         testParse("./test/fixtures/public/TicTacToe.jmm");
     }
 
-//    @Test
-//    public void failCompleteWhileTest() {
-//
-//        var fileContents = SpecsIo.read("./test/fixtures/public/fail/syntactical/CompleteWhileTest.jmm");
-//        JmmParserResult result = TestUtils.parse(fileContents);
-//
-////        System.out.println( result.getRootNode().toJson()); //prints ast in json format
-////
-////        for(Report r: result.getReports()) //prints errors in json format
-////            System.out.println(r.toJson());
-//    }
+
+    // MUST FAIL TESTS FROM HERE ON OUT
+    @Test
+    public void failBlowUpTest() {
+        testParseFail("./test/fixtures/public/fail/syntactical/BlowUp.jmm");
+    }
+
+    @Test
+    public void failCompleteWhileTest() {
+        testParseFail("./test/fixtures/public/fail/syntactical/CompleteWhileTest.jmm");
+    }
+
+    @Test
+    public void failLengthError() {
+        testParseFail("./test/fixtures/public/fail/syntactical/LengthError.jmm");
+    }
+
+    @Test
+    public void failMissingRightPar() {
+        testParseFail("./test/fixtures/public/fail/syntactical/MissingRightPar.jmm");
+    }
+
+    @Test
+    public void failMultipleSequential() {
+        testParseFail("./test/fixtures/public/fail/syntactical/MultipleSequential.jmm");
+    }
+
+    @Test
+    public void failNestedLoopTest() {
+        testParseFail("./test/fixtures/public/fail/syntactical/NestedLoop.jmm");
+    }
 }
