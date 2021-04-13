@@ -90,21 +90,21 @@ TOKEN:
 SimpleNode Program() #Program : {}
 {
 
-   ImportDeclaration()
+   ImportDeclarations()
    ClassDeclaration()
    <EOF> {return jjtThis;}
 }
 
 // {"import", Identifier,{”.”,Identifier },";"}
-void ImportDeclaration() #void : {Token t; String acc;}
+void ImportDeclarations() #void : {Token t; String acc;}
 {
-   ((<Import> t=<Identifier>{acc = t.image;} ("." t=<Identifier>{acc += "." + t.image;})* ";" {jjtThis.put("import",acc);}) #Import )*
+   ((<Import> t=<Identifier>{acc = t.image;} ("." t=<Identifier>{acc += "." + t.image;})* ";" {jjtThis.put("import",acc);}) #ImportDeclaration )*
 }
 
 //"class",Identifier,["extends",Identifier],"{",{VarDeclaration},{MethodDeclarationPublic}"}"
-void ClassDeclaration() #Class : {Token t, t2;}
+void ClassDeclaration() #ClassDeclaration : {Token t, t2;}
 {
-  <Class> t=<Identifier>{jjtThis.put("className",t.image);}
+  <Class> t=<Identifier>{jjtThis.put("name",t.image);}
   [<Extends> t2=<Identifier>{jjtThis.put("extends",t2.image);}]
   "{" (VarDeclaration())* (<Public> MethodDeclaration())* "}"
 }
@@ -113,17 +113,17 @@ void ClassDeclaration() #Class : {Token t, t2;}
 //Type,Identifier,";"
 void VarDeclaration() #VarDeclaration : {Token t;}
 {
-   Type() t=<Identifier>{jjtThis.put("varName",t.image);} #Identifier ";"
+   Symbol() ";"
 }
 
 //Type,Identifier,"(",[Type,Identifier,{",",Type,Identifier},],")","{",{VarDeclaration},{Statement},"return",Expression,";","}"
 //"static","void","main","(","String","[","]",Identifier,")","{",{VarDeclaration}, {Statement},"}";
-void MethodDeclaration() #MethodDeclaration : {Token t;}
+void MethodDeclaration() #MethodDeclaration : {}
 {
-   Type() t=<Identifier>{jjtThis.put("methodName",t.image);}#Method "(" [Type() <Identifier> ("," Type() <Identifier> )*] ")"
-       "{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* <Return> Expression() ";" "}"
+   ((Symbol() "(" [Symbol() ("," Symbol() )*] ")") #MethodHeader)
+       ("{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* <Return> Expression() ";" "}") #MethodBody
    |
-   (<Static> <Void> <Main>)#Main "(" <String> "[" "]" <Identifier> ")" "{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* "}"
+   (<Static> <Void> <Main>)#Main "(" <String> "[" "]" <Identifier> ")" ("{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* "}") #MainBody
 }
 
 //Statement =
@@ -168,12 +168,10 @@ void IterationStatement() #IterationStatement : {}
         error_skipto(Close_Parenthesis);
     }
     Statement()
-
 }
 
 JAVACODE
 void error_skipto(int kind) {
-
     Token t = getToken(0);
     while (t.next.kind != EOF && t.next.kind != kind) {
         t = getNextToken();
@@ -183,17 +181,23 @@ void error_skipto(int kind) {
     while (getToken(1).kind == kind) {
         t = getNextToken();
     }
-
-
 }
 
 
 // "int","[","]" | "boolean" | "int" | Identifier
-void Type() #Type: {Token t;String acc;}
+void Type() #Type: {Token t;String isArray="false";}
 {
-    <Int>{acc="int";} ["[" "]" {acc+="Array";}]{jjtThis.put("type",acc);}
-    | <Boolean> {jjtThis.put("type","Boolean");}
-    | t=<Identifier>{jjtThis.put("type",t.image);}
+    (
+        <Int>{jjtThis.put("type","int");} ["[" "]" {isArray="true";}]
+        | <Boolean> {jjtThis.put("type","Boolean");}
+        | t=<Identifier>{jjtThis.put("type",t.image);}
+    ){jjtThis.put("array",isArray);}
+}
+
+// int Memes
+void Symbol() #Symbol: {Token t;}
+{
+    Type() t=<Identifier>{jjtThis.put("name",t.image);}
 }
 
 void Expression() #void: {}

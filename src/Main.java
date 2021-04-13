@@ -10,7 +10,14 @@ public class Main {
 //        }
         var fileContents = SpecsIo.read("./test.txt");
         var parserResult = new SyntacticPhase().parse(fileContents);
-
+        if (parserResult.getReports().size() > 0) {
+            System.err.println("Failed on parse phase");
+            return;
+        }
         var semanticResult = new AnalysisStage().semanticAnalysis(parserResult);
+        if (semanticResult.getReports().size() > 0) {
+            System.err.println("Failed on semantic phase");
+            return;
+        }
     }
 }
