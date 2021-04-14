@@ -4,6 +4,9 @@ import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 
+import java.util.List;
+import java.util.Optional;
+
 public class AstUtils {
     public static Symbol getChildSymbol(JmmNode node, int index) {
         JmmNode sNode = node.getChildren().get(index);
@@ -22,5 +25,46 @@ public class AstUtils {
 
     public static boolean isMethodMain(JmmNode node) {
         return node.getChildren().get(0).getKind().equals("Main");
+    }
+
+    public static Type getChildType(JmmNode node, int index, MySymbolTable symbolTable) {
+        JmmNode child = node.getChildren().get(index);
+
+        if(child.getKind().equals("Value") && child.get("varType") != null) {
+            if(child.get("varType").equals("object")) {
+                Type objectType = AstUtils.getObjectType(child, symbolTable);
+                if(objectType == null) {
+                    //TODO: add to reports - uninitialized variable
+                    return null;
+                }
+                return objectType;
+            }
+            return new Type(child.get("varType"), false);
+
+        } else if(child.getKind().equals("Value")) {
+
+//            AstUtils.getChildType(child.getChildren().get(0), )
+        }
+    }
+
+    public static Type getObjectType(JmmNode node, MySymbolTable symbolTable) {
+        Optional<JmmNode> ancestorOpt = node.getAncestor("MethodDeclaration");
+        if(ancestorOpt.isPresent()) {
+            JmmNode ancestor = ancestorOpt.get();
+            List<Symbol> localVariables = symbolTable.getLocalVariables(AstUtils.getMethodName(ancestor));
+
+            for(Symbol s : localVariables) {
+                if(s.getName().equals(node.get("object"))) {
+                    return s.getType();
+                }
+            }
+
+            for(Symbol s : symbolTable.getFields()) {
+                if(s.getName().equals(node.get("object"))) {
+                    return s.getType();
+                }
+            }
+        }
+        return null;
     }
 }

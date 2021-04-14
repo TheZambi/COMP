@@ -242,7 +242,7 @@ void PostfixExpression() #void : {Token t;}
                   )*
 }
 
-void MethodCall() #MethodCall : {Token t;}
+void MethodCall() #Method : {Token t;}
 {
 	t=<Identifier> "(" [ArgumentExpressionList()] #Args")"{jjtThis.put("methodName",t.image);}
 
@@ -255,11 +255,11 @@ void ArgumentExpressionList() #void : {}
 
 void ExpTerm() #void: {Token t;}
 {
-    t=<IntegerLiteral>{jjtThis.put("int",t.image);} #Value
-    | t=<True>{jjtThis.put("boolean",t.image);} #Value
-    | t=<False>{jjtThis.put("boolean",t.image);} #Value
-    | t=<This>{jjtThis.put("this",t.image);} #Value
+    t=<IntegerLiteral>{jjtThis.put("int",t.image); jjtThis.put("varType", "int");} #Value
+    | t=<True>{jjtThis.put("boolean",t.image); jjtThis.put("varType", "Boolean");} #Value
+    | t=<False>{jjtThis.put("boolean",t.image); jjtThis.put("varType", "Boolean");} #Value
+    | t=<This>{jjtThis.put("this",t.image); jjtThis.put("varType", "int");} #Value
     | <New> (<Identifier> "(" ")" | <Int> "[" Expression() "]") {jjtThis.put("op", "NEW");} #UnaryOp
     | "(" Expression() ")" #Value
-    | t=<Identifier>{jjtThis.put("object",t.image);} #Value
+    | t=<Identifier>{jjtThis.put("object",t.image); jjtThis.put("varType", "object");} #Value
 }

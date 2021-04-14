@@ -17,7 +17,7 @@ public class SyntacticPhase implements JmmParser {
 		try {
     		SimpleNode root = myJmm.Program(); // returns reference to root node
 
-//    		root.dump(""); // prints the tree on the screen
+    		root.dump(""); // prints the tree on the screen
 
 //			if(myJmm.reports.size() != 0) {
 //				for(Report r: myJmm.reports) //prints errors
