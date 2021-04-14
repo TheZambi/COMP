@@ -27,36 +27,80 @@ public class AstUtils {
         return node.getChildren().get(0).getKind().equals("Main");
     }
 
+    public static Type getMethodCallType(JmmNode node, MySymbolTable symbolTable) {
+        if(!node.getKind().equals("MethodCall"))
+            throw new RuntimeException("Node is not a MethodCall");
+
+        JmmNode objectNode = node.getChildren().get(0);
+        String methodName = node.getChildren().get(1).get("methodName");
+
+        if(objectNode.getKind().equals("Value") && objectNode.get("varType").equals("this")) {
+            if(symbolTable.getMethods().contains(methodName)) {
+                return symbolTable.getReturnType(methodName);
+            } else {
+                //TODO: error report - invalid method on 'this'
+                return null;
+            }
+        } else if(objectNode.getKind().equals("Value") && objectNode.get("varType").equals("object")){
+            return new Type("", false);
+
+        } else {
+            //TODO: erro report - cant call method on non objects
+            return null;
+        }
+
+    }
+
     public static Type getNodeType(JmmNode node, MySymbolTable symbolTable) {
 
-        if(node.getKind().equals("Value") && node.get("varType") != null) {
-            if(node.get("varType").equals("object")) {
-                Type objectType = AstUtils.getObjectType(node, symbolTable);
-                if(objectType == null) {
-                    //TODO: add to reports - uninitialized variable
+        switch (node.getKind()) {
+            case "Value":
+                if (node.get("varType").equals("object")) {
+                    Type objectType = AstUtils.getObjectType(node, symbolTable);
+                    if (objectType == null) {
+                        //TODO: add to reports - uninitialized variable
+                        return null;
+                    }
+                    return objectType;
+                }
+                return new Type(node.get("varType"), false);
+
+            case "MethodCall":
+                return AstUtils.getMethodCallType(node, symbolTable);
+
+            case "BinaryOp":
+                Type type0 = AstUtils.getNodeType(node.getChildren().get(0), symbolTable);
+                Type type1 = AstUtils.getNodeType(node.getChildren().get(1), symbolTable);
+
+                if (type0 == null || type1 == null) {
                     return null;
                 }
-                return objectType;
-            }
-            return new Type(node.get("varType"), false);
-
-        } else if(node.getKind().equals("Value")) {
-//            return node.getChildren()
-//            AstUtils.getChildType(child.getChildren().get(0), )
-        } else if(node.getKind().equals("Method")) {
-
-        } else if(node.getKind().equals("BinaryOp")) {
-            Type type0 = AstUtils.getNodeType(node.getChildren().get(0), symbolTable);
-            Type type1 = AstUtils.getNodeType(node.getChildren().get(1), symbolTable);
-
-            //TODO: incompatible types error
-            if(type0 == null || type1 == null) {
-                return null;
-            }
-            if(type0.equals(type1))
-                return type0;
-            else
-                return null;
+                if (type0.equals(type1) || type0.getName().equals("") || type1.getName().equals(""))
+                    if(type0.getName().equals(""))
+                        return type1;
+                    else
+                        return type0;
+                else {
+                    //TODO: incompatible types error - add to report
+                    return null;
+                }
+            case "UnaryOp":
+                if (node.get("op").equals("NEW")) {
+                    JmmNode unaryChild = node.getChildren().get(0);
+                    if (unaryChild.getKind().equals("ClassObj"))
+                        return new Type(unaryChild.get("classObj"), false);
+                    else
+                        return new Type("int", true);
+                } else {
+                    Type unaryChildType = AstUtils.getNodeType(node.getChildren().get(0), symbolTable);
+                    if (unaryChildType != null && !unaryChildType.getName().equals("Boolean")) {
+                        //TODO: NEGATE ONLY BOOLEANS - add to report
+                        return null;
+                    } else
+                        return unaryChildType;
+                }
+            default:
+                break;
         }
         return null;
     }

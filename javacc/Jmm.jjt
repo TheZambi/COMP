@@ -259,8 +259,8 @@ void ExpTerm() #void: {Token t;}
     t=<IntegerLiteral>{jjtThis.put("int",t.image); jjtThis.put("varType", "int");} #Value
     | t=<True>{jjtThis.put("boolean",t.image); jjtThis.put("varType", "Boolean");} #Value
     | t=<False>{jjtThis.put("boolean",t.image); jjtThis.put("varType", "Boolean");} #Value
-    | t=<This>{jjtThis.put("this",t.image); jjtThis.put("varType", "int");} #Value
-    | <New> (t=<Identifier>{jjtThis.put("classObj", t.image);} #ClassObj "(" ")"  | <Int> "[" Expression() "]" #Array(1)) {jjtThis.put("op", "NEW");} #UnaryOp(1)
+    | t=<This>{jjtThis.put("this",t.image); jjtThis.put("varType", "this");} #Value
+    | <New> (t=<Identifier>{jjtThis.put("classObj", t.image); jjtThis.put("varType", "object");} #ClassObj "(" ")"  | <Int> "[" Expression() "]" #Array(1)) {jjtThis.put("op", "NEW");} #UnaryOp(1)
     | "(" Expression() ")"
     | t=<Identifier>{jjtThis.put("object",t.image); jjtThis.put("varType", "object");} #Value
 }

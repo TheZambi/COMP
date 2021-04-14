@@ -22,6 +22,28 @@
               "attributes": {},
               "children": [
                 {
+                  "kind": "VarDeclaration",
+                  "attributes": {},
+                  "children": [
+                    {
+                      "kind": "Symbol",
+                      "attributes": {
+                        "name": "a"
+                      },
+                      "children": [
+                        {
+                          "kind": "Type",
+                          "attributes": {
+                            "array": "false",
+                            "type": "int"
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "kind": "AssignmentStatement",
                   "attributes": {},
                   "children": [
@@ -86,62 +108,193 @@
                       "children": []
                     },
                     {
-                      "kind": "UnaryOp",
+                      "kind": "Length",
+                      "attributes": {},
+                      "children": [
+                        {
+                          "kind": "UnaryOp",
+                          "attributes": {
+                            "op": "NEW"
+                          },
+                          "children": [
+                            {
+                              "kind": "ClassObj",
+                              "attributes": {
+                                "varType": "object",
+                                "classObj": "Foo"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "AssignmentStatement",
+                  "attributes": {},
+                  "children": [
+                    {
+                      "kind": "Var",
                       "attributes": {
-                        "op": "NEW"
+                        "type": "a"
+                      },
+                      "children": []
+                    },
+                    {
+                      "kind": "BinaryOp",
+                      "attributes": {
+                        "op": "ADD"
                       },
                       "children": [
                         {
-                          "kind": "Array",
+                          "kind": "Value",
+                          "attributes": {
+                            "varType": "int",
+                            "int": "1"
+                          },
+                          "children": []
+                        },
+                        {
+                          "kind": "MethodCall",
                           "attributes": {},
                           "children": [
                             {
-                              "kind": "UnaryOp",
+                              "kind": "BinaryOp",
                               "attributes": {
-                                "op": "NEG"
+                                "op": "ADD"
                               },
                               "children": [
                                 {
-                                  "kind": "BinaryOp",
+                                  "kind": "Value",
                                   "attributes": {
-                                    "op": "ADD"
+                                    "varType": "int",
+                                    "int": "1"
                                   },
+                                  "children": []
+                                },
+                                {
+                                  "kind": "Value",
+                                  "attributes": {
+                                    "varType": "int",
+                                    "int": "1"
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "Method",
+                              "attributes": {
+                                "methodName": "getShit"
+                              },
+                              "children": [
+                                {
+                                  "kind": "Args",
+                                  "attributes": {},
                                   "children": [
                                     {
-                                      "kind": "BinaryOp",
+                                      "kind": "Value",
                                       "attributes": {
-                                        "op": "ADD"
+                                        "varType": "object",
+                                        "object": "a"
                                       },
-                                      "children": [
-                                        {
-                                          "kind": "Value",
-                                          "attributes": {
-                                            "varType": "object",
-                                            "object": "i"
-                                          },
-                                          "children": []
-                                        },
-                                        {
-                                          "kind": "Value",
-                                          "attributes": {
-                                            "varType": "int",
-                                            "int": "1"
-                                          },
-                                          "children": []
-                                        }
-                                      ]
+                                      "children": []
                                     },
                                     {
                                       "kind": "Value",
                                       "attributes": {
-                                        "varType": "int",
-                                        "int": "1"
+                                        "varType": "object",
+                                        "object": "b"
                                       },
                                       "children": []
                                     }
                                   ]
                                 }
                               ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "AssignmentStatement",
+                  "attributes": {},
+                  "children": [
+                    {
+                      "kind": "Var",
+                      "attributes": {
+                        "type": "a"
+                      },
+                      "children": [
+                        {
+                          "kind": "Indexing",
+                          "attributes": {},
+                          "children": [
+                            {
+                              "kind": "BinaryOp",
+                              "attributes": {
+                                "op": "ADD"
+                              },
+                              "children": [
+                                {
+                                  "kind": "Value",
+                                  "attributes": {
+                                    "varType": "int",
+                                    "int": "3"
+                                  },
+                                  "children": []
+                                },
+                                {
+                                  "kind": "Value",
+                                  "attributes": {
+                                    "varType": "int",
+                                    "int": "1"
+                                  },
+                                  "children": []
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "Value",
+                      "attributes": {
+                        "varType": "object",
+                        "object": "d"
+                      },
+                      "children": []
+                    },
+                    {
+                      "kind": "Indexing",
+                      "attributes": {},
+                      "children": [
+                        {
+                          "kind": "BinaryOp",
+                          "attributes": {
+                            "op": "ADD"
+                          },
+                          "children": [
+                            {
+                              "kind": "Value",
+                              "attributes": {
+                                "varType": "int",
+                                "int": "2"
+                              },
+                              "children": []
+                            },
+                            {
+                              "kind": "Value",
+                              "attributes": {
+                                "varType": "int",
+                                "int": "1"
+                              },
+                              "children": []
                             }
                           ]
                         }

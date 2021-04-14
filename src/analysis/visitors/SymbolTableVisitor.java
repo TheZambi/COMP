@@ -59,7 +59,8 @@ public class SymbolTableVisitor {
 
     private void classDeclarationVisit(JmmNode node) {
         symbolTable.setClassName(node.get("name"));
-        symbolTable.setSuperClass(node.get("extends"));
+        if(node.getAttributes().contains("extends"))
+            symbolTable.setSuperClass(node.get("extends"));
     }
 
     private void importDeclarationVisit(JmmNode node) {

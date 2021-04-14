@@ -26,12 +26,20 @@ public class TypeVerificationVisitor {
         JmmNode child0 = node.getChildren().get(0);
         JmmNode child1 = node.getChildren().get(1);
 
+        Type type0 = AstUtils.getNodeType(child0, symbolTable);
+        Type type1 = AstUtils.getNodeType(child1, symbolTable);
 
-        if(child0.getKind().equals("Value"))
+        if(type0 == null || type1 == null)
+            return;
+
+        if(!type0.equals(type1)) {
+            System.out.println("TIPOS INCOMPATIVEIS");
+            //TODO - report incompatible types
+        }
 
         switch(node.get("op")) {
             case "ADD":
-
+//                if(AstUtils.)
                 break;
             case "SUBTRACT":
                 break;
@@ -49,7 +57,7 @@ public class TypeVerificationVisitor {
     }
 
     private void arrayAccessVerification(JmmNode node) {
-
+//        node.get
     }
 
     public void visit(JmmNode jmmNode) {
