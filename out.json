@@ -225,55 +225,54 @@
                   "attributes": {},
                   "children": [
                     {
-                      "kind": "Var",
-                      "attributes": {
-                        "type": "a"
-                      },
+                      "kind": "Indexing",
+                      "attributes": {},
                       "children": [
                         {
-                          "kind": "Indexing",
-                          "attributes": {},
+                          "kind": "Var",
+                          "attributes": {
+                            "type": "a"
+                          },
+                          "children": []
+                        },
+                        {
+                          "kind": "BinaryOp",
+                          "attributes": {
+                            "op": "ADD"
+                          },
                           "children": [
                             {
-                              "kind": "BinaryOp",
+                              "kind": "Value",
                               "attributes": {
-                                "op": "ADD"
+                                "varType": "int",
+                                "int": "3"
                               },
-                              "children": [
-                                {
-                                  "kind": "Value",
-                                  "attributes": {
-                                    "varType": "int",
-                                    "int": "3"
-                                  },
-                                  "children": []
-                                },
-                                {
-                                  "kind": "Value",
-                                  "attributes": {
-                                    "varType": "int",
-                                    "int": "1"
-                                  },
-                                  "children": []
-                                }
-                              ]
+                              "children": []
+                            },
+                            {
+                              "kind": "Value",
+                              "attributes": {
+                                "varType": "int",
+                                "int": "1"
+                              },
+                              "children": []
                             }
                           ]
                         }
                       ]
                     },
                     {
-                      "kind": "Value",
-                      "attributes": {
-                        "varType": "object",
-                        "object": "d"
-                      },
-                      "children": []
-                    },
-                    {
                       "kind": "Indexing",
                       "attributes": {},
                       "children": [
+                        {
+                          "kind": "Value",
+                          "attributes": {
+                            "varType": "object",
+                            "object": "d"
+                          },
+                          "children": []
+                        },
                         {
                           "kind": "BinaryOp",
                           "attributes": {

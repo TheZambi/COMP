@@ -65,6 +65,28 @@ public class AstUtils {
                 }
                 return new Type(node.get("varType"), false);
 
+            case "Indexing":
+                JmmNode objectNode = node.getChildren().get(0);
+                JmmNode indexNode = node.getChildren().get(1);
+
+                if(objectNode.getKind().equals("Value") && objectNode.get("varType").equals("object")) {
+                    Type objectType = AstUtils.getObjectType(objectNode, symbolTable);
+                    if(objectType.isArray() && objectType.getName().equals("int")) {
+                        Type indexType = AstUtils.getNodeType(indexNode, symbolTable);
+
+                        if(indexType != null) {
+                            if(!indexType.getName().equals("int") || indexType.isArray()) {
+                                //TODO - report invalid index not integer
+                                return null;
+                            }
+                        }
+                        return new Type("int", false);
+                    }
+                }
+
+                //TODO - invalid object to access - not array
+                return null;
+
             case "MethodCall":
                 return AstUtils.getMethodCallType(node, symbolTable);
 

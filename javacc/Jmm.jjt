@@ -139,7 +139,7 @@ void Statement() #void : {Token t;}
         CompoundStatement()|
         SelectionStatement()|
         IterationStatement()|
-        (([LOOKAHEAD(2) t=<Identifier>{jjtThis.put("type",t.image);} ["[" Expression() #Indexing(1)"]"] "=" ]) #Var Expression() ";") #AssignmentStatement
+        ([LOOKAHEAD(2) t=<Identifier>{jjtThis.put("type",t.image);}#Var ["[" Expression() #Indexing(2)"]"] "=" ]  Expression() ";") #AssignmentStatement
 
 }
 
@@ -236,7 +236,7 @@ void NotExpression() #void : {}
 
 void PostfixExpression() #void : {Token t;}
 {
-	ExpTerm() ( "[" Expression() #Indexing(1) "]" |
+	ExpTerm() ( "[" Expression() #Indexing(2) "]" |
                   ("(" [ ArgumentExpressionList()]#Args ")")#FunctionCall(2) |
                   "." (<Length> #Length(1)
                       | MethodCall() #MethodCall(2) )
