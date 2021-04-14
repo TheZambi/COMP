@@ -81,17 +81,24 @@
                     {
                       "kind": "Var",
                       "attributes": {
-                        "type": "L"
+                        "type": "a"
+                      },
+                      "children": []
+                    },
+                    {
+                      "kind": "UnaryOp",
+                      "attributes": {
+                        "op": "NEW"
                       },
                       "children": [
                         {
-                          "kind": "Indexing",
+                          "kind": "Array",
                           "attributes": {},
                           "children": [
                             {
-                              "kind": "BinaryOp",
+                              "kind": "UnaryOp",
                               "attributes": {
-                                "op": "ADD"
+                                "op": "NEG"
                               },
                               "children": [
                                 {
@@ -101,12 +108,28 @@
                                   },
                                   "children": [
                                     {
-                                      "kind": "Value",
+                                      "kind": "BinaryOp",
                                       "attributes": {
-                                        "varType": "object",
-                                        "object": "i"
+                                        "op": "ADD"
                                       },
-                                      "children": []
+                                      "children": [
+                                        {
+                                          "kind": "Value",
+                                          "attributes": {
+                                            "varType": "object",
+                                            "object": "i"
+                                          },
+                                          "children": []
+                                        },
+                                        {
+                                          "kind": "Value",
+                                          "attributes": {
+                                            "varType": "int",
+                                            "int": "1"
+                                          },
+                                          "children": []
+                                        }
+                                      ]
                                     },
                                     {
                                       "kind": "Value",
@@ -117,48 +140,10 @@
                                       "children": []
                                     }
                                   ]
-                                },
-                                {
-                                  "kind": "Length",
-                                  "attributes": {},
-                                  "children": [
-                                    {
-                                      "kind": "Value",
-                                      "attributes": {
-                                        "varType": "object",
-                                        "object": "L"
-                                      },
-                                      "children": []
-                                    }
-                                  ]
                                 }
                               ]
                             }
                           ]
-                        }
-                      ]
-                    },
-                    {
-                      "kind": "BinaryOp",
-                      "attributes": {
-                        "op": "ADD"
-                      },
-                      "children": [
-                        {
-                          "kind": "Value",
-                          "attributes": {
-                            "varType": "int",
-                            "int": "1"
-                          },
-                          "children": []
-                        },
-                        {
-                          "kind": "Value",
-                          "attributes": {
-                            "varType": "int",
-                            "int": "2"
-                          },
-                          "children": []
                         }
                       ]
                     }

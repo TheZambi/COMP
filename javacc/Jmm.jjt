@@ -229,7 +229,8 @@ void MultiplicativeExpression() #void : {}
 
 void NotExpression() #void : {}
 {
-    [ "!" {jjtThis.put("op", "NEG");} #UnaryOp] PostfixExpression()
+     "!" PostfixExpression() {jjtThis.put("op", "NEG");} #UnaryOp(1)
+     | PostfixExpression()
 
 }
 
@@ -259,7 +260,7 @@ void ExpTerm() #void: {Token t;}
     | t=<True>{jjtThis.put("boolean",t.image); jjtThis.put("varType", "Boolean");} #Value
     | t=<False>{jjtThis.put("boolean",t.image); jjtThis.put("varType", "Boolean");} #Value
     | t=<This>{jjtThis.put("this",t.image); jjtThis.put("varType", "int");} #Value
-    | <New> (<Identifier> "(" ")" | <Int> "[" Expression() "]") {jjtThis.put("op", "NEW");} #UnaryOp
+    | <New> (t=<Identifier>{jjtThis.put("classObj", t.image);} #ClassObj "(" ")"  | <Int> "[" Expression() "]" #Array(1)) {jjtThis.put("op", "NEW");} #UnaryOp(1)
     | "(" Expression() ")"
     | t=<Identifier>{jjtThis.put("object",t.image); jjtThis.put("varType", "object");} #Value
 }
