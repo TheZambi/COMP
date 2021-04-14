@@ -27,24 +27,38 @@ public class AstUtils {
         return node.getChildren().get(0).getKind().equals("Main");
     }
 
-    public static Type getChildType(JmmNode node, int index, MySymbolTable symbolTable) {
-        JmmNode child = node.getChildren().get(index);
+    public static Type getNodeType(JmmNode node, MySymbolTable symbolTable) {
 
-        if(child.getKind().equals("Value") && child.get("varType") != null) {
-            if(child.get("varType").equals("object")) {
-                Type objectType = AstUtils.getObjectType(child, symbolTable);
+        if(node.getKind().equals("Value") && node.get("varType") != null) {
+            if(node.get("varType").equals("object")) {
+                Type objectType = AstUtils.getObjectType(node, symbolTable);
                 if(objectType == null) {
                     //TODO: add to reports - uninitialized variable
                     return null;
                 }
                 return objectType;
             }
-            return new Type(child.get("varType"), false);
+            return new Type(node.get("varType"), false);
 
-        } else if(child.getKind().equals("Value")) {
-
+        } else if(node.getKind().equals("Value")) {
+//            return node.getChildren()
 //            AstUtils.getChildType(child.getChildren().get(0), )
+        } else if(node.getKind().equals("Method")) {
+
+        } else if(node.getKind().equals("BinaryOp")) {
+            Type type0 = AstUtils.getNodeType(node.getChildren().get(0), symbolTable);
+            Type type1 = AstUtils.getNodeType(node.getChildren().get(1), symbolTable);
+
+            //TODO: incompatible types error
+            if(type0 == null || type1 == null) {
+                return null;
+            }
+            if(type0.equals(type1))
+                return type0;
+            else
+                return null;
         }
+        return null;
     }
 
     public static Type getObjectType(JmmNode node, MySymbolTable symbolTable) {

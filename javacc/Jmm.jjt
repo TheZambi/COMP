@@ -134,12 +134,12 @@ void MethodDeclaration() #MethodDeclaration : {}
 //    |Identifier,StatementIdentifier
 //;
 
-void Statement() #Statement : {}
+void Statement() #void : {Token t;}
 {
         CompoundStatement()|
         SelectionStatement()|
         IterationStatement()|
-        [LOOKAHEAD(2) <Identifier> ["[" Expression() "]"] "=" ] Expression() ";"
+        (([LOOKAHEAD(2) t=<Identifier>{jjtThis.put("type",t.image);} ["[" Expression() #Indexing(1)"]"] "=" ]) #Var Expression() ";") #AssignmentStatement
 
 }
 
@@ -235,7 +235,7 @@ void NotExpression() #void : {}
 
 void PostfixExpression() #void : {Token t;}
 {
-	ExpTerm() ( "[" Expression() #Indexing(2) "]" |
+	ExpTerm() ( "[" Expression() #Indexing(1) "]" |
                   ("(" [ ArgumentExpressionList()]#Args ")")#FunctionCall(2) |
                   "." (<Length> #Length(1)
                       | MethodCall() #MethodCall(2) )
@@ -260,6 +260,6 @@ void ExpTerm() #void: {Token t;}
     | t=<False>{jjtThis.put("boolean",t.image); jjtThis.put("varType", "Boolean");} #Value
     | t=<This>{jjtThis.put("this",t.image); jjtThis.put("varType", "int");} #Value
     | <New> (<Identifier> "(" ")" | <Int> "[" Expression() "]") {jjtThis.put("op", "NEW");} #UnaryOp
-    | "(" Expression() ")" #Value
+    | "(" Expression() ")"
     | t=<Identifier>{jjtThis.put("object",t.image); jjtThis.put("varType", "object");} #Value
 }

@@ -1,0 +1,174 @@
+{
+  "kind": "Program",
+  "attributes": {},
+  "children": [
+    {
+      "kind": "ClassDeclaration",
+      "attributes": {
+        "name": "Lazysort"
+      },
+      "children": [
+        {
+          "kind": "MethodDeclaration",
+          "attributes": {},
+          "children": [
+            {
+              "kind": "Main",
+              "attributes": {},
+              "children": []
+            },
+            {
+              "kind": "MainBody",
+              "attributes": {},
+              "children": [
+                {
+                  "kind": "AssignmentStatement",
+                  "attributes": {},
+                  "children": [
+                    {
+                      "kind": "Var",
+                      "attributes": {
+                        "type": "i"
+                      },
+                      "children": []
+                    },
+                    {
+                      "kind": "BinaryOp",
+                      "attributes": {
+                        "op": "ADD"
+                      },
+                      "children": [
+                        {
+                          "kind": "Value",
+                          "attributes": {
+                            "varType": "int",
+                            "int": "1"
+                          },
+                          "children": []
+                        },
+                        {
+                          "kind": "BinaryOp",
+                          "attributes": {
+                            "op": "ADD"
+                          },
+                          "children": [
+                            {
+                              "kind": "Value",
+                              "attributes": {
+                                "varType": "object",
+                                "object": "i"
+                              },
+                              "children": []
+                            },
+                            {
+                              "kind": "Value",
+                              "attributes": {
+                                "varType": "int",
+                                "int": "1"
+                              },
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "kind": "AssignmentStatement",
+                  "attributes": {},
+                  "children": [
+                    {
+                      "kind": "Var",
+                      "attributes": {
+                        "type": "L"
+                      },
+                      "children": [
+                        {
+                          "kind": "Indexing",
+                          "attributes": {},
+                          "children": [
+                            {
+                              "kind": "BinaryOp",
+                              "attributes": {
+                                "op": "ADD"
+                              },
+                              "children": [
+                                {
+                                  "kind": "BinaryOp",
+                                  "attributes": {
+                                    "op": "ADD"
+                                  },
+                                  "children": [
+                                    {
+                                      "kind": "Value",
+                                      "attributes": {
+                                        "varType": "object",
+                                        "object": "i"
+                                      },
+                                      "children": []
+                                    },
+                                    {
+                                      "kind": "Value",
+                                      "attributes": {
+                                        "varType": "int",
+                                        "int": "1"
+                                      },
+                                      "children": []
+                                    }
+                                  ]
+                                },
+                                {
+                                  "kind": "Length",
+                                  "attributes": {},
+                                  "children": [
+                                    {
+                                      "kind": "Value",
+                                      "attributes": {
+                                        "varType": "object",
+                                        "object": "L"
+                                      },
+                                      "children": []
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "BinaryOp",
+                      "attributes": {
+                        "op": "ADD"
+                      },
+                      "children": [
+                        {
+                          "kind": "Value",
+                          "attributes": {
+                            "varType": "int",
+                            "int": "1"
+                          },
+                          "children": []
+                        },
+                        {
+                          "kind": "Value",
+                          "attributes": {
+                            "varType": "int",
+                            "int": "2"
+                          },
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -6,6 +6,8 @@ import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.specs.util.SpecsIo;
 
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.io.StringReader;
 
@@ -19,6 +21,16 @@ public class SyntacticPhase implements JmmParser {
 
     		root.dump(""); // prints the tree on the screen
 
+			try {
+				FileWriter myWriter = new FileWriter("./out.json");
+				myWriter.write(root.toJson());
+				myWriter.close();
+				System.err.println("Successfully wrote to the file.");
+			} catch (IOException e) {
+				System.err.println("An error occurred.");
+				e.printStackTrace();
+			}
+			System.out.println(root.toJson());
 //			if(myJmm.reports.size() != 0) {
 //				for(Report r: myJmm.reports) //prints errors
 //	            	System.out.println(r.toString());
