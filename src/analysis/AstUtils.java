@@ -135,6 +135,10 @@ public class AstUtils {
         return null;
     }
 
+    public static Type getValueType(JmmNode node, MySymbolTable symbolTable) {
+        return new Type("a", false);
+    }
+
     public static Type getObjectType(JmmNode node, MySymbolTable symbolTable) {
         Optional<JmmNode> ancestorOpt = node.getAncestor("MethodDeclaration");
         if(ancestorOpt.isPresent()) {

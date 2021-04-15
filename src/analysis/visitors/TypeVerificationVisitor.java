@@ -13,12 +13,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class TypeVerificationVisitor {
-    private final Map<String, Function<JmmNode, String>> visitMap;
+    private final Map<String, Function<JmmNode, Type>> visitMap;
     private final Set<String> typesToCheck = new HashSet<>();
 
     private final MySymbolTable symbolTable;
 
-    private List<String> types;
+    private List<Type> types;
 
     public TypeVerificationVisitor(MySymbolTable symbolTable) {
         this.symbolTable = symbolTable;
@@ -36,24 +36,25 @@ public class TypeVerificationVisitor {
         this.typesToCheck.add("Length");
     }
 
-    private String valueVisit(JmmNode node) {
-        return node.get("type");
+    private Type valueVisit(JmmNode node) {
+        
+        return new Type(node.get("type"), false);
     }
 
-    private String methodVisit(JmmNode node) {
+    private Type methodVisit(JmmNode node) {
 //        System.out.println(this.types);
 //        if (this.types.size() != 2) {
 //            System.out.printf("Children of %s\n\t", node.getKind());
 //            System.out.println(node.getChildren());
 //        }
-        return "int";
+        return new Type("int", false);
     }
 
-    private String lengthVisitor(JmmNode node) {
-        return "int";
+    private Type lengthVisitor(JmmNode node) {
+        return new Type("int", false);
     }
 
-    private String binaryOpVerification(JmmNode node) {
+    private Type binaryOpVerification(JmmNode node) {
         System.out.println(this.types);
         if (this.types.size() != 2) {
             System.out.printf("Children of %s\n\t", node.getKind());
@@ -62,19 +63,19 @@ public class TypeVerificationVisitor {
         return this.types.get(0);
     }
 
-    public String visit(JmmNode node) {
+    public Type visit(JmmNode node) {
         SpecsCheck.checkNotNull(node, () -> "Node should not be null");
 
-        Function<JmmNode, String> visit = this.visitMap.get(node.getKind());
+        Function<JmmNode, Type> visit = this.visitMap.get(node.getKind());
 
-        List<String> childList = null, oldList = null;
+        List<Type> childList = null, oldList = null;
         if (this.typesToCheck.contains(node.getKind())) {
             childList = new ArrayList<>();
             oldList = this.types;
             this.types = childList;
         }
 
-        String res = null;
+        Type res = null;
 
         // Postorder: 1st visit each children
         for (var child : node.getChildren()) {

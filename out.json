@@ -220,7 +220,7 @@
                           "children": []
                         },
                         {
-                          "kind": "MethodCall",
+                          "kind": "Method",
                           "attributes": {
                             "methodName": "random"
                           },

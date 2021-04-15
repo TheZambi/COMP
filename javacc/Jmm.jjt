@@ -139,8 +139,8 @@ void Statement() #void : {Token t;}
         CompoundStatement()|
         SelectionStatement()|
         IterationStatement()|
-        ([LOOKAHEAD(2) t=<Identifier>{jjtThis.put("object",t.image); jjtThis.put("type", "object");}#Value ["[" Expression() #Indexing(2)"]"] "=" ]  Expression() ";") #AssignmentStatement
-
+        (LOOKAHEAD(2) Expression() ";" |
+        (t=<Identifier>{jjtThis.put("object",t.image); jjtThis.put("type", "object");}#Value ["[" Expression() #Indexing(2)"]"] "="  Expression() ";") #AssignmentStatement)
 }
 
 void CompoundStatement() #CompoundStatement : {}
@@ -237,13 +237,12 @@ void NotExpression() #void : {}
 void PostfixExpression() #void : {Token t;}
 {
 	ExpTerm() ( "[" Expression() #Indexing(2) "]" |
-                  ("(" [ ArgumentExpressionList()] ")")#FunctionCall(2) |
                   "." (<Length> #Length(1)
                       | MethodCall() #MethodCall(2) )
                   )*
 }
 
-void MethodCall() #MethodCall : {Token t;}
+void MethodCall() #Method : {Token t;}
 {
 	t=<Identifier> "(" [ArgumentExpressionList()] ")"{jjtThis.put("methodName",t.image);}
 
