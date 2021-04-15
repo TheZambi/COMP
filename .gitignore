@@ -8,3 +8,4 @@ gradlew
 gradlew.bat
 .idea/
 test.txt
+out.json
