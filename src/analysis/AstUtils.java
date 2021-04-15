@@ -12,8 +12,12 @@ public class AstUtils {
         JmmNode sNode = node.getChildren().get(index);
         if (!sNode.getKind().equals("Symbol"))
             throw new RuntimeException("Child note at index " + index + " is not a Symbol");
-        Type t = new Type(sNode.getChildren().get(0).get("type"), sNode.getChildren().get(0).get("array").equals("true"));
-        return new Symbol(t, sNode.get("name"));
+        return new Symbol(getChildType(sNode, 0), sNode.get("name"));
+    }
+
+    public static Type getChildType(JmmNode node, int index) {
+        JmmNode childNode = node.getChildren().get(index);
+        return new Type(childNode.get("type"), childNode.get("array").equals("true"));
     }
 
     public static String getMethodName(JmmNode node) {
@@ -27,6 +31,10 @@ public class AstUtils {
         return node.getChildren().get(0).getKind().equals("Main");
     }
 
+
+
+
+    // POST SYMBOL TABLE
     public static Type getMethodCallType(JmmNode node, MySymbolTable symbolTable) {
         if(!node.getKind().equals("MethodCall"))
             throw new RuntimeException("Node is not a MethodCall");
@@ -55,7 +63,7 @@ public class AstUtils {
 
         switch (node.getKind()) {
             case "Value":
-                if (node.get("varType").equals("object")) {
+                if (node.get("type").equals("object")) {
                     Type objectType = AstUtils.getObjectType(node, symbolTable);
                     if (objectType == null) {
                         //TODO: add to reports - uninitialized variable
@@ -63,7 +71,7 @@ public class AstUtils {
                     }
                     return objectType;
                 }
-                return new Type(node.get("varType"), false);
+                return new Type(node.get("type"), false);
 
             case "Indexing":
                 JmmNode objectNode = node.getChildren().get(0);

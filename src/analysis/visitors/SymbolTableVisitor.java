@@ -67,17 +67,17 @@ public class SymbolTableVisitor {
         symbolTable.addImport(node.get("import"));
     }
 
-    public void visit(JmmNode jmmNode) {
-        SpecsCheck.checkNotNull(jmmNode, () -> "Node should not be null");
+    public void visit(JmmNode node) {
+        SpecsCheck.checkNotNull(node, () -> "Node should not be null");
 
-        Consumer<JmmNode> visit = this.visitMap.get(jmmNode.getKind());
+        Consumer<JmmNode> visit = this.visitMap.get(node.getKind());
 
         // Preorder: 1st visit the node
         if (visit != null)
-            visit.accept(jmmNode);
+            visit.accept(node);
 
         // Preorder: then, visit each children
-        for (var child : jmmNode.getChildren())
+        for (var child : node.getChildren())
             visit(child);
     }
 

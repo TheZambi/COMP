@@ -139,7 +139,7 @@ void Statement() #void : {Token t;}
         CompoundStatement()|
         SelectionStatement()|
         IterationStatement()|
-        ([LOOKAHEAD(2) t=<Identifier>{jjtThis.put("type",t.image);}#Var ["[" Expression() #Indexing(2)"]"] "=" ]  Expression() ";") #AssignmentStatement
+        ([LOOKAHEAD(2) t=<Identifier>{jjtThis.put("object",t.image); jjtThis.put("type", "object");}#Value ["[" Expression() #Indexing(2)"]"] "=" ]  Expression() ";") #AssignmentStatement
 
 }
 
@@ -237,30 +237,30 @@ void NotExpression() #void : {}
 void PostfixExpression() #void : {Token t;}
 {
 	ExpTerm() ( "[" Expression() #Indexing(2) "]" |
-                  ("(" [ ArgumentExpressionList()]#Args ")")#FunctionCall(2) |
+                  ("(" [ ArgumentExpressionList()] ")")#FunctionCall(2) |
                   "." (<Length> #Length(1)
                       | MethodCall() #MethodCall(2) )
                   )*
 }
 
-void MethodCall() #Method : {Token t;}
+void MethodCall() #MethodCall : {Token t;}
 {
-	t=<Identifier> "(" [ArgumentExpressionList()] #Args")"{jjtThis.put("methodName",t.image);}
+	t=<Identifier> "(" [ArgumentExpressionList()] ")"{jjtThis.put("methodName",t.image);}
 
 }
 
-void ArgumentExpressionList() #void : {}
+void ArgumentExpressionList() #Args : {}
 {
 	Expression() ( "," Expression() )*
 }
 
 void ExpTerm() #void: {Token t;}
 {
-    t=<IntegerLiteral>{jjtThis.put("int",t.image); jjtThis.put("varType", "int");} #Value
-    | t=<True>{jjtThis.put("boolean",t.image); jjtThis.put("varType", "Boolean");} #Value
-    | t=<False>{jjtThis.put("boolean",t.image); jjtThis.put("varType", "Boolean");} #Value
-    | t=<This>{jjtThis.put("this",t.image); jjtThis.put("varType", "this");} #Value
-    | <New> (t=<Identifier>{jjtThis.put("classObj", t.image); jjtThis.put("varType", "object");} #ClassObj "(" ")"  | <Int> "[" Expression() "]" #Array(1)) {jjtThis.put("op", "NEW");} #UnaryOp(1)
+    t=<IntegerLiteral>{jjtThis.put("object",t.image); jjtThis.put("type", "int");} #Value
+    | t=<True>{jjtThis.put("object",t.image); jjtThis.put("type", "boolean");} #Value
+    | t=<False>{jjtThis.put("object",t.image); jjtThis.put("type", "boolean");} #Value
+    | t=<This>{jjtThis.put("object",t.image); jjtThis.put("type", "this");} #Value
+    | <New> (t=<Identifier>{jjtThis.put("classObj", t.image); jjtThis.put("type", "object");} #ClassObj "(" ")"  | <Int> "[" Expression() "]" #Array(1)) {jjtThis.put("op", "NEW");} #UnaryOp(1)
     | "(" Expression() ")"
-    | t=<Identifier>{jjtThis.put("object",t.image); jjtThis.put("varType", "object");} #Value
+    | t=<Identifier>{jjtThis.put("object",t.image); jjtThis.put("type", "object");} #Value
 }

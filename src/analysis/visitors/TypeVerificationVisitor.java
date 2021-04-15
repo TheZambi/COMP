@@ -10,67 +10,87 @@ import pt.up.fe.specs.util.SpecsCheck;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class TypeVerificationVisitor {
-    private final Map<String, Consumer<JmmNode>> visitMap;
+    private final Map<String, Function<JmmNode, String>> visitMap;
+    private final Set<String> typesToCheck = new HashSet<>();
 
     private final MySymbolTable symbolTable;
+
+    private List<String> types;
 
     public TypeVerificationVisitor(MySymbolTable symbolTable) {
         this.symbolTable = symbolTable;
         this.visitMap = new HashMap<>();
         this.visitMap.put("BinaryOp", this::binaryOpVerification);
+        this.visitMap.put("AssignmentStatement", this::binaryOpVerification);
+        this.visitMap.put("Length", this::lengthVisitor);
+        this.visitMap.put("MethodCall", this::methodVisit);
+        this.visitMap.put("Value", this::valueVisit);
+
+        this.typesToCheck.add("BinaryOp");
+        this.typesToCheck.add("UnaryOp");
+        this.typesToCheck.add("MethodCall");
+        this.typesToCheck.add("AssignmentStatement");
+        this.typesToCheck.add("Length");
     }
 
-    private void binaryOpVerification(JmmNode node) {
-        JmmNode child0 = node.getChildren().get(0);
-        JmmNode child1 = node.getChildren().get(1);
+    private String valueVisit(JmmNode node) {
+        return node.get("type");
+    }
 
-        Type type0 = AstUtils.getNodeType(child0, symbolTable);
-        Type type1 = AstUtils.getNodeType(child1, symbolTable);
+    private String methodVisit(JmmNode node) {
+//        System.out.println(this.types);
+//        if (this.types.size() != 2) {
+//            System.out.printf("Children of %s\n\t", node.getKind());
+//            System.out.println(node.getChildren());
+//        }
+        return "int";
+    }
 
-        if(type0 == null || type1 == null)
-            return;
+    private String lengthVisitor(JmmNode node) {
+        return "int";
+    }
 
-        if(!type0.equals(type1)) {
-            System.out.println("TIPOS INCOMPATIVEIS");
-            //TODO - report incompatible types
+    private String binaryOpVerification(JmmNode node) {
+        System.out.println(this.types);
+        if (this.types.size() != 2) {
+            System.out.printf("Children of %s\n\t", node.getKind());
+            System.out.println(node.getChildren());
+        }
+        return this.types.get(0);
+    }
+
+    public String visit(JmmNode node) {
+        SpecsCheck.checkNotNull(node, () -> "Node should not be null");
+
+        Function<JmmNode, String> visit = this.visitMap.get(node.getKind());
+
+        List<String> childList = null, oldList = null;
+        if (this.typesToCheck.contains(node.getKind())) {
+            childList = new ArrayList<>();
+            oldList = this.types;
+            this.types = childList;
         }
 
-        switch(node.get("op")) {
-            case "ADD":
-//                if(AstUtils.)
-                break;
-            case "SUBTRACT":
-                break;
-            case "AND":
-                break;
-            case "LESSER":
-                break;
-            case "MULTIPLY":
-                break;
-            case "DIVIDE":
-                break;
-            default:
-                break;
+        String res = null;
+
+        // Postorder: 1st visit each children
+        for (var child : node.getChildren()) {
+            res = visit(child);
+            if (res != null)
+                this.types.add(res);
         }
-    }
 
-    private void arrayAccessVerification(JmmNode node) {
-//        node.get
-    }
-
-    public void visit(JmmNode jmmNode) {
-        SpecsCheck.checkNotNull(jmmNode, () -> "Node should not be null");
-
-        Consumer<JmmNode> visit = this.visitMap.get(jmmNode.getKind());
-
-        // Preorder: 1st visit the node
+        // Postorder: then, visit the node
         if (visit != null)
-            visit.accept(jmmNode);
+            res = visit.apply(node);
 
-        // Preorder: then, visit each children
-        for (var child : jmmNode.getChildren())
-            visit(child);
+
+        if (oldList != null)
+            this.types = oldList;
+
+        return res;
     }
 }

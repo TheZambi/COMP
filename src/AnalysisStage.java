@@ -1,4 +1,6 @@
 import analysis.MySymbolTable;
+import analysis.visitors.PrintVisitor;
+import analysis.visitors.TypeVerificationVisitor;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.JmmParserResult;
 import pt.up.fe.comp.jmm.analysis.JmmAnalysis;
@@ -6,6 +8,7 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.report.Report;
 import analysis.visitors.SymbolTableVisitor;
 
+import java.util.HashSet;
 import java.util.List;
 
 public class AnalysisStage implements JmmAnalysis {
@@ -29,6 +32,19 @@ public class AnalysisStage implements JmmAnalysis {
         System.out.println("--------------- // -----------------");
         System.out.println(symbolTable);
         System.out.println("--------------- // -----------------");
+
+//        HashSet<String> toPrint = new HashSet<>();
+//        toPrint.add("BinaryOp");
+//        PrintVisitor pv = new PrintVisitor(toPrint);
+//        pv.visit(root);
+
+        TypeVerificationVisitor v = new TypeVerificationVisitor(symbolTable);
+        try {
+            v.visit(root);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("uwu");
+        }
 
         return new JmmSemanticsResult(root, symbolTable, reports);
     }
