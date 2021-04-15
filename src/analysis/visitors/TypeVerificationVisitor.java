@@ -37,8 +37,7 @@ public class TypeVerificationVisitor {
     }
 
     private Type valueVisit(JmmNode node) {
-        
-        return new Type(node.get("type"), false);
+        return AstUtils.getValueType(node, symbolTable);
     }
 
     private Type methodVisit(JmmNode node) {

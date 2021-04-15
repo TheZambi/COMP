@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public class AstUtils {
+
+    public static String NOT_LITERAL = "object";
+
     public static Symbol getChildSymbol(JmmNode node, int index) {
         JmmNode sNode = node.getChildren().get(index);
         if (!sNode.getKind().equals("Symbol"))
@@ -59,84 +62,15 @@ public class AstUtils {
 
     }
 
-    public static Type getNodeType(JmmNode node, MySymbolTable symbolTable) {
-
-        switch (node.getKind()) {
-            case "Value":
-                if (node.get("type").equals("object")) {
-                    Type objectType = AstUtils.getObjectType(node, symbolTable);
-                    if (objectType == null) {
-                        //TODO: add to reports - uninitialized variable
-                        return null;
-                    }
-                    return objectType;
-                }
-                return new Type(node.get("type"), false);
-
-            case "Indexing":
-                JmmNode objectNode = node.getChildren().get(0);
-                JmmNode indexNode = node.getChildren().get(1);
-
-                if(objectNode.getKind().equals("Value") && objectNode.get("varType").equals("object")) {
-                    Type objectType = AstUtils.getObjectType(objectNode, symbolTable);
-                    if(objectType.isArray() && objectType.getName().equals("int")) {
-                        Type indexType = AstUtils.getNodeType(indexNode, symbolTable);
-
-                        if(indexType != null) {
-                            if(!indexType.getName().equals("int") || indexType.isArray()) {
-                                //TODO - report invalid index not integer
-                                return null;
-                            }
-                        }
-                        return new Type("int", false);
-                    }
-                }
-
-                //TODO - invalid object to access - not array
-                return null;
-
-            case "MethodCall":
-                return AstUtils.getMethodCallType(node, symbolTable);
-
-            case "BinaryOp":
-                Type type0 = AstUtils.getNodeType(node.getChildren().get(0), symbolTable);
-                Type type1 = AstUtils.getNodeType(node.getChildren().get(1), symbolTable);
-
-                if (type0 == null || type1 == null) {
-                    return null;
-                }
-                if (type0.equals(type1) || type0.getName().equals("") || type1.getName().equals(""))
-                    if(type0.getName().equals(""))
-                        return type1;
-                    else
-                        return type0;
-                else {
-                    //TODO: incompatible types error - add to report
-                    return null;
-                }
-            case "UnaryOp":
-                if (node.get("op").equals("NEW")) {
-                    JmmNode unaryChild = node.getChildren().get(0);
-                    if (unaryChild.getKind().equals("ClassObj"))
-                        return new Type(unaryChild.get("classObj"), false);
-                    else
-                        return new Type("int", true);
-                } else {
-                    Type unaryChildType = AstUtils.getNodeType(node.getChildren().get(0), symbolTable);
-                    if (unaryChildType != null && !unaryChildType.getName().equals("Boolean")) {
-                        //TODO: NEGATE ONLY BOOLEANS - add to report
-                        return null;
-                    } else
-                        return unaryChildType;
-                }
-            default:
-                break;
-        }
-        return null;
-    }
-
     public static Type getValueType(JmmNode node, MySymbolTable symbolTable) {
-        return new Type("a", false);
+        if(!node.getKind().equals("Value"))
+            throw new RuntimeException("Node is not a Value");
+
+        if (!node.get("type").equals(NOT_LITERAL))
+            return new Type(node.get("object"), false);
+
+        // Lookup value on symbol table
+        return getObjectType(node, symbolTable);
     }
 
     public static Type getObjectType(JmmNode node, MySymbolTable symbolTable) {

@@ -118,12 +118,12 @@ void VarDeclaration() #VarDeclaration : {Token t;}
 
 //Type,Identifier,"(",[Type,Identifier,{",",Type,Identifier},],")","{",{VarDeclaration},{Statement},"return",Expression,";","}"
 //"static","void","main","(","String","[","]",Identifier,")","{",{VarDeclaration}, {Statement},"}";
-void MethodDeclaration() #MethodDeclaration : {}
+void MethodDeclaration() #MethodDeclaration : {Token t;}
 {
    ((Symbol() "(" [Symbol() ("," Symbol() )*] ")") #MethodHeader)
        ("{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* <Return> Expression() ";" "}") #MethodBody
    |
-   (<Static> <Void> <Main>)#Main "(" <String> "[" "]" <Identifier> ")" ("{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* "}") #MainBody
+   ((<Static> <Void> <Main> "(" <String> "[" "]" t=<Identifier>{jjtThis.put("stringArrayName", t.image);} ")") #Main) ("{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* "}") #MainBody
 }
 
 //Statement =

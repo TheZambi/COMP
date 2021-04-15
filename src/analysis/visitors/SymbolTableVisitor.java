@@ -32,11 +32,11 @@ public class SymbolTableVisitor {
         if (ancestorOpt.isPresent()) {
             // Method Local var
             JmmNode ancestor = ancestorOpt.get();
-            // TODO: Handle main :)
+            Method m;
             if (AstUtils.isMethodMain(ancestor))
-                return;
-
-            Method m = symbolTable.getMethod(AstUtils.getMethodName(ancestor));
+                m = symbolTable.getMethod("main");
+            else
+                m = symbolTable.getMethod(AstUtils.getMethodName(ancestor));
             m.addLocalVar(s);
         } else {
             // Class field
@@ -45,9 +45,12 @@ public class SymbolTableVisitor {
     }
 
     private void methodDeclarationVisit(JmmNode node) {
-        // TODO: Handle main :)
-        if (AstUtils.isMethodMain(node))
+        if (AstUtils.isMethodMain(node)) {
+            List<Symbol> symbols = new ArrayList<>();
+            symbols.add(new Symbol(new Type("String",false), node.getChildren().get(0).get("stringArrayName")));
+            symbolTable.addMethod(new Method("main", new Type("void", false), symbols));
             return;
+        }
 
         JmmNode header = node.getChildren().get(0);
         List<Symbol> symbols = new ArrayList<>();
