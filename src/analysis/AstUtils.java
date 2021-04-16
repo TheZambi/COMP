@@ -2,6 +2,7 @@ package analysis;
 
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
+import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 
 import java.util.List;
@@ -62,18 +63,18 @@ public class AstUtils {
 
     }
 
-    public static Type getValueType(JmmNode node, MySymbolTable symbolTable) {
+    public static Type getValueType(JmmNode node, SymbolTable symbolTable) {
         if(!node.getKind().equals("Value"))
             throw new RuntimeException("Node is not a Value");
 
         if (!node.get("type").equals(NOT_LITERAL))
-            return new Type(node.get("object"), false);
+            return new Type(node.get("type"), false);
 
         // Lookup value on symbol table
         return getObjectType(node, symbolTable);
     }
 
-    public static Type getObjectType(JmmNode node, MySymbolTable symbolTable) {
+    public static Type getObjectType(JmmNode node, SymbolTable symbolTable) {
         Optional<JmmNode> ancestorOpt = node.getAncestor("MethodDeclaration");
         if(ancestorOpt.isPresent()) {
             JmmNode ancestor = ancestorOpt.get();

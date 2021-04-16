@@ -188,7 +188,7 @@ void Type() #Type: {Token t;String isArray="false";}
 {
     (
         <Int>{jjtThis.put("type","int");} ["[" "]" {isArray="true";}]
-        | <Boolean> {jjtThis.put("type","Boolean");}
+        | <Boolean> {jjtThis.put("type","boolean");}
         | t=<Identifier>{jjtThis.put("type",t.image);}
     ){jjtThis.put("array",isArray);}
 }

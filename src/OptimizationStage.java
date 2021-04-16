@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 
+import generation.OllirAssistant;
+import generation.OllirVisitor;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
@@ -28,13 +30,22 @@ public class OptimizationStage implements JmmOptimization {
 
         JmmNode node = semanticsResult.getRootNode();
 
+        OllirVisitor visitor = new OllirVisitor(semanticsResult.getSymbolTable());
+
+        OllirAssistant result = visitor.visit(node);
+
+        System.out.println("\n\n");
+        System.out.println(result.getAuxCode());
+        System.out.println(result.getValue());
+
         // Convert the AST to a String containing the equivalent OLLIR code
         String ollirCode = ""; // Convert node ...
 
         // More reports from this stage
         List<Report> reports = new ArrayList<>();
 
-        return new OllirResult(semanticsResult, ollirCode, reports);
+//        return new OllirResult(semanticsResult, ollirCode, reports);
+        return null;
     }
 
     @Override

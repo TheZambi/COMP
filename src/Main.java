@@ -1,3 +1,4 @@
+import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.specs.util.SpecsIo;
 
 import java.util.Arrays;
@@ -20,6 +21,8 @@ public class Main {
                 System.err.println("Failed on semantic phase");
                 return;
             }
+
+            var ollirResult = new OptimizationStage().toOllir(semanticResult);
         }
         catch (Exception e) {
             e.printStackTrace();
