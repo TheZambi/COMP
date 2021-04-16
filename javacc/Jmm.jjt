@@ -121,7 +121,7 @@ void VarDeclaration() #VarDeclaration : {Token t;}
 void MethodDeclaration() #MethodDeclaration : {Token t;}
 {
    ((Symbol() "(" [Symbol() ("," Symbol() )*] ")") #MethodHeader)
-       ("{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* <Return> Expression() ";" "}") #MethodBody
+       ("{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* <Return> Expression() #Return ";" "}") #MethodBody
    |
    ((<Static> <Void> <Main> "(" <String> "[" "]" t=<Identifier>{jjtThis.put("stringArrayName", t.image);} ")") #Main) ("{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* "}") #MainBody
 }

@@ -34,9 +34,9 @@ public class OptimizationStage implements JmmOptimization {
 
         OllirAssistant result = visitor.visit(node);
 
-        System.out.println("\n\n");
-        System.out.println(result.getAuxCode());
-        System.out.println(result.getValue());
+//        System.out.println("\n\n");
+//        System.out.println(result.getAuxCode());
+//        System.out.println(result.getValue());
 
         // Convert the AST to a String containing the equivalent OLLIR code
         String ollirCode = ""; // Convert node ...

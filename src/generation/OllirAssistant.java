@@ -62,9 +62,12 @@ public class OllirAssistant {
 
     public static String convertTypeToString(Type type) {
         String name = type.getName();
+        boolean isArray = type.isArray();
 
         switch(name) {
             case "int":
+                if(isArray)
+                    return ".array.i32";
                 return ".i32";
             case "boolean":
                 return ".bool";
@@ -78,10 +81,11 @@ public class OllirAssistant {
 
     @Override
     public String toString() {
+        String varTypeStr = varType == null ? ", varType = null" : ", varType='" + varType.getName() + " " + varType.isArray() + '\'';
         return "OllirAssistant{" +
                 "type=" + type +
                 ", value='" + value + '\'' +
-                ", varType=" + varType.getName() + " " + varType.isArray() + '\'' +
+                varTypeStr +
                 ", auxCode='" + auxCode + '\'' +
                 '}';
     }

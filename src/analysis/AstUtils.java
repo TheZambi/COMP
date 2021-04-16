@@ -78,7 +78,16 @@ public class AstUtils {
         Optional<JmmNode> ancestorOpt = node.getAncestor("MethodDeclaration");
         if(ancestorOpt.isPresent()) {
             JmmNode ancestor = ancestorOpt.get();
-            List<Symbol> localVariables = symbolTable.getLocalVariables(AstUtils.getMethodName(ancestor));
+            String methodName = AstUtils.getMethodName(ancestor);
+
+            List<Symbol> localVariables = symbolTable.getLocalVariables(methodName);
+            List<Symbol> parameters = symbolTable.getParameters(methodName);
+
+            for(Symbol s : parameters) {
+                if (s.getName().equals(node.get("object"))) {
+                    return s.getType();
+                }
+            }
 
             for(Symbol s : localVariables) {
                 if(s.getName().equals(node.get("object"))) {

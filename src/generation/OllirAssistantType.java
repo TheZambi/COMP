@@ -9,5 +9,13 @@ public enum OllirAssistantType {
     STATEMENT,
     METHODCALL,
     METHOD,
-    METHOD_ARGS
+    METHOD_ARGS,
+    INDEXING,
+    RETURN,
+    METHOD_BODY,
+    METHOD_HEADER,
+    METHOD_DECLARATION,
+    VAR_DECLARATION,
+    TYPE,
+    SYMBOL
 }
