@@ -16,6 +16,5 @@ public enum OllirAssistantType {
     METHOD_HEADER,
     METHOD_DECLARATION,
     VAR_DECLARATION,
-    TYPE,
-    SYMBOL
+    CLASS_DECLARATION
 }

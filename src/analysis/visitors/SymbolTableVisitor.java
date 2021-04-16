@@ -3,7 +3,7 @@ package analysis.visitors;
 import analysis.AstUtils;
 import analysis.MySymbolTable;
 import pt.up.fe.comp.jmm.JmmNode;
-import pt.up.fe.comp.jmm.analysis.Method;
+import analysis.Method;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.specs.util.SpecsCheck;

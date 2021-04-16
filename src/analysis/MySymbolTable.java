@@ -1,6 +1,5 @@
 package analysis;
 
-import pt.up.fe.comp.jmm.analysis.Method;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
