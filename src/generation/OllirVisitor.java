@@ -94,8 +94,6 @@ public class OllirVisitor {
                 oat = OllirAssistantType.FIELD;
         }
 
-
-        System.out.println(oat);
         if(oat == OllirAssistantType.FIELD)
         {
             System.out.println(name);
@@ -214,7 +212,12 @@ public class OllirVisitor {
 
         OllirAssistant.addAllAuxCode(auxCode, childrenResults);
 
-        String varValue = childrenResults.get(0).getValue().split("\\.")[0];
+        List<String> varValueList = Arrays.asList(childrenResults.get(0).getValue().split("\\."));
+        String varValue = varValueList.get(0);
+        System.out.println("\n\n\n" + varValueList.toString() + "\n\n\n\n");
+
+        if(varValueList.size() > 3) //if accessing a parameter
+            varValue += "." + varValueList.get(1);
 
         switch (childVar.getType()) {
             case VALUE:
