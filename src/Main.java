@@ -22,7 +22,7 @@ public class Main {
                 return;
             }
 
-            var ollirResult = new OptimizationStage().toOllir(semanticResult);
+//            var ollirResult = new OptimizationStage().toOllir(semanticResult);
         }
         catch (Exception e) {
             e.printStackTrace();

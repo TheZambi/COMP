@@ -116,7 +116,7 @@ public class AnalyseTest {
 
     @Test
     public void failVarLitIncomp() {
-        testAnalyseFail("./test/fixtures/public/fail/semantic/var_lit_incompt.jmm");
+        testAnalyseFail("./test/fixtures/public/fail/semantic/var_lit_incomp.jmm");
     }
 
     @Test
