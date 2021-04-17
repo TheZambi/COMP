@@ -20,13 +20,20 @@ public class AstUtils {
     }
 
     public static Type getChildType(JmmNode node, int index) {
-        JmmNode childNode = node.getChildren().get(index);
-        return new Type(childNode.get("type"), childNode.get("array").equals("true"));
+        return getType(node.getChildren().get(index));
+    }
+
+    public static Type getType(JmmNode node) {
+        return new Type(node.get("type"), node.get("array").equals("true"));
     }
 
     public static String getMethodName(JmmNode node) {
         if (!node.getKind().equals("MethodDeclaration"))
             throw new RuntimeException("Node is not a MethodDeclaration");
+
+        if (isMethodMain(node))
+            return "main";
+
         JmmNode sNode = node.getChildren().get(0);
         return sNode.getChildren().get(0).get("name");
     }
@@ -35,6 +42,11 @@ public class AstUtils {
         return node.getChildren().get(0).getKind().equals("Main");
     }
 
+    public static boolean isAssignment(JmmNode node) {
+        if (!node.getKind().equals("Statement"))
+            throw new RuntimeException("Node is not a Statement");
+        return node.getNumChildren() == 2;
+    }
 
 
 
@@ -64,7 +76,7 @@ public class AstUtils {
     }
 
     public static Type getValueType(JmmNode node, SymbolTable symbolTable) {
-        if(!node.getKind().equals("Value"))
+        if (!node.getKind().equals("Value"))
             throw new RuntimeException("Node is not a Value");
 
         if (!node.get("type").equals(NOT_LITERAL))

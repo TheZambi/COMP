@@ -29,22 +29,21 @@ public class AnalysisStage implements JmmAnalysis {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        System.out.println("--------------- // -----------------");
-        System.out.println(symbolTable);
-        System.out.println("--------------- // -----------------");
+//        System.out.println("--------------- // -----------------");
+//        System.out.println(symbolTable);
+//        System.out.println("--------------- // -----------------");
 
 //        HashSet<String> toPrint = new HashSet<>();
 //        toPrint.add("BinaryOp");
 //        PrintVisitor pv = new PrintVisitor(toPrint);
 //        pv.visit(root);
 
-//        TypeVerificationVisitor v = new TypeVerificationVisitor(symbolTable);
-//        try {
-//            v.visit(root);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            System.out.println("uwu");
-//        }
+        TypeVerificationVisitor v = new TypeVerificationVisitor(symbolTable, reports);
+        try {
+            v.visit(root);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return new JmmSemanticsResult(root, symbolTable, reports);
     }
