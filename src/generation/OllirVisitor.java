@@ -102,7 +102,10 @@ public class OllirVisitor {
         }
 
         value += name + convertTypeToString(type);
-        return new OllirAssistant(oat, value, "", type);
+        OllirAssistant result = new OllirAssistant(oat, value, "", type);
+        System.out.println(result);
+
+        return result;
     }
 
     private OllirAssistant handleClassDeclaration(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -239,6 +242,7 @@ public class OllirVisitor {
                 break;
             case METHODCALL:
             case BIN_OP:
+            case LENGTH:
                 String auxVar = createAux(childIndex.getValue(), childIndex.getVarType(), childIndex.getType(), auxCode);
                 value.append(auxVar);
                 break;
@@ -268,6 +272,7 @@ public class OllirVisitor {
             case VALUE:
                 value.append(childrenResults.get(0).getValue());
                 break;
+            case UN_OP_NEW_OBJ:
             case METHODCALL:
                 String auxVar = createAux(childrenResults.get(0).getValue(),
                         childrenResults.get(0).getVarType(), childrenResults.get(0).getType(), auxCode);
@@ -311,6 +316,7 @@ public class OllirVisitor {
         switch (returnChild.getType()) {
             case FIELD:
             case VALUE:
+            case LENGTH:
             case INDEXING:
                 value.append(returnChild.getValue());
                 break;
@@ -345,6 +351,8 @@ public class OllirVisitor {
                 case UN_OP_NEG:
                 case UN_OP_NEW_ARRAY:
                 case UN_OP_NEW_OBJ:
+                case LENGTH:
+                case METHODCALL:
                 case BIN_OP :
                     String auxVar = createAux(childResult.getValue(), childResult.getVarType(),
                             childResult.getType(), auxCode);
@@ -382,6 +390,8 @@ public class OllirVisitor {
             switch (childResult.getType()) {
                 case UN_OP_NEG:
                 case BIN_OP:
+                case METHODCALL:
+                case LENGTH:
                     String auxVar = createAux(childResult.getValue(), childResult.getVarType(), childResult.getType(), auxCode);
                     values.add(auxVar);
                     break;
@@ -400,7 +410,8 @@ public class OllirVisitor {
                 OllirAssistant.biOpToString(values, opType, node.get("op")),
                 auxCode.toString(),
                 opType);
-        
+
+        System.out.println(result);
         return result;
     }
 
@@ -422,8 +433,8 @@ public class OllirVisitor {
         }
 
         OllirAssistant result = new OllirAssistant(opType, value, auxCode.toString(), childrenResults.get(0).getVarType());
-        
 
+        System.out.println(result);
         return result;
     }
 
@@ -449,6 +460,8 @@ public class OllirVisitor {
         }
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.LENGTH, value.toString(), auxCode.toString(), new Type("int", false));
+
+        System.out.println(result);
         return result;
     }
 
@@ -474,7 +487,8 @@ public class OllirVisitor {
         value.append(").array.i32");
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.ARRAY, value.toString(), auxCode.toString(), new Type("int", true));
-        
+
+        System.out.println(result);
         return result;
     }
 
@@ -487,8 +501,8 @@ public class OllirVisitor {
         value.append(objClassName).append(").").append(objClassName);
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.CLASSOBJ, value.toString(), "", new Type(objClassName, false));
-        
 
+        System.out.println(result);
         return result;
     }
 
@@ -543,8 +557,8 @@ public class OllirVisitor {
 
         OllirAssistant result = new OllirAssistant(statementType, value.toString(), auxCode.toString(), null);
 
-        
 
+        System.out.println(result);
         return result;
 
     }
@@ -560,20 +574,20 @@ public class OllirVisitor {
 
         if (!childExpression.getAuxCode().equals("")) {
             for (String s : childExpression.getAuxCode().split("\n")) {
-                value.append("\t\t\t").append(s).append("\n");
+                value.append("\t").append(s).append("\n");
             }
         }
 
-        value.append("\t\t\tif (").append(childExpression.getValue()).append(") goto Body;\n\t\t\tgoto EndLoop;\n\t\tBody:\n");
+        value.append("\tif (").append(childExpression.getValue()).append(") goto Body;\n\tgoto EndLoop;\nBody:\n");
         value.append(compoundStatement.getValue());
-        value.append("\t\t\tgoto Loop;\n").append("\t\tEndLoop:\n");
+        value.append("\tgoto Loop;\n").append("EndLoop:\n");
 
 
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.ITERATION_STATEMENT, value.toString(), auxCode.toString(), null);
 
-        
 
+        System.out.println(result);
         return result;
     }
 
@@ -586,11 +600,11 @@ public class OllirVisitor {
         OllirAssistant elseStatement = childrenResults.get(2);
 
         if (!expression.getAuxCode().equals("")) {
-            System.out.println(expression.getAuxCode());
             for (String s : expression.getAuxCode().split("\n")) {
                 auxCode.append(s).append("\n");
             }
         }
+
         value.append("if(").append(expression.getValue()).append(") goto Then;\n");
         value.append("\tgoto Else;\n");
 
@@ -599,8 +613,8 @@ public class OllirVisitor {
         value.append("Endif:");
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.SELECTION_STATEMENT, value.toString(), auxCode.toString(), null);
-        
 
+        System.out.println(result);
         return result;
     }
 
@@ -621,8 +635,8 @@ public class OllirVisitor {
         }
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.COMPOUND_STATEMENT, value.toString(), "", null);
-        
 
+        System.out.println(result);
         return result;
     }
 
