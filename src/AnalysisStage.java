@@ -38,12 +38,12 @@ public class AnalysisStage implements JmmAnalysis {
 //        PrintVisitor pv = new PrintVisitor(toPrint);
 //        pv.visit(root);
 
-        TypeVerificationVisitor v = new TypeVerificationVisitor(symbolTable, reports);
-        try {
-            v.visit(root);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        TypeVerificationVisitor v = new TypeVerificationVisitor(symbolTable, reports);
+//        try {
+//            v.visit(root);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         return new JmmSemanticsResult(root, symbolTable, reports);
     }

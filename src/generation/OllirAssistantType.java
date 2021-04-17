@@ -2,9 +2,11 @@ package generation;
 
 public enum OllirAssistantType {
     BIN_OP,
-    UN_OP_NEW,
+    UN_OP_NEW_OBJ,
+    UN_OP_NEW_ARRAY,
     UN_OP_NEG,
     VALUE,
+    FIELD,
     STATEMENT_ASSIGN,
     STATEMENT,
     METHODCALL,

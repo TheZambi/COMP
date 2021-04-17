@@ -48,7 +48,10 @@ public class AstUtils {
         return node.getNumChildren() == 2;
     }
 
-
+    public static boolean isVariable(JmmNode node)
+    {
+        return (node.get("type").equals("object")) && (node.get("object") != null);
+    }
 
     // POST SYMBOL TABLE
     public static Type getMethodCallType(JmmNode node, MySymbolTable symbolTable) {

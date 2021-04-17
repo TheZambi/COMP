@@ -45,6 +45,10 @@ public class OllirVisitor {
         this.visitMap.put("IterationStatement", this::handleIterationStatement);
         this.visitMap.put("CompoundStatement", this::handleCompoundStatement);
         this.visitMap.put("SelectionStatement", this::handleSelectionStatement);
+        this.visitMap.put("MainBody", this::handleMethodBody);
+        this.visitMap.put("Main", this::handleMain);
+        this.visitMap.put("ClassObj", this::handleClassObj);
+
 
         auxVarCounter = 0;
     }
@@ -62,6 +66,7 @@ public class OllirVisitor {
         }
 
         JmmNode ancestor = ancestorOpt.get();
+        String methodName = AstUtils.getMethodName(ancestor);
         JmmNode methodHeader = ancestor.getChildren().get(0);
 
         for (int i = 1; i < methodHeader.getChildren().size(); i++) {
@@ -71,10 +76,33 @@ public class OllirVisitor {
             }
         }
 
+        OllirAssistantType oat = OllirAssistantType.VALUE;
+        if(AstUtils.isVariable(node))
+        {
+            boolean notFound = true;
+            Method method = symbolTable.getMethod(methodName);
+            List<Symbol> symbolList = method.getLocalVariables();
+            symbolList.addAll(method.getParameters());
+            for(Symbol s : symbolList)
+            {
+                if (s.getName().equals(name)) {
+                    notFound = false;
+                    break;
+                }
+            }
+            if(notFound)
+                oat = OllirAssistantType.FIELD;
+        }
+
+
+        System.out.println(oat);
+        if(oat == OllirAssistantType.FIELD)
+        {
+            System.out.println(name);
+        }
+
         value += name + convertTypeToString(type);
-        OllirAssistant result = new OllirAssistant(OllirAssistantType.VALUE, value, "", type);
-        System.out.println(result);
-        return result;
+        return new OllirAssistant(oat, value, "", type);
     }
 
     private OllirAssistant handleClassDeclaration(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -113,7 +141,7 @@ public class OllirVisitor {
         String value = ".field private " + childSymbol.getName() + convertTypeToString(childSymbol.getType()) + ";";
         OllirAssistant result = new OllirAssistant(OllirAssistantType.VAR_DECLARATION, value, "", childSymbol.getType());
 
-        System.out.println(result);
+        
         return result;
     }
 
@@ -121,7 +149,7 @@ public class OllirVisitor {
         String value = childrenResults.get(0).getValue() + childrenResults.get(1).getValue();
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.METHOD_DECLARATION, value, "", null);
-        System.out.println(result);
+        
 
         return result;
     }
@@ -137,7 +165,7 @@ public class OllirVisitor {
 
         value.append(")").append(convertTypeToString(method.getReturnType()));
         OllirAssistant result = new OllirAssistant(OllirAssistantType.METHOD_HEADER, value.toString(), "", null);
-        System.out.println(result);
+        
         return result;
     }
 
@@ -153,13 +181,24 @@ public class OllirVisitor {
             for (String s : oa.getAuxCode().split("\n")) {
                 value.append("\t\t").append(s).append("\n");
             }
-            value.append("\t\t").append(oa.getValue()).append("\n");
+            for(String s : oa.getValue().split("\n")) {
+                value.append("\t\t").append(s).append("\n");
+            }
         }
         value.append("\t}\n");
 
         System.out.println("\n\n\n");
         OllirAssistant result = new OllirAssistant(OllirAssistantType.METHOD_BODY, value.toString(), "", null);
-        System.out.println(result);
+        
+        return result;
+    }
+
+    private OllirAssistant handleMain(JmmNode node, List<OllirAssistant> childrenResults) {
+        StringBuilder value = new StringBuilder(".method public static main(args.array.String).V ");
+
+        OllirAssistant result = new OllirAssistant(OllirAssistantType.METHOD_BODY, value.toString(), "", null);
+        
+
         return result;
     }
 
@@ -178,8 +217,12 @@ public class OllirVisitor {
             case VALUE:
                 value.append(varValue);
                 break;
-            case METHODCALL :
-                String auxVar = createAux(varValue, childrenResults.get(0).getVarType(), auxCode);
+            case FIELD:
+                String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                value.append(auxVarF);
+                break;
+            case METHODCALL:
+                String auxVar = createAux(varValue, childrenResults.get(0).getVarType(), childVar.getType(), auxCode);
                 value.append(auxVar);
                 break;
         }
@@ -187,12 +230,16 @@ public class OllirVisitor {
         value.append("[");
 
         switch (childIndex.getType()) {
+            case FIELD:
+                String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                value.append(auxVarF);
+                break;
             case VALUE:
                 value.append(childIndex.getValue());
                 break;
             case METHODCALL:
             case BIN_OP:
-                String auxVar = createAux(childIndex.getValue(), childIndex.getVarType(), auxCode);
+                String auxVar = createAux(childIndex.getValue(), childIndex.getVarType(), childIndex.getType(), auxCode);
                 value.append(auxVar);
                 break;
         }
@@ -201,7 +248,7 @@ public class OllirVisitor {
         value.append("]").append(convertTypeToString(arrayValueType));
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.INDEXING, value.toString(), auxCode.toString(), arrayValueType);
-        System.out.println(result);
+        
         return result;
     }
 
@@ -214,18 +261,23 @@ public class OllirVisitor {
         Type methodVarType = childrenResults.get(1).getVarType();
 
         switch (childrenResults.get(0).getType()) {
+            case FIELD:
+                String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                value.append(auxVarF);
+                break;
             case VALUE:
                 value.append(childrenResults.get(0).getValue());
                 break;
             case METHODCALL:
-                String auxVar = createAux(childrenResults.get(0).getValue(), childrenResults.get(0).getVarType(), auxCode);
+                String auxVar = createAux(childrenResults.get(0).getValue(),
+                        childrenResults.get(0).getVarType(), childrenResults.get(0).getType(), auxCode);
                 value.append(auxVar);
                 break;
         }
         value.append(childrenResults.get(1).getValue()).append(")").append(convertTypeToString(methodVarType));
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.METHODCALL, value.toString(), auxCode.toString(), methodVarType);
-        System.out.println(result);
+        
         return result;
     }
 
@@ -237,10 +289,13 @@ public class OllirVisitor {
             StringBuilder auxCode = new StringBuilder();
             OllirAssistant.addAllAuxCode(auxCode, childrenResults);
 
-            result = new OllirAssistant(OllirAssistantType.METHOD, ", " + "\"" + node.get("methodName") + "\"" + child.getValue(), auxCode.toString(), returnType);
-            System.out.println(result);
+            result = new OllirAssistant(OllirAssistantType.METHOD,
+                    ", " + "\"" + node.get("methodName") + "\"" + child.getValue(),
+                    auxCode.toString(), returnType);
+            
         } else {
-            result = new OllirAssistant(OllirAssistantType.METHOD, ", " + "\"" + node.get("methodName") + "\"", "", returnType);
+            result = new OllirAssistant(OllirAssistantType.METHOD,
+                    ", " + "\"" + node.get("methodName") + "\"", "", returnType);
         }
         return result;
     }
@@ -254,22 +309,25 @@ public class OllirVisitor {
         value.append(convertTypeToString(returnChild.getVarType())).append(" ");
 
         switch (returnChild.getType()) {
+            case FIELD:
             case VALUE:
             case INDEXING:
                 value.append(returnChild.getValue());
                 break;
             case BIN_OP:
             case UN_OP_NEG:
-            case UN_OP_NEW:
+            case UN_OP_NEW_ARRAY:
+            case UN_OP_NEW_OBJ:
             case METHODCALL:
-                String auxVar = createAux(returnChild.getValue(), returnChild.getVarType(), auxCode);
+                String auxVar = createAux(returnChild.getValue(), returnChild.getVarType(),
+                        returnChild.getType(), auxCode);
                 value.append(auxVar);
                 break;
         }
         value.append(";");
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.RETURN, value.toString(), auxCode.toString(), returnChild.getVarType());
-        System.out.println(result);
+        
 
         return result;
     }
@@ -285,10 +343,16 @@ public class OllirVisitor {
             sb.append(", ");
             switch (childResult.getType()) {
                 case UN_OP_NEG:
-                case UN_OP_NEW:
+                case UN_OP_NEW_ARRAY:
+                case UN_OP_NEW_OBJ:
                 case BIN_OP :
-                    String auxVar = createAux(childResult.getValue(), childResult.getVarType(), auxCode);
+                    String auxVar = createAux(childResult.getValue(), childResult.getVarType(),
+                            childResult.getType(), auxCode);
                     sb.append(auxVar);
+                    break;
+                case FIELD:
+                    String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                    sb.append(auxVarF);
                     break;
                 case VALUE :
                     sb.append(childResult.getValue());
@@ -301,7 +365,7 @@ public class OllirVisitor {
                 auxCode.toString(),
                 opType);
 
-        System.out.println(result);
+        
         return result;
     }
 
@@ -318,11 +382,15 @@ public class OllirVisitor {
             switch (childResult.getType()) {
                 case UN_OP_NEG:
                 case BIN_OP:
-                    String auxVar = createAux(childResult.getValue(), childResult.getVarType(), auxCode);
+                    String auxVar = createAux(childResult.getValue(), childResult.getVarType(), childResult.getType(), auxCode);
                     values.add(auxVar);
                     break;
                     //TODO: see how OLLIR NEG
 
+                case FIELD:
+                    String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                    values.add(auxVarF);
+                    break;
                 case VALUE:
                     values.add(childResult.getValue());
                     break;
@@ -332,7 +400,7 @@ public class OllirVisitor {
                 OllirAssistant.biOpToString(values, opType, node.get("op")),
                 auxCode.toString(),
                 opType);
-        System.out.println(result);
+        
         return result;
     }
 
@@ -344,13 +412,17 @@ public class OllirVisitor {
         addAllAuxCode(auxCode, childrenResults);
 
         if(!node.get("op").equals("NEG")) {
-            opType = OllirAssistantType.UN_OP_NEW;
+            if(childrenResults.get(0).getType() == OllirAssistantType.CLASSOBJ) {
+                opType = OllirAssistantType.UN_OP_NEW_OBJ;
+            } else
+                opType = OllirAssistantType.UN_OP_NEW_ARRAY;
+
         } else {
             opType = OllirAssistantType.UN_OP_NEG;
         }
 
         OllirAssistant result = new OllirAssistant(opType, value, auxCode.toString(), childrenResults.get(0).getVarType());
-        System.out.println(result);
+        
 
         return result;
     }
@@ -362,11 +434,16 @@ public class OllirVisitor {
         OllirAssistant child = childrenResults.get(0);
 
         switch (child.getType()) {
+            case FIELD:
+                String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                value.append(auxVarF);
+                break;
             case VALUE:
                 value.append("arraylength(").append(child.getValue()).append(")");
                 break;
             case METHODCALL:
-                String auxVar = createAux(childrenResults.get(0).getValue(), childrenResults.get(0).getVarType(), auxCode);
+                String auxVar = createAux(childrenResults.get(0).getValue(), childrenResults.get(0).getVarType(),
+                        child.getType(), auxCode);
                 value.append("arraylength(").append(auxVar).append(").i32");
                 break;
         }
@@ -384,9 +461,11 @@ public class OllirVisitor {
             case METHODCALL:
             case LENGTH:
             case INDEXING:
-                String auxVar = createAux(childrenResults.get(0).getValue(), childrenResults.get(0).getVarType(), auxCode);
+                String auxVar = createAux(childrenResults.get(0).getValue(), childrenResults.get(0).getVarType(),
+                        childrenResults.get(0).getType(), auxCode);
                 value.append(auxVar);
                 break;
+            case FIELD:
             case VALUE:
                 value.append(childrenResults.get(0).getValue());
                 break;
@@ -395,7 +474,7 @@ public class OllirVisitor {
         value.append(").array.i32");
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.ARRAY, value.toString(), auxCode.toString(), new Type("int", true));
-        System.out.println(result);
+        
         return result;
     }
 
@@ -408,7 +487,7 @@ public class OllirVisitor {
         value.append(objClassName).append(").").append(objClassName);
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.CLASSOBJ, value.toString(), "", new Type(objClassName, false));
-        System.out.println(result);
+        
 
         return result;
     }
@@ -421,11 +500,40 @@ public class OllirVisitor {
         OllirAssistant.addAllAuxCode(auxCode, childrenResults);
 
         if (node.getChildren().size() == 2) {
+
             statementType = OllirAssistantType.STATEMENT_ASSIGN;
             String typeString = convertTypeToString(childrenResults.get(0).getVarType());
 
-            value.append(childrenResults.get(0).getValue()).append(" :=").append(typeString).append(" ");
-            value.append(childrenResults.get(1).getValue());
+            if(childrenResults.get(0).getType() == OllirAssistantType.FIELD)
+            {
+                String auxVar;
+                if (childrenResults.get(1).getType() == OllirAssistantType.FIELD) {
+                    auxVar = createGetFieldAux(childrenResults.get(1), auxCode);
+                } else {
+                    if(childrenResults.get(1).getType() != OllirAssistantType.VALUE)
+                        auxVar = createAux(childrenResults.get(1).getValue(), childrenResults.get(1).getVarType(),
+                                childrenResults.get(1).getType(), auxCode);
+                    else
+                        auxVar = childrenResults.get(1).getValue();
+                }
+                value.append("putfield(this, ").append(childrenResults.get(0).getValue()).append(", ")
+                        .append(auxVar).append(").V");
+            }
+            else {
+                value.append(childrenResults.get(0).getValue()).append(" :=").append(typeString).append(" ");
+
+
+                if (childrenResults.get(1).getType() == OllirAssistantType.FIELD) {
+                    value.append("getfield(this, ")
+                            .append(childrenResults.get(1).getValue()).append(")").append(typeString);
+                } else
+                    value.append(childrenResults.get(1).getValue());
+
+                if (childrenResults.get(0).getType() != OllirAssistantType.FIELD)
+                    if (childrenResults.get(1).getType() == OllirAssistantType.UN_OP_NEW_OBJ)
+                        value.append(";\ninvocespecial(").append(childrenResults.get(0).getValue())
+                                .append(", \"<init>\").V");
+            }
         } else {
             statementType = OllirAssistantType.STATEMENT;
             value.append(childrenResults.get(0).getValue());
@@ -435,9 +543,10 @@ public class OllirVisitor {
 
         OllirAssistant result = new OllirAssistant(statementType, value.toString(), auxCode.toString(), null);
 
-        System.out.println(result);
+        
 
         return result;
+
     }
 
     private OllirAssistant handleIterationStatement(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -448,7 +557,6 @@ public class OllirVisitor {
         OllirAssistant compoundStatement = childrenResults.get(1);
 
         value.append("Loop:\n");
-
 
         if (!childExpression.getAuxCode().equals("")) {
             for (String s : childExpression.getAuxCode().split("\n")) {
@@ -464,7 +572,7 @@ public class OllirVisitor {
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.ITERATION_STATEMENT, value.toString(), auxCode.toString(), null);
 
-        System.out.println(result);
+        
 
         return result;
     }
@@ -484,14 +592,14 @@ public class OllirVisitor {
             }
         }
         value.append("if(").append(expression.getValue()).append(") goto Then;\n");
-        value.append("\t\t\tgoto Else;\n");
+        value.append("\tgoto Else;\n");
 
-        value.append("\t\tThen:\n").append(thenStatement.getValue()).append("\t\t\tgoto Endif;\n");
-        value.append("\t\tElse:\n").append(elseStatement.getValue());
-        value.append("\t\tEndif:");
+        value.append("Then:\n").append(thenStatement.getValue()).append("\tgoto Endif;\n");
+        value.append("Else:\n").append(elseStatement.getValue());
+        value.append("Endif:");
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.SELECTION_STATEMENT, value.toString(), auxCode.toString(), null);
-        System.out.println(result);
+        
 
         return result;
     }
@@ -506,24 +614,39 @@ public class OllirVisitor {
 
             if (!oa.getAuxCode().equals("")) {
                 for (String s : oa.getAuxCode().split("\n")) {
-                    value.append("\t\t\t").append(s).append("\n");
+                    value.append("\t").append(s).append("\n");
                 }
             }
-            value.append("\t\t\t").append(oa.getValue()).append("\n");
+            value.append("\t").append(oa.getValue()).append("\n");
         }
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.COMPOUND_STATEMENT, value.toString(), "", null);
-        System.out.println(result);
+        
 
         return result;
     }
 
-    private String createAux(String value, Type type, StringBuilder auxCode) {
+    private String createAux(String value, Type type, OllirAssistantType auxType, StringBuilder auxCode) {
         String typeString = convertTypeToString(type);
         String auxVar = "t" + auxVarCounter++ + typeString;
         auxCode.append(auxVar).append(" :=").append(typeString).append(" ").append(value).append(";\n");
+
+        if(auxType == OllirAssistantType.UN_OP_NEW_OBJ) {
+            auxCode.append("invocespecial(").append(auxVar).append(", \"<init>\").V;\n");
+        }
         return auxVar;
     }
+
+    private String createGetFieldAux(OllirAssistant oa, StringBuilder auxCode) {
+
+        String typeString = convertTypeToString(oa.getVarType());
+        String auxVar = "t" + auxVarCounter++ + typeString;
+        auxCode.append(auxVar).append(" :=").append(typeString).append(" getfield(this, ")
+                .append(oa.getValue()).append(")").append(typeString).append(";\n");
+
+        return auxVar;
+    }
+
 
     public OllirAssistant visit(JmmNode node) {
         SpecsCheck.checkNotNull(node, () -> "Node should not be null");
