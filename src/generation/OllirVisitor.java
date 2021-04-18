@@ -60,6 +60,8 @@ public class OllirVisitor {
         Type type = AstUtils.getValueType(node, symbolTable);
         String name = node.get("object");
 
+
+
         Optional<JmmNode> ancestorOpt = node.getAncestor("MethodDeclaration");
         if(ancestorOpt.isEmpty()) {
             throw new RuntimeException("Value not inside method");
@@ -77,7 +79,8 @@ public class OllirVisitor {
         }
 
         OllirAssistantType oat = OllirAssistantType.VALUE;
-        if(AstUtils.isVariable(node))
+
+        if(AstUtils.isVariable(node) && type!=null)
         {
             boolean notFound = true;
             Method method = symbolTable.getMethod(methodName);
@@ -94,9 +97,9 @@ public class OllirVisitor {
                 oat = OllirAssistantType.FIELD;
         }
 
-        if(oat == OllirAssistantType.FIELD)
+        if(type == null) //Lib call
         {
-            System.out.println(name);
+            type = new Type("lib", false);
         }
 
         value += name + convertTypeToString(type);
@@ -261,11 +264,86 @@ public class OllirVisitor {
 
     private OllirAssistant handleMethodCall(JmmNode node, List<OllirAssistant> childrenResults) {
         StringBuilder auxCode = new StringBuilder();
-        StringBuilder value = new StringBuilder("invokevirtual(");
+        StringBuilder value = new StringBuilder();
 
         OllirAssistant.addAllAuxCode(auxCode, childrenResults);
 
         Type methodVarType = childrenResults.get(1).getVarType();
+
+        if(methodVarType == null) //method does not exist. Is imported or from super
+        {
+            value.append("invokestatic(");
+            Optional<JmmNode> ancestorOpt = node.getAncestor("Statement");
+
+            if(ancestorOpt.isEmpty()) {
+                throw new RuntimeException("Value not inside method");
+            }
+
+            JmmNode ancestor = ancestorOpt.get();
+
+
+            if(ancestor.getChildren().size() == 1)
+                methodVarType = new Type("void", false);
+            else
+            {
+
+                Optional<JmmNode> ancestorOptMethod = node.getAncestor("MethodDeclaration");
+
+                if(ancestorOptMethod.isEmpty()) {
+                    throw new RuntimeException("Value not inside method");
+                }
+
+                JmmNode ancestorMethod = ancestorOptMethod.get();
+
+                String methodName;
+                if(!AstUtils.isMethodMain(ancestorMethod))
+                    methodName = ancestorMethod.getChildren().get(0).getChildren().get(0).get("name");
+                else
+                    methodName = "main";
+
+                String varName;
+                boolean notIndex = true;
+                if(ancestor.getChildren().get(0).getKind().equals("Value"))
+                     varName = ancestor.getChildren().get(0).get("object"); //variable
+                else {//indexing
+                    varName = ancestor.getChildren().get(0).getChildren().get(0).get("object");
+                    notIndex = false;
+                }
+
+                List<Symbol> symbolList = new ArrayList<>();
+
+
+                if(symbolTable.getLocalVariables(methodName) != null)
+                    symbolList.addAll(symbolTable.getLocalVariables(methodName));
+                if(symbolTable.getParameters(methodName) != null)
+                    symbolList.addAll(symbolTable.getParameters(methodName));
+
+
+                for(Symbol s : symbolList)
+                {
+                    if(s.getName().equals(varName))
+                    {
+                        methodVarType = new Type(s.getType().getName(), s.getType().isArray() && notIndex);
+                        break;
+                    }
+                }
+                if(methodVarType == null)
+                {
+                    List<Symbol> filedList = symbolTable.getFields();
+                    for(Symbol s : filedList)
+                    {
+                        if(s.getName().equals(varName))
+                        {
+                            methodVarType = new Type(s.getType().getName(), s.getType().isArray() && notIndex);
+                            break;
+                        }
+                    }
+                }
+
+            }
+        }
+        else
+            value.append("invokevirtual(");
 
         switch (childrenResults.get(0).getType()) {
             case FIELD:

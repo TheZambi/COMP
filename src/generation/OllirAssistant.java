@@ -80,6 +80,10 @@ public class OllirAssistant {
                 return ".i32";
             case "boolean":
                 return ".bool";
+            case "lib":
+                return "";
+            case "void":
+                return ".V";
             case "this": //TODO: TO CHECK
                 return "";
             default:
