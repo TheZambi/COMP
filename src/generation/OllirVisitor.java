@@ -143,19 +143,16 @@ public class OllirVisitor {
 
         Symbol childSymbol = AstUtils.getChildSymbol(node, 0);
         String value = ".field private " + childSymbol.getName() + convertTypeToString(childSymbol.getType()) + ";";
-        OllirAssistant result = new OllirAssistant(OllirAssistantType.VAR_DECLARATION, value, "", childSymbol.getType());
 
-        
-        return result;
+
+        return new OllirAssistant(OllirAssistantType.VAR_DECLARATION, value, "", childSymbol.getType());
     }
 
     private OllirAssistant handleMethodDeclaration(JmmNode node, List<OllirAssistant> childrenResults) {
         String value = childrenResults.get(0).getValue() + childrenResults.get(1).getValue();
 
-        OllirAssistant result = new OllirAssistant(OllirAssistantType.METHOD_DECLARATION, value, "", null);
-        
 
-        return result;
+        return new OllirAssistant(OllirAssistantType.METHOD_DECLARATION, value, "", null);
     }
 
     private OllirAssistant handleMethodHeader(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -168,9 +165,8 @@ public class OllirVisitor {
         }
 
         value.append(")").append(convertTypeToString(method.getReturnType()));
-        OllirAssistant result = new OllirAssistant(OllirAssistantType.METHOD_HEADER, value.toString(), "", null);
-        
-        return result;
+
+        return new OllirAssistant(OllirAssistantType.METHOD_HEADER, value.toString(), "", null);
     }
 
     private OllirAssistant handleMethodBody(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -192,18 +188,14 @@ public class OllirVisitor {
         value.append("\t}\n");
 
         System.out.println("\n\n\n");
-        OllirAssistant result = new OllirAssistant(OllirAssistantType.METHOD_BODY, value.toString(), "", null);
-        
-        return result;
+
+        return new OllirAssistant(OllirAssistantType.METHOD_BODY, value.toString(), "", null);
     }
 
     private OllirAssistant handleMain(JmmNode node, List<OllirAssistant> childrenResults) {
-        StringBuilder value = new StringBuilder(".method public static main(args.array.String).V ");
 
-        OllirAssistant result = new OllirAssistant(OllirAssistantType.METHOD_BODY, value.toString(), "", null);
-        
 
-        return result;
+        return new OllirAssistant(OllirAssistantType.METHOD_BODY, ".method public static main(args.array.String).V ", "", null);
     }
 
     private OllirAssistant handleIndexing(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -217,7 +209,7 @@ public class OllirVisitor {
 
         List<String> varValueList = Arrays.asList(childrenResults.get(0).getValue().split("\\."));
         String varValue = varValueList.get(0);
-        System.out.println("\n\n\n" + varValueList.toString() + "\n\n\n\n");
+        System.out.println("\n\n\n" + varValueList + "\n\n\n\n");
 
         if(varValueList.size() > 3) //if accessing a parameter
             varValue += "." + varValueList.get(1);
@@ -257,9 +249,7 @@ public class OllirVisitor {
         Type arrayValueType = new Type(childVar.getVarType().getName(), false);
         value.append("]").append(convertTypeToString(arrayValueType));
 
-        OllirAssistant result = new OllirAssistant(OllirAssistantType.INDEXING, value.toString(), auxCode.toString(), arrayValueType);
-        
-        return result;
+        return new OllirAssistant(OllirAssistantType.INDEXING, value.toString(), auxCode.toString(), arrayValueType);
     }
 
     private OllirAssistant handleMethodCall(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -362,9 +352,7 @@ public class OllirVisitor {
         }
         value.append(childrenResults.get(1).getValue()).append(")").append(convertTypeToString(methodVarType));
 
-        OllirAssistant result = new OllirAssistant(OllirAssistantType.METHODCALL, value.toString(), auxCode.toString(), methodVarType);
-        
-        return result;
+        return new OllirAssistant(OllirAssistantType.METHODCALL, value.toString(), auxCode.toString(), methodVarType);
     }
 
     private OllirAssistant handleMethod(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -413,10 +401,8 @@ public class OllirVisitor {
         }
         value.append(";");
 
-        OllirAssistant result = new OllirAssistant(OllirAssistantType.RETURN, value.toString(), auxCode.toString(), returnChild.getVarType());
-        
 
-        return result;
+        return new OllirAssistant(OllirAssistantType.RETURN, value.toString(), auxCode.toString(), returnChild.getVarType());
     }
 
     private OllirAssistant handleArgs(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -449,13 +435,11 @@ public class OllirVisitor {
             }
         }
 
-        OllirAssistant result = new OllirAssistant(OllirAssistantType.METHOD_ARGS,
+
+        return new OllirAssistant(OllirAssistantType.METHOD_ARGS,
                 sb.toString(),
                 auxCode.toString(),
                 opType);
-
-        
-        return result;
     }
 
     private OllirAssistant handleBinaryOp(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -575,7 +559,6 @@ public class OllirVisitor {
 
     private OllirAssistant handleClassObj(JmmNode node, List<OllirAssistant> childrenResults) {
         StringBuilder value = new StringBuilder("new(");
-        StringBuilder auxCode = new StringBuilder();
 
         String objClassName = node.get("classObj");
 
@@ -646,7 +629,6 @@ public class OllirVisitor {
 
     private OllirAssistant handleIterationStatement(JmmNode node, List<OllirAssistant> childrenResults) {
         StringBuilder value = new StringBuilder();
-        StringBuilder auxCode = new StringBuilder();
 
         OllirAssistant childExpression = childrenResults.get(0);
         OllirAssistant compoundStatement = childrenResults.get(1);
@@ -665,7 +647,7 @@ public class OllirVisitor {
 
 
 
-        OllirAssistant result = new OllirAssistant(OllirAssistantType.ITERATION_STATEMENT, value.toString(), auxCode.toString(), null);
+        OllirAssistant result = new OllirAssistant(OllirAssistantType.ITERATION_STATEMENT, value.toString(), "", null);
 
 
         System.out.println(result);
