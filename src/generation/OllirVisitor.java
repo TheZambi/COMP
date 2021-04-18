@@ -60,7 +60,11 @@ public class OllirVisitor {
         Type type = AstUtils.getValueType(node, symbolTable);
         String name = node.get("object");
 
-
+        if(name.equals("true")) {
+            name = "1";
+        } else if(name.equals("false")) {
+            name = "0";
+        }
 
         Optional<JmmNode> ancestorOpt = node.getAncestor("MethodDeclaration");
         if(ancestorOpt.isEmpty()) {
@@ -481,13 +485,14 @@ public class OllirVisitor {
     }
 
     private OllirAssistant handleUnaryOp(JmmNode node, List<OllirAssistant> childrenResults) {
-        String value = childrenResults.get(0).getValue();
+        StringBuilder value = new StringBuilder();
         StringBuilder auxCode = new StringBuilder();
         OllirAssistantType opType;
 
         addAllAuxCode(auxCode, childrenResults);
 
         if(!node.get("op").equals("NEG")) {
+            value.append(childrenResults.get(0).getValue());
             if(childrenResults.get(0).getType() == OllirAssistantType.CLASSOBJ) {
                 opType = OllirAssistantType.UN_OP_NEW_OBJ;
             } else
@@ -495,9 +500,26 @@ public class OllirVisitor {
 
         } else {
             opType = OllirAssistantType.UN_OP_NEG;
+
+            switch(childrenResults.get(0).getType()) {
+                case BIN_OP:
+                case METHODCALL:
+                case FIELD:
+                    String auxVar1 = createAux(childrenResults.get(0).getValue(), childrenResults.get(0).getVarType(),
+                            childrenResults.get(0).getType(), auxCode);
+                    String auxVar2 = createAux(auxVar1 + " !.bool " + auxVar1, new Type("boolean", false),
+                            null, auxCode);
+                    auxCode.append(auxVar1).append(" !.bool ").append(auxVar1).append(";\n");
+                    value.append(auxVar2);
+                case VALUE:
+//                    auxVar2 = createAux(childrenResults.get(0).getValue() + " !.bool " + childrenResults.get(0).getValue(), new Type("boolean", false),
+//                            null, auxCode);
+                    value.append(childrenResults.get(0).getValue() + " !.bool " + childrenResults.get(0).getValue());
+                    break;
+            }
         }
 
-        OllirAssistant result = new OllirAssistant(opType, value, auxCode.toString(), childrenResults.get(0).getVarType());
+        OllirAssistant result = new OllirAssistant(opType, value.toString(), auxCode.toString(), childrenResults.get(0).getVarType());
 
         System.out.println(result);
         return result;
