@@ -23,6 +23,9 @@ public class OllirVisitor {
 
     private int auxVarCounter;
 
+    private int ifCounter;
+    private int whileCounter;
+
     public OllirVisitor(SymbolTable symbolTable) {
         this.symbolTable = (MySymbolTable) symbolTable;
         this.visitMap = new HashMap<>();
@@ -48,9 +51,16 @@ public class OllirVisitor {
         this.visitMap.put("MainBody", this::handleMethodBody);
         this.visitMap.put("Main", this::handleMain);
         this.visitMap.put("ClassObj", this::handleClassObj);
+        this.visitMap.put("Program", this::handleProgram);
 
 
         auxVarCounter = 0;
+        ifCounter = 0;
+        whileCounter = 0;
+    }
+
+    private OllirAssistant handleProgram(JmmNode node, List<OllirAssistant> childrenResults) {
+        return childrenResults.get(childrenResults.size()-1);
     }
 
     private OllirAssistant handleValue(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -272,6 +282,7 @@ public class OllirVisitor {
             if(ancestorOpt.isEmpty()) {
                 throw new RuntimeException("Value not inside method");
             }
+
 
             JmmNode ancestor = ancestorOpt.get();
 
@@ -537,7 +548,7 @@ public class OllirVisitor {
                 value.append(auxVarF);
                 break;
             case VALUE:
-                value.append("arraylength(").append(child.getValue()).append(")");
+                value.append("arraylength(").append(child.getValue()).append(").i32");
                 break;
             case METHODCALL:
                 String auxVar = createAux(childrenResults.get(0).getValue(), childrenResults.get(0).getVarType(),
@@ -655,7 +666,7 @@ public class OllirVisitor {
         OllirAssistant childExpression = childrenResults.get(0);
         OllirAssistant compoundStatement = childrenResults.get(1);
 
-        value.append("Loop:\n");
+        value.append("Loop" + whileCounter + ":\n");
 
         if (!childExpression.getAuxCode().equals("")) {
             for (String s : childExpression.getAuxCode().split("\n")) {
@@ -663,9 +674,27 @@ public class OllirVisitor {
             }
         }
 
-        value.append("\tif (").append(childExpression.getValue()).append(") goto Body;\n\tgoto EndLoop;\nBody:\n");
+
+        if(childExpression.getType() == OllirAssistantType.VALUE) {
+            value.append("\tif (");
+            value.append(childExpression.getValue()).append(" &&.bool 1.bool");
+        }
+        else if(childExpression.getType() == OllirAssistantType.METHODCALL)
+        {
+            StringBuilder auxCode = new StringBuilder();
+            String auxVar = createAux(childExpression.getValue(), childExpression.getVarType(), OllirAssistantType.METHODCALL, auxCode);
+            value.append(auxCode);
+            value.append("\tif (");
+            value.append(auxVar).append(" &&.bool 1.bool");
+        }
+        else {
+            value.append("\tif (");
+            value.append(childExpression.getValue());
+        }
+
+        value.append(") goto Body" + whileCounter + ";\n\tgoto EndLoop" + whileCounter + ";\nBody" + whileCounter + ":\n");
         value.append(compoundStatement.getValue());
-        value.append("\tgoto Loop;\n").append("EndLoop:\n");
+        value.append("\tgoto Loop").append(whileCounter).append(";\n").append("EndLoop" + whileCounter + ":\n");
 
 
 
@@ -673,6 +702,7 @@ public class OllirVisitor {
 
 
         System.out.println(result);
+        whileCounter++;
         return result;
     }
 
@@ -690,16 +720,28 @@ public class OllirVisitor {
             }
         }
 
-        value.append("if(").append(expression.getValue()).append(") goto Then;\n");
-        value.append("\tgoto Else;\n");
+        value.append("if(");
+        if(expression.getType() == OllirAssistantType.VALUE)
+            value.append(expression.getValue()).append(" &&.bool 1.bool");
+        else if(expression.getType() == OllirAssistantType.METHODCALL)
+        {
+            String auxVar = createAux(expression.getValue(), expression.getVarType(), OllirAssistantType.METHODCALL, auxCode);
+            value.append(auxVar).append(" &&.bool 1.bool");
+        }
+        else
+            value.append(expression.getValue());
+        value.append(") goto Then" + ifCounter + ";\n");
+        value.append("\tgoto Else" + ifCounter + ";\n");
 
-        value.append("Then:\n").append(thenStatement.getValue()).append("\tgoto Endif;\n");
-        value.append("Else:\n").append(elseStatement.getValue());
-        value.append("Endif:");
+        value.append("Then" + ifCounter + ":\n").append(thenStatement.getValue()).append("\tgoto Endif" + ifCounter + ";\n");
+        value.append("Else" + ifCounter + ":\n").append(elseStatement.getValue());
+        value.append("Endif" + ifCounter + ":");
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.SELECTION_STATEMENT, value.toString(), auxCode.toString(), null);
 
         System.out.println(result);
+
+        ifCounter++;
         return result;
     }
 

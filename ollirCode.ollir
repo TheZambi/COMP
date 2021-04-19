@@ -1,0 +1,73 @@
+Lazysort {
+
+	.construct Lazysort().V {
+		invokespecial(this, "<init>").V;
+	}
+
+	.method public static main(args.array.String).V  {
+		t0.i32 :=.i32 2.i32 *.i32 3.i32;
+		a.String :=.String 1.i32 +.i32 t0.i32;
+	}
+
+	.method public quicksort(L.array.i32).bool {
+		
+		rand.i32 :=.i32 0.i32;
+		
+		rand.i32 :=.i32 invokestatic(MathUtils, "random", 0.i32, 5.i32).i32;
+		
+		if(rand.i32 <.i32 4.i32) goto Then0;
+			goto Else0;
+		Then0:
+			invokevirtual(this, "beLazy", $1.L.array.i32).bool;
+			lazy.bool :=.bool 1.bool;
+			goto Endif0;
+		Else0:
+			lazy.bool :=.bool 0.bool;
+		Endif0:
+		
+		if(lazy.bool &&.bool 1.bool) goto Then1;
+			goto Else1;
+		Then1:
+			lazy.bool :=.bool lazy.bool !.bool lazy.bool;
+			goto Endif1;
+		Else1:
+			t1.i32 :=.i32 arraylength($1.L.array.i32).i32;
+			t2.i32 :=.i32 t1.i32 -.i32 1.i32;
+			lazy.bool :=.bool invokevirtual(this, "quicksort", $1.L.array.i32, 0.i32, t2.i32).bool;
+		Endif1:
+		
+		ret.bool lazy.bool;
+	}
+
+	.method public beLazy(L.array.i32).bool {
+		
+		_allowedNameL.i32 :=.i32 arraylength($1.L.array.i32).i32;
+		
+		allowedNameI.i32 :=.i32 0.i32;
+		
+		Loop0:
+			t3.i32 :=.i32 _allowedNameL.i32 /.i32 2.i32;
+			if (allowedNameI.i32 <.i32 t3.i32) goto Body0;
+			goto EndLoop0;
+		Body0:
+			$1.L[allowedNameI.i32].i32 :=.i32 invokestatic(MathUtils, "random", 0.i32, 10.i32).i32;
+			allowedNameI.i32 :=.i32 allowedNameI.i32 +.i32 1.i32;
+			goto Loop0;
+		EndLoop0:
+		
+		allowedNameI.i32 :=.i32 10000.i32;
+		
+		Loop1:
+			if (allowedNameI.i32 <.i32 _allowedNameL.i32) goto Body1;
+			goto EndLoop1;
+		Body1:
+			rand.i32 :=.i32 invokestatic(MathUtils, "random", 0.i32, 10.i32).i32;
+			$1.L[allowedNameI.i32].i32 :=.i32 rand.i32 +.i32 1.i32;
+			allowedNameI.i32 :=.i32 allowedNameI.i32 +.i32 1.i32;
+			goto Loop1;
+		EndLoop1:
+		
+		ret.bool 1.bool;
+	}
+
+}
