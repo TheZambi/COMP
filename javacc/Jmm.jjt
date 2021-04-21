@@ -1,6 +1,7 @@
 options
 {
     LOOKAHEAD=1;
+    NODE_SCOPE_HOOK = true;
 }
 
 PARSER_BEGIN(Jmm)
@@ -18,6 +19,17 @@ public class Jmm
 
 		SimpleNode root = myJmm.Program(); // returns reference to root node
     }
+
+    // Hooks
+    private void jjtreeOpenNodeScope(Node n) {
+        SimpleNode sn = (SimpleNode) n;
+        Token t = getToken(1);
+        sn.put("line", Integer.toString(t.beginLine));
+        sn.put("col", Integer.toString(t.beginColumn));
+    }
+
+    private void jjtreeCloseNodeScope(Node n) {}
+
 }
 
 PARSER_END(Jmm)

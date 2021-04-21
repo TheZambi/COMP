@@ -28,6 +28,8 @@ public class TypeVerificationVisitor {
         NEW
     }
 
+    private static final Type ignore = new Type("-ignore", false);
+
     private final Map<String, Function<JmmNode, Type>> visitMap;
     private final Set<String> typesToCheck = new HashSet<>();
 
@@ -35,6 +37,8 @@ public class TypeVerificationVisitor {
     private final List<Report> reports;
 
     private List<Type> types;
+
+    private final Set<String> validTypes;
 
     public TypeVerificationVisitor(MySymbolTable symbolTable, List<Report> reports) {
         this.symbolTable = symbolTable;
@@ -49,6 +53,7 @@ public class TypeVerificationVisitor {
         this.visitMap.put("UnaryOp", this::unaryOpVisit);
         this.visitMap.put("ClassObj", this::classObjVisit);
         this.visitMap.put("Array", this::arrayVisit);
+        this.visitMap.put("Type", this::typeVisit);
 
         this.typesToCheck.add("BinaryOp");
         this.typesToCheck.add("UnaryOp");
@@ -57,6 +62,21 @@ public class TypeVerificationVisitor {
         this.typesToCheck.add("Length");
         this.typesToCheck.add("Indexing");
         this.typesToCheck.add("Array");
+
+        this.validTypes = new HashSet<>();
+        this.validTypes.add("int");
+        this.validTypes.add("boolean");
+        this.validTypes.add(symbolTable.getClassName());
+        this.validTypes.addAll(symbolTable.getImports());
+    }
+
+    private Type typeVisit(JmmNode node) {
+        if (!this.validTypes.contains(node.get("type"))) {
+            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                    "Invalid type, found <" + node.get("type") + ">"));
+        }
+
+        return null;
     }
 
     private Type arrayVisit(JmmNode node) {
@@ -64,7 +84,7 @@ public class TypeVerificationVisitor {
             throw new RuntimeException("Array instantiation without 1 child");
 
         if (!this.types.get(0).equals(new Type("int", false)))
-            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1,
+            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                     "Array must be instantiated with an integer size, <" + this.types.get(0).getName() + "> received"));
 
         return new Type("int", true);
@@ -72,7 +92,7 @@ public class TypeVerificationVisitor {
 
     private Type classObjVisit(JmmNode node) {
         if (!node.get("type").equals(AstUtils.NOT_LITERAL)) {
-            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1,
+            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                     "Cannot call new on a <" + node.get("type") + ">"));
             return null;
         }
@@ -81,7 +101,15 @@ public class TypeVerificationVisitor {
     }
 
     private Type valueVisit(JmmNode node) {
-        return AstUtils.getValueType(node, symbolTable);
+        Type t = AstUtils.getValueType(node, symbolTable);
+        // Test both variables missing from the scope and if the imports are valid
+        if (t == null && !symbolTable.getImports().contains(node.get("object"))) {
+            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                    "Identifier <" + node.get("object") + "> is undeclared in this scope"));
+            return ignore;
+        }
+
+        return t;
     }
 
     private Type methodVisit(JmmNode node) {
@@ -101,12 +129,11 @@ public class TypeVerificationVisitor {
         switch (UnaryOperator.valueOf(node.get("op"))) {
             case NEG:
                 ret = new Type("boolean", false);
-                if (!this.types.get(0).equals(ret))
-                    this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1,
+                if (ignore != this.types.get(0) && !this.types.get(0).equals(ret))
+                    this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                             "Can only negate a boolean, received <" + this.types.get(0).getName() + "> instead"));
                 break;
             case NEW:
-                // TODO: Check constructors?
                 ret = this.types.get(0);
                 break;
             default:
@@ -119,18 +146,18 @@ public class TypeVerificationVisitor {
         if (this.types.size() != 2)
             throw new RuntimeException("Indexing without 2 children");
 
-        if (!this.types.get(0).isArray())
-            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1,
+        if (ignore != this.types.get(0) && !this.types.get(0).isArray())
+            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                     "Can only index an array, <" + this.types.get(0).getName() + "> is not an array"));
-        if (!this.types.get(1).equals(new Type("int", false)))
-            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1,
+        if (ignore != this.types.get(1) && !this.types.get(1).equals(new Type("int", false)))
+            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                     "Indexing index must be an int, was <" + this.types.get(1).getName() + ">"));
 
         return new Type("int", false);
     }
 
     private Type lengthVisit(JmmNode node) {
-        if (!this.types.get(0).isArray())
+        if (ignore != this.types.get(0) && !this.types.get(0).isArray())
             this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1, "length must only be used on arrays: " + this.types.get(0) + " is not an array"));
         return new Type("int", false);
     }
@@ -142,8 +169,11 @@ public class TypeVerificationVisitor {
         if (this.types.size() != 2)
             throw new RuntimeException("Assignment without 2 children");
 
+        if (ignore == this.types.get(0) || ignore == this.types.get(1))
+            return null;
+
         if (!this.types.get(0).equals(this.types.get(1)))
-            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1,
+            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                     "Assignment types must match, tried to assign a <" + this.types.get(0).getName() + "> to a <" + this.types.get(1).getName() + ">"));
 
         return null;
@@ -178,11 +208,11 @@ public class TypeVerificationVisitor {
                 throw new RuntimeException("Unsupported binary operation");
         }
 
-        if (!leftExpected.equals(left)) {
-            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1,
+        if (ignore != left && !leftExpected.equals(left)) {
+            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                     "&& left operand type must be boolean but was <" + left.getName() + ">"));
-        } else if (!rightExpected.equals(right)) {
-            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1,
+        } else if (ignore != right && !rightExpected.equals(right)) {
+            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                     "&& right operand type must be boolean but was <" + right.getName() + ">"));
         }
         return ret;
