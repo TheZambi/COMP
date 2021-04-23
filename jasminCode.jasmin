@@ -12,3 +12,27 @@
 .method index(I)I
 	.limit stack 99
 	.limit locals 99
+iconst_2
+istore_2
+zconst_0
+zconst_1
+zandb
+zstore_3
+iconst_1
+iload_5
+
+iadd
+istore_4
+astore_5
+iconst_1
+istore_5
+iconst_1
+aload_5
+
+iadd
+istore_7
+iload_7
+
+iconst_1
+iadd
+istore_4

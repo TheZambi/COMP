@@ -3,6 +3,8 @@ package generation.jasmin;
 import org.specs.comp.ollir.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 
 public class JasminAssistant {
@@ -82,7 +84,12 @@ public class JasminAssistant {
     private void generateInstruction(Method method, Instruction instruction) {
         switch(instruction.getInstType()) {
             case ASSIGN -> {
-
+                AssignInstruction assignInstruction = (AssignInstruction) instruction;
+                Operand leftOp = (Operand) assignInstruction.getDest();
+                this.generateInstruction(method, assignInstruction.getRhs());
+                HashMap<String, Descriptor> varTable = OllirAccesser.getVarTable(method);
+                code.append(convertTypeToInst(leftOp.getType().getTypeOfElement())).append("store_")
+                        .append(varTable.get(leftOp.getName()).getVirtualReg()).append("\n");
             }
             case CALL -> {
 
@@ -106,12 +113,91 @@ public class JasminAssistant {
 
             }
             case BINARYOPER -> {
-
+                this.generateBiOpInstruction(method, (BinaryOpInstruction) instruction);
             }
             case NOPER -> {
-                
+                SingleOpInstruction noOperInstruction = (SingleOpInstruction) instruction;
+                Element element = noOperInstruction.getSingleOperand();
+
+                code.append(convertTypeToInst(element.getType().getTypeOfElement()));
+                if(element.isLiteral()) {
+                    code.append("const_").append(((LiteralElement)element).getLiteral());
+                } else {
+                    code.append("load_").append(getVirtualReg(method, (Operand) element));
+                }
+                code.append("\n");
             }
         }
+    }
+
+    private void generateBiOpInstruction(Method method, BinaryOpInstruction instruction) {
+        List<Element> operands = new ArrayList<>();
+        operands.add(instruction.getLeftOperand());
+        operands.add(instruction.getRightOperand());
+
+        for(Element operand : operands) {
+            code.append(convertTypeToInst(operand.getType().getTypeOfElement()));
+            if(operand.isLiteral()) {
+                code.append("const_").append(((LiteralElement) operand).getLiteral());
+            } else {
+                code.append("load_")
+                        .append(getVirtualReg(method, (Operand) operand)).append("\n");
+            }
+            code.append("\n");
+        }
+        code.append(convertTypeToInst(operands.get(0).getType().getTypeOfElement()));
+        String opStr = "";
+        switch(instruction.getUnaryOperation().getOpType()) {
+            case ADD -> {
+                opStr = "add";
+            }
+            case SUB -> {
+                opStr = "sub";
+            }
+            case MUL -> {
+                opStr = "mul";
+            }
+            case DIV -> {
+                opStr = "div";
+            }
+            case LTH -> {
+                opStr = "add";
+            }
+            case GTH -> {
+                opStr = "add";
+            }
+            case EQ -> {
+            }
+            case NEQ -> {
+            }
+            case LTE -> {
+                opStr = "add";
+            }
+            case GTE -> {
+                opStr = "add";
+            }
+            case ANDB -> {
+                opStr = "andb";
+            }
+            case ORB -> {
+                opStr = "orb";
+            }
+        }
+        code.append(opStr).append("\n");
+    }
+
+    private int getVirtualReg(Method method, Operand operand) {
+        return OllirAccesser.getVarTable(method).get(operand.getName()).getVirtualReg();
+    }
+
+    private static String convertTypeToInst(ElementType type) {
+        return switch (type) {
+            case INT32 -> "i";
+            case BOOLEAN -> "z";
+            case ARRAYREF, OBJECTREF, THIS -> "a";
+            case CLASS -> "";
+            default -> throw new IllegalStateException("Unexpected value: " + type);
+        };
     }
 
     private static String convertType(ElementType type) {
@@ -135,7 +221,7 @@ public class JasminAssistant {
                 return "";
             }
             case STRING -> {
-                return "Ljava/lang/String";
+                return "Ljava/lang/String;";
             }
             case VOID -> {
                 return "V";

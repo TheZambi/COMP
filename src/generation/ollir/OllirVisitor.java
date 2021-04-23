@@ -459,6 +459,7 @@ public class OllirVisitor {
                     String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
                     sb.append(auxVarF);
                     break;
+                case INDEXING:
                 case VALUE :
                     sb.append(childResult.getValue());
                     break;
@@ -496,6 +497,7 @@ public class OllirVisitor {
                     String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
                     values.add(auxVarF);
                     break;
+                case INDEXING:
                 case VALUE:
                     values.add(childResult.getValue());
                     break;
