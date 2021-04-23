@@ -112,7 +112,6 @@ public class JasminAssistant {
                 
             }
         }
->>>>>>> 08d77568b663c1f0cee05ca969b157f14e1dcf02
     }
 
     private static String convertType(ElementType type) {

@@ -1,5 +1,14 @@
 .class public Lazysort
 .super 
 .field private field1 I
-.field private field2 L
+.field private field2 Z
 .field private field3 [I
+.method Lazysort()V
+	.limit stack 99
+	.limit locals 99
+.method main([I)V
+	.limit stack 99
+	.limit locals 99
+.method index(I)I
+	.limit stack 99
+	.limit locals 99
