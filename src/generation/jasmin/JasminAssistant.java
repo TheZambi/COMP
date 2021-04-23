@@ -57,7 +57,7 @@ public class JasminAssistant {
     }
 
     private void generateMethod(Method method) {
-        code.append(".method ").append(method.getMethodName()).append("()").append(method.getReturnType().toString())
+        code.append(".method ").append(method.getMethodName()).append("()").append(method.getReturnType().toString());
     }
 
     private static String convertType(ElementType type) {
