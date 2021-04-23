@@ -23,7 +23,7 @@ public class AnalysisStage implements JmmAnalysis {
         this.root = parserResult.getRootNode();
         this.symbolTable = new MySymbolTable();
 
-        SymbolTableVisitor stv = new SymbolTableVisitor(symbolTable);
+        SymbolTableVisitor stv = new SymbolTableVisitor(symbolTable, reports);
         try {
             stv.visit(root);
         } catch (Exception e) {

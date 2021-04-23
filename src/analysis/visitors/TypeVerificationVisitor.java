@@ -1,6 +1,7 @@
 package analysis.visitors;
 
 import analysis.AstUtils;
+import analysis.Method;
 import analysis.MySymbolTable;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Type;
@@ -47,7 +48,7 @@ public class TypeVerificationVisitor {
         this.visitMap.put("BinaryOp", this::binaryOpVisit);
         this.visitMap.put("Statement", this::assignmentVisit);
         this.visitMap.put("Length", this::lengthVisit);
-        this.visitMap.put("MethodCall", this::methodVisit);
+        this.visitMap.put("MethodCall", this::methodCallVisit);
         this.visitMap.put("Value", this::valueVisit);
         this.visitMap.put("Indexing", this::indexingVisit);
         this.visitMap.put("UnaryOp", this::unaryOpVisit);
@@ -102,23 +103,56 @@ public class TypeVerificationVisitor {
 
     private Type valueVisit(JmmNode node) {
         Type t = AstUtils.getValueType(node, symbolTable);
-        // Test both variables missing from the scope and if the imports are valid
+        // Test variables missing from the scope and invalid imports
         if (t == null && !symbolTable.getImports().contains(node.get("object"))) {
             this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                     "Identifier <" + node.get("object") + "> is undeclared in this scope"));
             return ignore;
+        } else if (t == null) {
+            t = new Type(node.get("object"), false);
         }
 
         return t;
     }
 
-    private Type methodVisit(JmmNode node) {
-//        System.out.println(this.types);
-//        if (this.types.size() != 2) {
-//            System.out.printf("Children of %s\n\t", node.getKind());
-//            System.out.println(node.getChildren());
-//        }
-        return new Type("int", false);
+    private Type methodCallVisit(JmmNode node) {
+
+        Type calledOn = types.get(0);
+        // True if callee was ignored already or is unknown (eg: import)
+        if (ignore == calledOn)
+            return ignore;
+
+
+        switch (calledOn.getName()) {
+            case "int":
+            case "boolean":
+                this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                        "Cannot call method on primitive data types"));
+                return ignore;
+            case "this":
+                calledOn = new Type(symbolTable.getClassName(), false);
+                break;
+        }
+
+        if (!calledOn.getName().equals(symbolTable.getClassName())) {
+            // Outside method
+            return ignore;
+        }
+
+        String name = AstUtils.getMethodCallName(node);
+        String uniqueName = symbolTable.getUniqueName(name, types.subList(1, types.size()));
+        Method method = symbolTable.getMethod(uniqueName);
+
+        if (method == null) {
+            if (symbolTable.getSuper() == null) {
+                // If the method does not exist
+                this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                        "Method <" + name + "> with params " + types.subList(1, types.size()) + " of class <" + calledOn.getName() + "> is undeclared in this scope"));
+            }
+            return ignore;
+        }
+
+        return method.getReturnType();
     }
 
     private Type unaryOpVisit(JmmNode node) {
@@ -210,10 +244,10 @@ public class TypeVerificationVisitor {
 
         if (ignore != left && !leftExpected.equals(left)) {
             this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
-                    "&& left operand type must be boolean but was <" + left.getName() + ">"));
+                    node.get("op") + " left operand type must be " + leftExpected.getName() + " but was <" + left.getName() + ">"));
         } else if (ignore != right && !rightExpected.equals(right)) {
             this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
-                    "&& right operand type must be boolean but was <" + right.getName() + ">"));
+                    node.get("op") + " right operand type must be " + rightExpected.getName() + " but was <" + right.getName() + ">"));
         }
         return ret;
     }
@@ -233,10 +267,12 @@ public class TypeVerificationVisitor {
         Type res = null;
 
         // Postorder: 1st visit each children
-        for (var child : node.getChildren()) {
+        for (JmmNode child : node.getChildren()) {
             res = visit(child);
-            if (res != null)
+            if (res != null) {
                 this.types.add(res);
+                res = null;
+            }
         }
 
         // Postorder: then, visit the node

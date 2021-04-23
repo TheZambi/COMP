@@ -17,11 +17,14 @@ public class MySymbolTable implements SymbolTable {
     private String superClass = null;
     private String className = null;
 
+    private final Map<String, Map<String, String>> overloadingMap;
+
     public MySymbolTable() {
         this.fields = new ArrayList<>();
         this.imports = new ArrayList<>();
         this.methodNames = new ArrayList<>();
         this.methods = new HashMap<>();
+        this.overloadingMap = new HashMap<>();
     }
 
     public void setSuperClass(String superClass) {
@@ -40,13 +43,65 @@ public class MySymbolTable implements SymbolTable {
         this.imports.add(importName);
     }
 
-    public void addMethod(Method method) {
-        this.methodNames.add(method.getName());
-        this.methods.put(method.getName(), method);
+    /**
+     *
+     * @param method
+     * @return True upon success, false otherwise
+     */
+    public boolean addMethod(Method method) {
+        if (method.getName().equals("main")) {
+            if (this.methodNames.contains(("main")))
+                return false;
+
+            this.methodNames.add("main");
+            this.methods.put("main", method);
+            return true;
+        }
+
+        Map<String, String> methodEntry = this.overloadingMap.computeIfAbsent(method.getName(), k -> new HashMap<>());
+        String typesStr = generateParamsString(method.getParamameterTypes());
+        if (methodEntry.containsKey(typesStr))
+            return false;
+        String nameId = method.getName() + methodEntry.size();
+        method.setUniqueName(nameId);
+        methodEntry.put(typesStr, nameId);
+        this.methodNames.add(nameId);
+        this.methods.put(nameId, method);
+
+        return true;
     }
 
     public Method getMethod(String name) {
         return this.methods.get(name);
+    }
+
+    private String generateParamsString(List<Type> parameters) {
+        StringBuilder mapName = new StringBuilder();
+        boolean first = true;
+        for (Type t: parameters) {
+            if (!first) mapName.append("-");
+            else first = false;
+
+            mapName.append(t.getName()).append(t.isArray() ? "[]" : "");
+        }
+        return mapName.toString();
+    }
+
+    public String getUniqueName(String name, List<Type> parameters) {
+        if (name.equals("main"))
+            return "main";
+
+        Map<String, String> overloads = this.overloadingMap.get(name);
+        if (overloads == null)
+            return null;
+        return overloads.get(generateParamsString(parameters));
+    }
+
+    public String getUniqueNameFromSymbols(String name, List<Symbol> parameters) {
+        List<Type> types = new ArrayList<>();
+        for (Symbol s: parameters)
+            types.add(s.getType());
+        return getUniqueName(name, types);
     }
 
     @Override
