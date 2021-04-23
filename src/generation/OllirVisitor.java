@@ -731,10 +731,10 @@ public class OllirVisitor {
         else
             value.append(expression.getValue());
         value.append(") goto Then" + ifCounter + ";\n");
-        value.append("\tgoto Else" + ifCounter + ";\n");
+        value.append(elseStatement.getValue());
+        value.append("\tgoto Endif" + ifCounter + ";\n");
 
-        value.append("Then" + ifCounter + ":\n").append(thenStatement.getValue()).append("\tgoto Endif" + ifCounter + ";\n");
-        value.append("Else" + ifCounter + ":\n").append(elseStatement.getValue());
+        value.append("Then" + ifCounter + ":\n").append(thenStatement.getValue());
         value.append("Endif" + ifCounter + ":");
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.SELECTION_STATEMENT, value.toString(), auxCode.toString(), null);
