@@ -57,7 +57,62 @@ public class JasminAssistant {
     }
 
     private void generateMethod(Method method) {
-        code.append(".method ").append(method.getMethodName()).append("()").append(method.getReturnType().toString());
+        code.append(".method ").append(method.getMethodName()).append("(");
+
+        for(int i = 0; i < method.getParams().size(); ++i) {
+            Element param = method.getParam(i);
+            if(i > 0) {
+                code.append(", ");
+            }
+            code.append(convertType(param.getType().getTypeOfElement()));
+        }
+
+        code.append(")").append(convertType(method.getReturnType().getTypeOfElement())).append("\n");
+        char prefix = '\t';
+
+        //TODO: change stack and locals limit
+        code.append(prefix).append(".limit stack 99\n");
+        code.append(prefix).append(".limit locals 99\n");
+
+        for(Instruction instruction : method.getInstructions()) {
+            this.generateInstruction(method, instruction);
+        }
+    }
+
+    private void generateInstruction(Method method, Instruction instruction) {
+        switch(instruction.getInstType()) {
+            case ASSIGN -> {
+
+            }
+            case CALL -> {
+
+            }
+            case GOTO -> {
+
+            }
+            case BRANCH -> {
+
+            }
+            case RETURN -> {
+
+            }
+            case PUTFIELD -> {
+
+            }
+            case GETFIELD -> {
+
+            }
+            case UNARYOPER -> {
+
+            }
+            case BINARYOPER -> {
+
+            }
+            case NOPER -> {
+                
+            }
+        }
+>>>>>>> 08d77568b663c1f0cee05ca969b157f14e1dcf02
     }
 
     private static String convertType(ElementType type) {
@@ -84,7 +139,7 @@ public class JasminAssistant {
                 return "Ljava/lang/String";
             }
             case VOID -> {
-                return "";
+                return "V";
             }
             default -> {return "";}
         }
