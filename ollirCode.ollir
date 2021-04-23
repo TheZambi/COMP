@@ -1,6 +1,6 @@
 Lazysort {
 	.field private field1.i32;
-	.field private field2.bool;
+	.field private field2.Boda;
 	.field private field3.array.i32;
 
 	.construct Lazysort().V {
@@ -10,11 +10,13 @@ Lazysort {
 	.method public static main(args.array.String).V  {
 	}
 
-	.method public index(parametro.i32).i32 {
+	.method public index(parametro.array.i32).i32 {
 		
 		a.i32 :=.i32 5.i32;
 		
 		b.i32 :=.i32 0.i32;
+		
+		putfield(this, field1.i32, 2.i32).V;
 		
 		if(a.i32 <.i32 1.i32) goto Then0;
 			b.i32 :=.i32 1.i32;

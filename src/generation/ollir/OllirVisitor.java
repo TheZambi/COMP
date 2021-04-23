@@ -1,4 +1,4 @@
-package generation;
+package generation.ollir;
 
 import analysis.AstUtils;
 import analysis.MySymbolTable;
@@ -12,8 +12,8 @@ import pt.up.fe.specs.util.SpecsCheck;
 import java.util.*;
 import java.util.function.BiFunction;
 
-import static generation.OllirAssistant.addAllAuxCode;
-import static generation.OllirAssistant.convertTypeToString;
+import static generation.ollir.OllirAssistant.addAllAuxCode;
+import static generation.ollir.OllirAssistant.convertTypeToString;
 
 public class OllirVisitor {
 
@@ -52,6 +52,7 @@ public class OllirVisitor {
         this.visitMap.put("Main", this::handleMain);
         this.visitMap.put("ClassObj", this::handleClassObj);
         this.visitMap.put("Program", this::handleProgram);
+        this.visitMap.put("ImportDeclaration", this::handleImport);
 
 
         auxVarCounter = 0;
@@ -60,7 +61,14 @@ public class OllirVisitor {
     }
 
     private OllirAssistant handleProgram(JmmNode node, List<OllirAssistant> childrenResults) {
-        return childrenResults.get(childrenResults.size()-1);
+        StringBuilder value = new StringBuilder();
+
+        for(OllirAssistant oa : childrenResults) {
+            System.out.println(oa.getType());
+            value.append(oa.getValue());
+        }
+
+        return new OllirAssistant(null, value.toString(), "", null);
     }
 
     private OllirAssistant handleValue(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -121,6 +129,13 @@ public class OllirVisitor {
         System.out.println(result);
 
         return result;
+    }
+
+    private OllirAssistant handleImport(JmmNode node, List<OllirAssistant> childrenResults) {
+        String value = "import " + node.get("import") + ";\n";
+        System.out.println(value);
+
+        return new OllirAssistant(OllirAssistantType.IMPORT, value, "", null);
     }
 
     private OllirAssistant handleClassDeclaration(JmmNode node, List<OllirAssistant> childrenResults) {

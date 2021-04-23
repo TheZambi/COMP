@@ -1,7 +1,11 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import generation.jasmin.JasminAssistant;
+import generation.ollir.OllirAssistant;
 import org.specs.comp.ollir.ClassUnit;
 import org.specs.comp.ollir.OllirErrorException;
 
@@ -30,7 +34,7 @@ public class BackendStage implements JasminBackend {
     @Override
     public JasminResult toJasmin(OllirResult ollirResult) {
         ClassUnit ollirClass = ollirResult.getOllirClass();
-
+        System.out.println(ollirClass.getImports());
         try {
 
             // Example of what you can do with the OLLIR class
@@ -40,8 +44,21 @@ public class BackendStage implements JasminBackend {
             ollirClass.buildVarTables(); // build the table of variables for each method
             ollirClass.show(); // print to console main information about the input OLLIR
 
+
+            JasminAssistant jasminAssistant = new JasminAssistant(ollirClass).generate();
+
             // Convert the OLLIR to a String containing the equivalent Jasmin code
-            String jasminCode = ""; // Convert node ...
+            String jasminCode = jasminAssistant.getCode();; // Convert node ...
+
+            try {
+                FileWriter myWriter = new FileWriter("./jasminCode.jasmin");
+                myWriter.write(jasminCode);
+                myWriter.close();
+                System.err.println("Successfully wrote to the file.");
+            } catch (IOException e) {
+                System.err.println("An error occurred.");
+                e.printStackTrace();
+            }
 
             // More reports from this stage
             List<Report> reports = new ArrayList<>();

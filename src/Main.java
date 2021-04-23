@@ -23,6 +23,12 @@ public class Main {
             }
 
             var ollirResult = new OptimizationStage().toOllir(semanticResult);
+            if(ollirResult.getReports().size()> 0){
+                System.err.println("Failed on ollir generation");
+                return;
+            }
+
+            var jasminResult = new BackendStage().toJasmin(ollirResult);
         }
         catch (Exception e) {
             e.printStackTrace();

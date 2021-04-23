@@ -1,0 +1,5 @@
+.class public Lazysort
+.super 
+.field private field1 I
+.field private field2 L
+.field private field3 [I

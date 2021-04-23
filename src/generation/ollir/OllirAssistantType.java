@@ -1,4 +1,4 @@
-package generation;
+package generation.ollir;
 
 public enum OllirAssistantType {
     BIN_OP,
@@ -24,5 +24,6 @@ public enum OllirAssistantType {
     CLASSOBJ,
     ITERATION_STATEMENT,
     COMPOUND_STATEMENT,
-    SELECTION_STATEMENT
+    SELECTION_STATEMENT,
+    IMPORT
 }

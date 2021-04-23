@@ -1,4 +1,4 @@
-package generation;
+package generation.ollir;
 
 import pt.up.fe.comp.jmm.analysis.table.Type;
 
