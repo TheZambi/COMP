@@ -72,6 +72,10 @@ public class AstUtils {
         return node.getNumChildren() == 2;
     }
 
+    public static boolean isInsideConditionalBranch(JmmNode node) {
+        return node.getAncestor("SelectionStatement").isPresent() || node.getAncestor("IterationStatement").isPresent();
+    }
+
 
 
     // POST SYMBOL TABLE

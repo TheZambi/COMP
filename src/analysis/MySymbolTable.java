@@ -35,8 +35,12 @@ public class MySymbolTable implements SymbolTable {
         this.className = className;
     }
 
-    public void addField(Symbol symbol) {
+    public boolean addField(Symbol symbol) {
+        for (Symbol s : fields)
+            if (symbol.getName().equals(s.getName()))
+                return false;
         this.fields.add(symbol);
+        return true;
     }
 
     public void addImport(String importName) {

@@ -1,4 +1,5 @@
 import analysis.MySymbolTable;
+import analysis.visitors.InitedVarsVisitor;
 import analysis.visitors.PrintVisitor;
 import analysis.visitors.TypeVerificationVisitor;
 import pt.up.fe.comp.jmm.JmmNode;
@@ -38,9 +39,16 @@ public class AnalysisStage implements JmmAnalysis {
 //        PrintVisitor pv = new PrintVisitor(toPrint);
 //        pv.visit(root);
 
-        TypeVerificationVisitor v = new TypeVerificationVisitor(symbolTable, reports);
+        TypeVerificationVisitor typeVerificationVisitor = new TypeVerificationVisitor(symbolTable, reports);
         try {
-            v.visit(root);
+            typeVerificationVisitor.visit(root);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        InitedVarsVisitor initedVarsVisitor = new InitedVarsVisitor(symbolTable, reports);
+        try {
+            initedVarsVisitor.visit(root);
         } catch (Exception e) {
             e.printStackTrace();
         }

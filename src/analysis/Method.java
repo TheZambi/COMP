@@ -30,8 +30,15 @@ public class Method {
         );
     }
 
-    public void addLocalVar(Symbol s) {
-        this.localVariables.add(s);
+    public boolean addLocalVar(Symbol symbol) {
+        for (Symbol s : parameters)
+            if (symbol.getName().equals(s.getName()))
+                return false;
+        for (Symbol s : localVariables)
+            if (symbol.getName().equals(s.getName()))
+                return false;
+        this.localVariables.add(symbol);
+        return true;
     }
 
     public String getName() {

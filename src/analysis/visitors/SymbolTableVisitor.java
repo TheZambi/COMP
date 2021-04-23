@@ -44,10 +44,15 @@ public class SymbolTableVisitor {
                 m = symbolTable.getMethod("main");
             else
                 m = symbolTable.getMethod(AstUtils.getUniqueMethodName(ancestor, symbolTable));
-            m.addLocalVar(s);
+
+            if (!m.addLocalVar(s))
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                        "Method defines multiple times the same variable with the name <" + s.getName() + ">"));
         } else {
             // Class field
-            symbolTable.addField(s);
+            if (!symbolTable.addField(s))
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                        "Class has multiple fields with the same name <" + s.getName() + ">"));
         }
     }
 
@@ -67,7 +72,6 @@ public class SymbolTableVisitor {
         if (!symbolTable.addMethod(m))
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                     "Found multiple declarations of method with the same prototype: <" + m.getName() + "> with params <" + m.getParameters() + ">"));
-
     }
 
     private void classDeclarationVisit(JmmNode node) {

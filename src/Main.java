@@ -10,9 +10,7 @@ public class Main {
     public static void main(String[] args) {
         try {  // TODO: REMOVE THIS BECAUSE INTELLIJ IS BAD :(
             System.out.println("Executing with args: " + Arrays.toString(args));
-//        if (args[0].contains("fail")) {
-//            throw new RuntimeException("It's supposed to fail");
-//        }
+
             var fileContents = SpecsIo.read("./test.txt");
             var parserResult = new SyntacticPhase().parse(fileContents);
             checkReports("parser", parserResult.getReports());

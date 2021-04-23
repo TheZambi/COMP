@@ -4,6 +4,7 @@ import analysis.AstUtils;
 import analysis.Method;
 import analysis.MySymbolTable;
 import pt.up.fe.comp.jmm.JmmNode;
+import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
@@ -32,7 +33,7 @@ public class TypeVerificationVisitor {
     private static final Type ignore = new Type("-ignore", false);
 
     private final Map<String, Function<JmmNode, Type>> visitMap;
-    private final Set<String> typesToCheck = new HashSet<>();
+    private final Set<String> typesToCheck;
 
     private final MySymbolTable symbolTable;
     private final List<Report> reports;
@@ -56,6 +57,7 @@ public class TypeVerificationVisitor {
         this.visitMap.put("Array", this::arrayVisit);
         this.visitMap.put("Type", this::typeVisit);
 
+        this.typesToCheck = new HashSet<>();
         this.typesToCheck.add("BinaryOp");
         this.typesToCheck.add("UnaryOp");
         this.typesToCheck.add("MethodCall");
@@ -203,12 +205,12 @@ public class TypeVerificationVisitor {
         if (this.types.size() != 2)
             throw new RuntimeException("Assignment without 2 children");
 
-        if (ignore == this.types.get(0) || ignore == this.types.get(1))
-            return null;
-
-        if (!this.types.get(0).equals(this.types.get(1)))
-            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
-                    "Assignment types must match, tried to assign a <" + this.types.get(0).getName() + "> to a <" + this.types.get(1).getName() + ">"));
+        if (!(ignore == this.types.get(0) || ignore == this.types.get(1))) {
+            // Check types
+            if (!this.types.get(0).equals(this.types.get(1)))
+                this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                        "Assignment types must match, tried to assign a <" + this.types.get(0).getName() + "> to a <" + this.types.get(1).getName() + ">"));
+        }
 
         return null;
     }
@@ -255,8 +257,6 @@ public class TypeVerificationVisitor {
     public Type visit(JmmNode node) {
         SpecsCheck.checkNotNull(node, () -> "Node should not be null");
 
-        Function<JmmNode, Type> visit = this.visitMap.get(node.getKind());
-
         List<Type> childList = null, oldList = null;
         if (this.typesToCheck.contains(node.getKind())) {
             childList = new ArrayList<>();
@@ -265,7 +265,6 @@ public class TypeVerificationVisitor {
         }
 
         Type res = null;
-
         // Postorder: 1st visit each children
         for (JmmNode child : node.getChildren()) {
             res = visit(child);
@@ -276,6 +275,7 @@ public class TypeVerificationVisitor {
         }
 
         // Postorder: then, visit the node
+        Function<JmmNode, Type> visit = this.visitMap.get(node.getKind());
         if (visit != null)
             res = visit.apply(node);
 
