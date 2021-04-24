@@ -59,7 +59,15 @@ public class JasminAssistant {
     }
 
     private void generateMethod(Method method) {
-        code.append(".method ").append(method.getMethodName()).append("(");
+
+        code.append("\n.method ");
+        if(method.isConstructMethod()) {
+            code.append("public ")
+                    .append("<init>()V\n\taload_0\n\tinvokenonvirtual java/lang/Object/<init>()V\n\treturn\n.end method\n");
+            return;
+        }
+        code.append(convertAccessModifier(method.getMethodAccessModifier())).append(" ")
+                .append(method.getMethodName()).append("(");
 
         for(int i = 0; i < method.getParams().size(); ++i) {
             Element param = method.getParam(i);
@@ -77,22 +85,35 @@ public class JasminAssistant {
         code.append(prefix).append(".limit locals 99\n");
 
         for(Instruction instruction : method.getInstructions()) {
-            this.generateInstruction(method, instruction);
+            String instructionCode = this.generateInstruction(method, instruction);
+            String [] lines = instructionCode.split("\n");
+            for(String line : lines) {
+                if(line.length() > 0)
+                    code.append("\t").append(line).append("\n");
+            }
         }
+        code.append(".end method\n");
     }
 
-    private void generateInstruction(Method method, Instruction instruction) {
+    private void generateConstructor(Method method) {
+        code.append(".method ").append(convertAccessModifier(method.getMethodAccessModifier()));
+        code.append(" ").append(method.getMethodName()).append("(");
+    }
+
+    private String generateInstruction(Method method, Instruction instruction) {
+        StringBuilder instCode = new StringBuilder();
+
         switch(instruction.getInstType()) {
             case ASSIGN -> {
                 AssignInstruction assignInstruction = (AssignInstruction) instruction;
                 Operand leftOp = (Operand) assignInstruction.getDest();
-                this.generateInstruction(method, assignInstruction.getRhs());
+                instCode.append(this.generateInstruction(method, assignInstruction.getRhs()));
                 HashMap<String, Descriptor> varTable = OllirAccesser.getVarTable(method);
-                code.append(convertTypeToInst(leftOp.getType().getTypeOfElement())).append("store_")
+                instCode.append(convertTypeToInst(leftOp.getType().getTypeOfElement())).append("store_")
                         .append(varTable.get(leftOp.getName()).getVirtualReg()).append("\n");
             }
             case CALL -> {
-
+                CallInstruction callInstruction = (CallInstruction) instruction;
             }
             case GOTO -> {
 
@@ -101,8 +122,16 @@ public class JasminAssistant {
 
             }
             case RETURN -> {
-
-            }
+                Element element = ((ReturnInstruction) instruction).getOperand();
+                String typeStr = convertTypeToInst(element.getType().getTypeOfElement());
+                instCode.append(typeStr);
+                if(element.isLiteral()) {
+                    instCode.append("const_").append(((LiteralElement)element).getLiteral());
+                } else {
+                    instCode.append("load_").append(getVirtualReg(method, (Operand)element));
+                }
+                instCode.append("\n").append(typeStr).append("return\n");
+             }
             case PUTFIELD -> {
 
             }
@@ -113,39 +142,42 @@ public class JasminAssistant {
 
             }
             case BINARYOPER -> {
-                this.generateBiOpInstruction(method, (BinaryOpInstruction) instruction);
+                instCode.append(this.generateBiOpInstruction(method, (BinaryOpInstruction) instruction));
             }
             case NOPER -> {
                 SingleOpInstruction noOperInstruction = (SingleOpInstruction) instruction;
                 Element element = noOperInstruction.getSingleOperand();
 
-                code.append(convertTypeToInst(element.getType().getTypeOfElement()));
+                instCode.append(convertTypeToInst(element.getType().getTypeOfElement()));
                 if(element.isLiteral()) {
-                    code.append("const_").append(((LiteralElement)element).getLiteral());
+                    instCode.append("const_").append(((LiteralElement)element).getLiteral());
                 } else {
-                    code.append("load_").append(getVirtualReg(method, (Operand) element));
+                    instCode.append("load_").append(getVirtualReg(method, (Operand) element));
                 }
-                code.append("\n");
+                instCode.append("\n");
             }
         }
+
+        return instCode.toString();
     }
 
-    private void generateBiOpInstruction(Method method, BinaryOpInstruction instruction) {
+    private String generateBiOpInstruction(Method method, BinaryOpInstruction instruction) {
         List<Element> operands = new ArrayList<>();
         operands.add(instruction.getLeftOperand());
         operands.add(instruction.getRightOperand());
+        StringBuilder instCode = new StringBuilder();
 
         for(Element operand : operands) {
-            code.append(convertTypeToInst(operand.getType().getTypeOfElement()));
+            instCode.append(convertTypeToInst(operand.getType().getTypeOfElement()));
             if(operand.isLiteral()) {
-                code.append("const_").append(((LiteralElement) operand).getLiteral());
+                instCode.append("const_").append(((LiteralElement) operand).getLiteral());
             } else {
-                code.append("load_")
-                        .append(getVirtualReg(method, (Operand) operand)).append("\n");
+                instCode.append("load_")
+                        .append(getVirtualReg(method, (Operand) operand));
             }
-            code.append("\n");
+            instCode.append("\n");
         }
-        code.append(convertTypeToInst(operands.get(0).getType().getTypeOfElement()));
+        instCode.append(convertTypeToInst(operands.get(0).getType().getTypeOfElement()));
         String opStr = "";
         switch(instruction.getUnaryOperation().getOpType()) {
             case ADD -> {
@@ -183,11 +215,16 @@ public class JasminAssistant {
                 opStr = "orb";
             }
         }
-        code.append(opStr).append("\n");
+        instCode.append(opStr).append("\n");
+        return instCode.toString();
     }
 
     private int getVirtualReg(Method method, Operand operand) {
         return OllirAccesser.getVarTable(method).get(operand.getName()).getVirtualReg();
+    }
+
+    private static String convertAccessModifier(AccessModifiers accessModifier) {
+        return accessModifier.toString().toLowerCase();
     }
 
     private static String convertTypeToInst(ElementType type) {
