@@ -1,9 +1,5 @@
 .class public Lazysort
-.super 
-.field private field1 I
-.field private field2 Z
-.field private field3 [I
-.field private bodafield LBoda
+.super java/lang/Object
 
 .method public <init>()V
 	aload_0
@@ -11,39 +7,39 @@
 	return
 .end method
 
-.method public main([I)V
+.method public static main([Ljava/lang/String;)V
 	.limit stack 99
 	.limit locals 99
+	new Lazysort
+	dup
+	invokespecial Lazysort.<init>()V
+	astore_1
+	iconst_1
+	istore_3
+	iload_3
+	invokestatic io.println()V
+	aload_1
+	iconst_1
+	invokevirtual Lazysort.index(I)I
+	istore_3
+	return
 .end method
 
 .method public index(I)I
 	.limit stack 99
 	.limit locals 99
-	iconst_2
+	iconst_1
 	istore_2
-	zconst_0
-	zconst_1
-	zandb
-	zstore_3
+	aload_0
 	iconst_1
 	iload_2
-	iadd
-	istore_4
-	iload_5
-	istore_2
-	new Boda
-	dup
-	invokespecial <init>()V
-	astore_7
-	invokestatic io.print()V
-	aload_0
 	invokevirtual Lazysort.add(II)I
-	istore_10
-	iload_10
+	istore_3
+	iload_3
 	ireturn
 .end method
 
-.method public add(I, I)I
+.method public add(II)I
 	.limit stack 99
 	.limit locals 99
 	iload_1

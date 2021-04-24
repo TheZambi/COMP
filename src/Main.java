@@ -29,6 +29,7 @@ public class Main {
             }
 
             var jasminResult = new BackendStage().toJasmin(ollirResult);
+            jasminResult.run();
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -29,7 +29,7 @@ public class JasminAssistant {
 //            System.out.println("\tFinal class: " + this.finalClass);
 
         code.append(".class public ").append(ollirClass.getClassName()).append("\n");
-        code.append(".super ").append("\n"); // NOT DONE YET
+        code.append(".super java/lang/Object").append("\n");
 
         this.generateFields();
 
@@ -66,14 +66,19 @@ public class JasminAssistant {
                     .append("<init>()V\n\taload_0\n\tinvokespecial java/lang/Object/<init>()V\n\treturn\n.end method\n");
             return;
         }
-        code.append(convertAccessModifier(method.getMethodAccessModifier())).append(" ")
-                .append(method.getMethodName()).append("(");
+        code.append(convertAccessModifier(method.getMethodAccessModifier())).append(" ");
+
+        if(method.isStaticMethod())
+            code.append("static ");
+        else if(method.isFinalMethod())
+            code.append("final ");
+        code.append(method.getMethodName()).append("(");
 
         for(int i = 0; i < method.getParams().size(); ++i) {
             Element param = method.getParam(i);
-            if(i > 0) {
-                code.append(", ");
-            }
+//            if(i > 0) {
+//                code.append(", ");
+//            }
             code.append(convertType(param.getType()));
         }
 
@@ -92,6 +97,12 @@ public class JasminAssistant {
                     code.append("\t").append(line).append("\n");
             }
         }
+
+        int lastInstIndex = method.getInstructions().size()-1;
+        if(lastInstIndex < 0 || method.getInstructions().get(lastInstIndex).getInstType() != InstructionType.RETURN) {
+            code.append("\treturn\n");
+        }
+
         code.append(".end method\n");
     }
 
@@ -114,10 +125,15 @@ public class JasminAssistant {
 
             }
             case RETURN -> {
-                Element element = ((ReturnInstruction) instruction).getOperand();
-                instCode.append(getElement(method, element));
-                String typeStr = convertTypeToInst(element.getType().getTypeOfElement());
-                instCode.append(typeStr).append("return\n");
+                ReturnInstruction returnInstruction = (ReturnInstruction) instruction;
+
+                if(returnInstruction.hasReturnValue()) {
+                    Element element = returnInstruction.getOperand();
+                    instCode.append(getElement(method, element));
+                    String typeStr = convertTypeToInst(element.getType().getTypeOfElement());
+                    instCode.append(typeStr);
+                }
+                instCode.append("return\n");
              }
             case PUTFIELD -> {
 
@@ -197,14 +213,9 @@ public class JasminAssistant {
         Operand firstArg = (Operand) callInstruction.getFirstArg();
         LiteralElement methodElement = (LiteralElement) callInstruction.getSecondArg();
 
-        instCode.append(getElement(method, callInstruction.getFirstArg()));
-
         StringBuilder params = new StringBuilder();
         for(Element param : callInstruction.getListOfOperands()) {
-            params.append(convertType(param.getType()));
-            if(param.isLiteral()) {
-                instCode.append(getElement(method, param));
-            }
+            instCode.append(getElement(method, param));
         }
 
         instCode.append("invokestatic ").append(getMethodName(firstArg, methodElement)).append("(");
@@ -222,12 +233,11 @@ public class JasminAssistant {
         StringBuilder params = new StringBuilder();
         for(Element param : callInstruction.getListOfOperands()) {
             params.append(convertType(param.getType()));
-            if(param.isLiteral()) {
-                instCode.append(getElement(method, param));
-            }
+            instCode.append(getElement(method, param));
         }
 
-        instCode.append("invokespecial <init>(");
+        instCode.append("invokespecial ").append(((ClassType)callInstruction.getFirstArg().getType()).getName())
+                .append(".<init>(");
 
         instCode.append(params);
 
@@ -247,9 +257,7 @@ public class JasminAssistant {
         StringBuilder params = new StringBuilder();
         for(Element param : callInstruction.getListOfOperands()) {
             params.append(convertType(param.getType()));
-            if(param.isLiteral()) {
-                instCode.append(getElement(method, param));
-            }
+            instCode.append(getElement(method, param));
         }
 
         instCode.append("invokevirtual ").append(getMethodName(firstArg, methodElement)).append("(");
@@ -268,7 +276,7 @@ public class JasminAssistant {
         } else if(object.getType().getTypeOfElement() == ElementType.CLASS) { //static invoke
             return object.getName() + '.' + methodName;
         } else {
-            return "";//TODO: methods without 'this'
+            return ((ClassType)object.getType()).getName() + '.' + methodName;//TODO: methods without 'this'
         }
     }
 
@@ -352,8 +360,7 @@ public class JasminAssistant {
         return switch (type) {
             case INT32 -> "i";
             case BOOLEAN -> "z";
-            case ARRAYREF, OBJECTREF, THIS -> "a";
-            case CLASS -> "";
+            case ARRAYREF, OBJECTREF, THIS, CLASS -> "a";
             default -> throw new IllegalStateException("Unexpected value: " + type);
         };
     }
@@ -367,13 +374,34 @@ public class JasminAssistant {
                 return "Z";
             }
             case ARRAYREF -> {
-                return "[I";
+                return "[" + convertType(((ArrayType) type).getTypeOfElements());
             }
             case OBJECTREF -> {
                 return "L" + ((ClassType) type).getName();
             }
             case CLASS -> {
                 return "L" + ((ClassType) type).getName();
+            }
+            case THIS -> {
+                return "";
+            }
+            case STRING -> {
+                return "Ljava/lang/String;";
+            }
+            case VOID -> {
+                return "V";
+            }
+            default -> {return "";}
+        }
+    }
+
+    private static String convertType(ElementType type) {
+        switch (type) {
+            case INT32 -> {
+                return "I";
+            }
+            case BOOLEAN -> {
+                return "Z";
             }
             case THIS -> {
                 return "";
