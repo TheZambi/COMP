@@ -663,7 +663,7 @@ public class OllirVisitor {
 
                 if (childrenResults.get(0).getType() != OllirAssistantType.FIELD)
                     if (childrenResults.get(1).getType() == OllirAssistantType.UN_OP_NEW_OBJ)
-                        value.append(";\ninvocespecial(").append(childrenResults.get(0).getValue())
+                        value.append(";\ninvokespecial(").append(childrenResults.get(0).getValue())
                                 .append(", \"<init>\").V");
             }
         } else {

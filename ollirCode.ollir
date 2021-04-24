@@ -2,6 +2,7 @@ Lazysort {
 	.field private field1.i32;
 	.field private field2.bool;
 	.field private field3.array.i32;
+	.field private bodafield.Boda;
 
 	.construct Lazysort().V {
 		invokespecial(this, "<init>").V;
@@ -17,7 +18,14 @@ Lazysort {
 		t.bool :=.bool 0.bool &&.bool 1.bool;
 		
 		b.i32 :=.i32 1.i32 +.i32 c.i32;
-		t0.i32 :=.i32 invokevirtual(this, "add", a.array.i32, b.i32).i32;
+		
+		a.array.i32 :=.array.i32 new(array, 5.i32).array.i32;
+		
+		c.i32 :=.i32 a[b.i32].i32;
+		
+		boda.Boda :=.Boda new(Boda).Boda;
+		invokespecial(boda.Boda, "<init>").V;
+		t0.i32 :=.i32 invokevirtual(this, "add", c.i32, b.i32).i32;
 		ret.i32 t0.i32;
 	}
 

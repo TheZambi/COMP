@@ -3,10 +3,11 @@
 .field private field1 I
 .field private field2 Z
 .field private field3 [I
+.field private bodafield LBoda
 
 .method public <init>()V
 	aload_0
-	invokenonvirtual java/lang/Object/<init>()V
+	invokespecial java/lang/Object/<init>()V
 	return
 .end method
 
@@ -28,10 +29,16 @@
 	iload_2
 	iadd
 	istore_4
-	aload_0
-	invokevirtual ([I, I)I
-	istore_5
 	iload_5
+	istore_2
+	new Boda
+	dup
+	invokespecial <init>()V
+	astore_7
+	aload_0
+	invokevirtual Lazysort.add(II)I
+	istore_9
+	iload_9
 	ireturn
 .end method
 

@@ -48,7 +48,7 @@ public class JasminAssistant {
                 code.append("static ");
             code.append(f.getFieldName());
             code.append(" ");
-            code.append(convertType(f.getFieldType().getTypeOfElement()));
+            code.append(convertType(f.getFieldType()));
 
             if(f.isInitialized()){
                 code.append(" = ");
@@ -63,7 +63,7 @@ public class JasminAssistant {
         code.append("\n.method ");
         if(method.isConstructMethod()) {
             code.append("public ")
-                    .append("<init>()V\n\taload_0\n\tinvokenonvirtual java/lang/Object/<init>()V\n\treturn\n.end method\n");
+                    .append("<init>()V\n\taload_0\n\tinvokespecial java/lang/Object/<init>()V\n\treturn\n.end method\n");
             return;
         }
         code.append(convertAccessModifier(method.getMethodAccessModifier())).append(" ")
@@ -74,10 +74,10 @@ public class JasminAssistant {
             if(i > 0) {
                 code.append(", ");
             }
-            code.append(convertType(param.getType().getTypeOfElement()));
+            code.append(convertType(param.getType()));
         }
 
-        code.append(")").append(convertType(method.getReturnType().getTypeOfElement())).append("\n");
+        code.append(")").append(convertType(method.getReturnType())).append("\n");
         char prefix = '\t';
 
         //TODO: change stack and locals limit
@@ -95,49 +95,17 @@ public class JasminAssistant {
         code.append(".end method\n");
     }
 
-    private void generateConstructor(Method method) {
-        code.append(".method ").append(convertAccessModifier(method.getMethodAccessModifier()));
-        code.append(" ").append(method.getMethodName()).append("(");
-    }
-
     private String generateInstruction(Method method, Instruction instruction) {
         StringBuilder instCode = new StringBuilder();
 
         switch(instruction.getInstType()) {
             case ASSIGN -> {
                 AssignInstruction assignInstruction = (AssignInstruction) instruction;
-                Operand leftOp = (Operand) assignInstruction.getDest();
-                instCode.append(this.generateInstruction(method, assignInstruction.getRhs()));
-                HashMap<String, Descriptor> varTable = OllirAccesser.getVarTable(method);
-                instCode.append(convertTypeToInst(leftOp.getType().getTypeOfElement())).append("store_")
-                        .append(varTable.get(leftOp.getName()).getVirtualReg()).append("\n");
+                instCode.append(this.generateAssign(method, assignInstruction));
             }
             case CALL -> {
                 CallInstruction callInstruction = (CallInstruction) instruction;
-                CallType callType = OllirAccesser.getCallInvocation(callInstruction);
-
-                switch (callType) {
-                    case invokevirtual -> {
-                        instCode.append(this.generateInvVirtual(method, callInstruction));
-                    }
-                    case invokeinterface -> {
-                    }
-                    case invokespecial -> {
-                    }
-                    case invokestatic -> {
-                    }
-                    case NEW -> {
-                    }
-                    case arraylength -> {
-                    }
-                    case ldc -> {
-                    }
-                }
-                System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAA");
-                System.out.println(getVirtualReg(method, (Operand)callInstruction.getFirstArg()));
-                System.out.println(((LiteralElement)callInstruction.getSecondArg()).getLiteral());
-                System.out.println(((Operand)callInstruction.getListOfOperands().get(0)).getName());
-                System.out.println(callInstruction.getNumOperands());
+                instCode.append(this.generateCall(method, callInstruction));
             }
             case GOTO -> {
 
@@ -147,14 +115,9 @@ public class JasminAssistant {
             }
             case RETURN -> {
                 Element element = ((ReturnInstruction) instruction).getOperand();
+                instCode.append(getElement(method, element));
                 String typeStr = convertTypeToInst(element.getType().getTypeOfElement());
-                instCode.append(typeStr);
-                if(element.isLiteral()) {
-                    instCode.append("const_").append(((LiteralElement)element).getLiteral());
-                } else {
-                    instCode.append("load_").append(getVirtualReg(method, (Operand)element));
-                }
-                instCode.append("\n").append(typeStr).append("return\n");
+                instCode.append(typeStr).append("return\n");
              }
             case PUTFIELD -> {
 
@@ -172,15 +135,81 @@ public class JasminAssistant {
                 SingleOpInstruction noOperInstruction = (SingleOpInstruction) instruction;
                 Element element = noOperInstruction.getSingleOperand();
 
-                instCode.append(convertTypeToInst(element.getType().getTypeOfElement()));
-                if(element.isLiteral()) {
-                    instCode.append("const_").append(((LiteralElement)element).getLiteral());
-                } else {
-                    instCode.append("load_").append(getVirtualReg(method, (Operand) element));
-                }
-                instCode.append("\n");
+                instCode.append(getElement(method, element));
             }
         }
+
+        return instCode.toString();
+    }
+
+    private String generateAssign(Method method, AssignInstruction assignInstruction) {
+        StringBuilder instCode = new StringBuilder();
+
+        Operand leftOp = (Operand) assignInstruction.getDest();
+
+        if(assignInstruction.getRhs().getInstType() == InstructionType.CALL
+            && OllirAccesser.getCallInvocation((CallInstruction)(assignInstruction.getRhs())) == CallType.NEW) {
+            CallInstruction callInstruction = (CallInstruction) (assignInstruction.getRhs());
+            if(callInstruction.getReturnType().getTypeOfElement() == ElementType.ARRAYREF) {
+
+            } else {
+                instCode.append("new ").append(((ClassType) callInstruction.getReturnType()).getName()).append("\n");
+                instCode.append("dup").append("\n");
+            }
+        } else {
+            instCode.append(this.generateInstruction(method, assignInstruction.getRhs()));
+            instCode.append(convertTypeToInst(leftOp.getType().getTypeOfElement())).append("store_")
+                    .append(getVirtualReg(method, leftOp)).append("\n");
+
+        }
+        return instCode.toString();
+    }
+
+    private String generateCall(Method method, CallInstruction callInstruction) {
+        String invokeString = "";
+        StringBuilder callCode = new StringBuilder();
+        switch(OllirAccesser.getCallInvocation(callInstruction)) {
+            case invokevirtual:
+                callCode.append(this.generateInvVirtual(method, callInstruction));
+                break;
+            case invokeinterface:
+                break;
+            case invokespecial: //does not work for class constructor, only for NEW OBJREF operations!!
+                callCode.append(this.generateInvSpecial(method, callInstruction));
+                break;
+            case invokestatic:
+
+                break;
+            case NEW:
+
+            case arraylength:
+
+            case ldc:
+
+                return "";
+            default:
+                throw new RuntimeException("Invalid call type!");
+        }
+        return callCode.toString();
+    }
+
+    private String generateInvSpecial(Method method, CallInstruction callInstruction) {
+        StringBuilder instCode = new StringBuilder("");
+
+        StringBuilder params = new StringBuilder();
+        for(Element param : callInstruction.getListOfOperands()) {
+            params.append(convertType(param.getType()));
+            if(param.isLiteral()) {
+                instCode.append(getElement(method, param));
+            }
+        }
+
+        instCode.append("invokespecial <init>(");
+
+        instCode.append(params);
+
+        instCode.append(")V\n");
+        instCode.append("astore_").append(getVirtualReg(method, (Operand) callInstruction.getFirstArg())).append("\n");
 
         return instCode.toString();
     }
@@ -190,26 +219,28 @@ public class JasminAssistant {
         Operand firstArg = (Operand) callInstruction.getFirstArg();
         LiteralElement methodElement = (LiteralElement) callInstruction.getSecondArg();
 
-        instCode.append(convertTypeToInst(firstArg.getType().getTypeOfElement()))
-                .append("load_").append(getVirtualReg(method, firstArg)).append("\n");
+        instCode.append(getElement(method, callInstruction.getFirstArg()));
+
+        StringBuilder params = new StringBuilder();
+        for(Element param : callInstruction.getListOfOperands()) {
+            params.append(convertType(param.getType()));
+            if(param.isLiteral()) {
+                instCode.append(getElement(method, param));
+            }
+        }
 
         instCode.append("invokevirtual ").append(getMethodName(firstArg, methodElement)).append("(");
 
-        for(int i = 0; i < callInstruction.getListOfOperands().size(); ++i) {
-            Element param = callInstruction.getListOfOperands().get(i);
-            if (i > 0) {
-                instCode.append(", ");
-            }
-            instCode.append(convertType(param.getType().getTypeOfElement()));
-        }
-        instCode.append(")").append(convertType(callInstruction.getReturnType().getTypeOfElement())).append("\n");
+        instCode.append(params);
+
+        instCode.append(")").append(convertType(callInstruction.getReturnType())).append("\n");
 
         return instCode.toString();
     }
 
     private String getMethodName(Operand object, LiteralElement methodElement) {
-        if(methodElement.getLiteral().equals("this")) {
-            return ollirClass.getClassName() + '.' + methodElement.getLiteral();
+        if(object.getName().equals("this")) {
+            return ollirClass.getClassName() + '.' + methodElement.getLiteral().replaceAll("\"", "");
         } else {
             return ""; //TODO: methods without 'this'
         }
@@ -222,14 +253,7 @@ public class JasminAssistant {
         StringBuilder instCode = new StringBuilder();
 
         for(Element operand : operands) {
-            instCode.append(convertTypeToInst(operand.getType().getTypeOfElement()));
-            if(operand.isLiteral()) {
-                instCode.append("const_").append(((LiteralElement) operand).getLiteral());
-            } else {
-                instCode.append("load_")
-                        .append(getVirtualReg(method, (Operand) operand));
-            }
-            instCode.append("\n");
+            instCode.append(getElement(method, operand));
         }
         instCode.append(convertTypeToInst(operands.get(0).getType().getTypeOfElement()));
         String opStr = "";
@@ -273,6 +297,19 @@ public class JasminAssistant {
         return instCode.toString();
     }
 
+    private String getElement(Method method, Element operand) {
+        StringBuilder instCode = new StringBuilder();
+        instCode.append(convertTypeToInst(operand.getType().getTypeOfElement()));
+        if(operand.isLiteral()) {
+            instCode.append("const_").append(((LiteralElement) operand).getLiteral());
+        } else {
+            instCode.append("load_")
+                    .append(getVirtualReg(method, (Operand) operand));
+        }
+        instCode.append("\n");
+        return instCode.toString();
+    }
+
     private int getVirtualReg(Method method, Operand operand) {
         if(operand.getName().equals("this"))
             return 0;
@@ -293,8 +330,8 @@ public class JasminAssistant {
         };
     }
 
-    private static String convertType(ElementType type) {
-        switch (type) {
+    private static String convertType(Type type) {
+        switch (type.getTypeOfElement()) {
             case INT32 -> {
                 return "I";
             }
@@ -305,7 +342,7 @@ public class JasminAssistant {
                 return "[I";
             }
             case OBJECTREF -> {
-                return "L";
+                return "L" + ((ClassType) type).getName();
             }
             case CLASS -> {
                 return "";
