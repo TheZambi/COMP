@@ -114,6 +114,30 @@ public class JasminAssistant {
             }
             case CALL -> {
                 CallInstruction callInstruction = (CallInstruction) instruction;
+                CallType callType = OllirAccesser.getCallInvocation(callInstruction);
+
+                switch (callType) {
+                    case invokevirtual -> {
+                        instCode.append(this.generateInvVirtual(method, callInstruction));
+                    }
+                    case invokeinterface -> {
+                    }
+                    case invokespecial -> {
+                    }
+                    case invokestatic -> {
+                    }
+                    case NEW -> {
+                    }
+                    case arraylength -> {
+                    }
+                    case ldc -> {
+                    }
+                }
+                System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAA");
+                System.out.println(getVirtualReg(method, (Operand)callInstruction.getFirstArg()));
+                System.out.println(((LiteralElement)callInstruction.getSecondArg()).getLiteral());
+                System.out.println(((Operand)callInstruction.getListOfOperands().get(0)).getName());
+                System.out.println(callInstruction.getNumOperands());
             }
             case GOTO -> {
 
@@ -159,6 +183,36 @@ public class JasminAssistant {
         }
 
         return instCode.toString();
+    }
+
+    private String generateInvVirtual(Method method, CallInstruction callInstruction) {
+        StringBuilder instCode = new StringBuilder("");
+        Operand firstArg = (Operand) callInstruction.getFirstArg();
+        LiteralElement methodElement = (LiteralElement) callInstruction.getSecondArg();
+
+        instCode.append(convertTypeToInst(firstArg.getType().getTypeOfElement()))
+                .append("load_").append(getVirtualReg(method, firstArg)).append("\n");
+
+        instCode.append("invokevirtual ").append(getMethodName(firstArg, methodElement)).append("(");
+
+        for(int i = 0; i < callInstruction.getListOfOperands().size(); ++i) {
+            Element param = callInstruction.getListOfOperands().get(i);
+            if (i > 0) {
+                instCode.append(", ");
+            }
+            instCode.append(convertType(param.getType().getTypeOfElement()));
+        }
+        instCode.append(")").append(convertType(callInstruction.getReturnType().getTypeOfElement())).append("\n");
+
+        return instCode.toString();
+    }
+
+    private String getMethodName(Operand object, LiteralElement methodElement) {
+        if(methodElement.getLiteral().equals("this")) {
+            return ollirClass.getClassName() + '.' + methodElement.getLiteral();
+        } else {
+            return ""; //TODO: methods without 'this'
+        }
     }
 
     private String generateBiOpInstruction(Method method, BinaryOpInstruction instruction) {
@@ -220,6 +274,8 @@ public class JasminAssistant {
     }
 
     private int getVirtualReg(Method method, Operand operand) {
+        if(operand.getName().equals("this"))
+            return 0;
         return OllirAccesser.getVarTable(method).get(operand.getName()).getVirtualReg();
     }
 

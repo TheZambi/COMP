@@ -28,7 +28,20 @@
 	iload_2
 	iadd
 	istore_4
+	aload_0
+	invokevirtual ([I, I)I
 	istore_5
 	iload_5
+	ireturn
+.end method
+
+.method public add(I, I)I
+	.limit stack 99
+	.limit locals 99
+	iload_1
+	iload_2
+	iadd
+	istore_3
+	iload_3
 	ireturn
 .end method

@@ -189,7 +189,11 @@ public class OllirVisitor {
         Method method = symbolTable.getMethod(node.getChildren().get(0).get("name"));
 
         value.append(method.getName()).append("(");
-        for (Symbol s : method.getParameters()) {
+        for(int i = 0; i < method.getParameters().size(); ++i) {
+            Symbol s = method.getParameters().get(i);
+            if(i > 0) {
+                value.append(", ");
+            }
             value.append(s.getName()).append(convertTypeToString(s.getType()));
         }
 
