@@ -35,10 +35,11 @@
 	dup
 	invokespecial <init>()V
 	astore_7
+	invokestatic io.print()V
 	aload_0
 	invokevirtual Lazysort.add(II)I
-	istore_9
-	iload_9
+	istore_10
+	iload_10
 	ireturn
 .end method
 
