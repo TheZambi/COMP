@@ -5,6 +5,7 @@ import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +28,13 @@ public class AstUtils {
         return new Type(node.get("type"), node.get("array").equals("true"));
     }
 
+    public static String getMethodCallName(JmmNode node) {
+        if (!node.getKind().equals("MethodCall"))
+            throw new RuntimeException("Node is not a MethodCall");
+
+        return node.getChildren().get(1).get("methodName");
+    }
+
     public static String getMethodName(JmmNode node) {
         if (!node.getKind().equals("MethodDeclaration"))
             throw new RuntimeException("Node is not a MethodDeclaration");
@@ -36,6 +44,22 @@ public class AstUtils {
 
         JmmNode sNode = node.getChildren().get(0);
         return sNode.getChildren().get(0).get("name");
+    }
+
+    public static List<Symbol> getMethodParams(JmmNode node) {
+        if (!node.getKind().equals("MethodDeclaration"))
+            throw new RuntimeException("Node is not a MethodDeclaration");
+
+        if (isMethodMain(node))
+            throw new RuntimeException("Node is main (unsupported operation)");
+
+        JmmNode header = node.getChildren().get(0);
+        List<Symbol> symbols = new ArrayList<>();
+        for (int i = 1; i < header.getNumChildren(); i++) {
+            symbols.add(AstUtils.getChildSymbol(header, i));
+        }
+
+        return symbols;
     }
 
     public static boolean isMethodMain(JmmNode node) {
@@ -53,32 +77,22 @@ public class AstUtils {
         return (node.get("type").equals("object")) && (node.get("object") != null);
     }
 
-    // POST SYMBOL TABLE
-    public static Type getMethodCallType(JmmNode node, MySymbolTable symbolTable) {
-        if(!node.getKind().equals("MethodCall"))
-            throw new RuntimeException("Node is not a MethodCall");
-
-        JmmNode objectNode = node.getChildren().get(0);
-        String methodName = node.getChildren().get(1).get("methodName");
-
-        if(objectNode.getKind().equals("Value") && objectNode.get("varType").equals("this")) {
-            if(symbolTable.getMethods().contains(methodName)) {
-                return symbolTable.getReturnType(methodName);
-            } else {
-                //TODO: error report - invalid method on 'this'
-                return null;
-            }
-        } else if(objectNode.getKind().equals("Value") && objectNode.get("varType").equals("object")){
-            return new Type("", false);
-
-        } else {
-            //TODO: erro report - cant call method on non objects
-            return null;
-        }
-
+    public static boolean isInsideConditionalBranch(JmmNode node) {
+        return node.getAncestor("SelectionStatement").isPresent() || node.getAncestor("IterationStatement").isPresent();
     }
 
-    public static Type getValueType(JmmNode node, SymbolTable symbolTable) {
+    // POST SYMBOL TABLE
+    public static String getUniqueMethodName(JmmNode node, MySymbolTable symbolTable) {
+        if (!node.getKind().equals("MethodDeclaration"))
+            throw new RuntimeException("Node is not a MethodDeclaration");
+
+        if (isMethodMain(node))
+            return "main";
+
+        return symbolTable.getUniqueNameFromSymbols(getMethodName(node), getMethodParams(node));
+    }
+
+    public static Type getValueType(JmmNode node, MySymbolTable symbolTable) {
         if (!node.getKind().equals("Value"))
             throw new RuntimeException("Node is not a Value");
 
@@ -89,14 +103,14 @@ public class AstUtils {
         return getObjectType(node, symbolTable);
     }
 
-    public static Type getObjectType(JmmNode node, SymbolTable symbolTable) {
+    public static Type getObjectType(JmmNode node, MySymbolTable symbolTable) {
         Optional<JmmNode> ancestorOpt = node.getAncestor("MethodDeclaration");
         if(ancestorOpt.isPresent()) {
             JmmNode ancestor = ancestorOpt.get();
-            String methodName = AstUtils.getMethodName(ancestor);
+            String uniqueName = AstUtils.getUniqueMethodName(ancestor, symbolTable);
 
-            List<Symbol> localVariables = symbolTable.getLocalVariables(methodName);
-            List<Symbol> parameters = symbolTable.getParameters(methodName);
+            List<Symbol> localVariables = symbolTable.getLocalVariables(uniqueName);
+            List<Symbol> parameters = symbolTable.getParameters(uniqueName);
 
             for(Symbol s : parameters) {
                 if (s.getName().equals(node.get("object"))) {

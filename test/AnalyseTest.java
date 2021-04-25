@@ -2,34 +2,45 @@ import org.junit.Test;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.JmmParserResult;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
+
+import java.util.List;
 
 public class AnalyseTest {
 
     private void testAnalyse(String filename) {
-        testAnalyse(filename, false);
-    }
+        System.out.println("TEST " + filename);
 
-    private void testAnalyse(String filename, Boolean print) {
         var fileContents = SpecsIo.read(filename);
          JmmSemanticsResult semanticsResult = TestUtils.analyse(fileContents);
 
-        if (print)
-            System.out.println(semanticsResult.getReports());
+        printReports(semanticsResult.getReports());
+
+        TestUtils.noErrors(semanticsResult.getReports());
     }
 
     private void testAnalyseFail(String filename) {
-        testAnalyseFail(filename, false);
-    }
+        System.out.println("FAIl " + filename);
 
-    private void testAnalyseFail(String filename, Boolean print) {
         var fileContents = SpecsIo.read(filename);
         JmmSemanticsResult semanticsResult = TestUtils.analyse(fileContents);
 
-        if (print)
-            System.out.println("Total Reports: " + semanticsResult.getReports().size());
+        printReports(semanticsResult.getReports());
 
         TestUtils.mustFail(semanticsResult.getReports());
+    }
+
+    private static void printReports(List<Report> reports) {
+        int errors = 0;
+        if (reports.size() == 0)
+            System.out.println("No errors found");
+        for (Report r: reports) {
+            if (r.getType().equals(ReportType.ERROR))
+                errors += 1;
+            System.out.println(r);
+        }
     }
 
     @Test
@@ -75,6 +86,12 @@ public class AnalyseTest {
     @Test
     public void testTicTacToe() {
         testAnalyse("./test/fixtures/public/TicTacToe.jmm");
+    }
+
+    // CUSTOM TESTS
+    @Test
+    public void testOverloading() {
+        testAnalyse("./test/fixtures/public/Overloading.jmm");
     }
 
 

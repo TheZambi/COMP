@@ -71,6 +71,7 @@ class SimpleNode implements Node, JmmNode {
   }
 
 
+
   public void jjtOpen() {
   }
 

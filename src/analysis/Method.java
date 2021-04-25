@@ -10,11 +10,13 @@ import java.util.Objects;
 public class Method {
 
     private final String name;
+    private String uniqueName;
     private final Type returnType;
     private final List<Symbol> parameters, localVariables;
 
     public Method(String name, Type returnType, List<Symbol> getParameters) {
         this.name = name;
+        this.uniqueName = name;
         this.returnType = returnType;
         this.parameters = getParameters;
         this.localVariables = new ArrayList<>();
@@ -28,13 +30,24 @@ public class Method {
         );
     }
 
-    public void addLocalVar(Symbol s) {
-        this.localVariables.add(s);
+    public boolean addLocalVar(Symbol symbol) {
+        for (Symbol s : parameters)
+            if (symbol.getName().equals(s.getName()))
+                return false;
+        for (Symbol s : localVariables)
+            if (symbol.getName().equals(s.getName()))
+                return false;
+        this.localVariables.add(symbol);
+        return true;
     }
 
     public String getName() {
         return name;
     }
+
+    public String getUniqueName() { return uniqueName; }
+
+    public Method setUniqueName(String uniqueName) { this.uniqueName = uniqueName; return this; }
 
     public Type getReturnType() {
         return returnType;
@@ -42,6 +55,13 @@ public class Method {
 
     public List<Symbol> getParameters() {
         return parameters;
+    }
+
+    public List<Type> getParamameterTypes() {
+        List<Type> types = new ArrayList<>();
+        for (Symbol s : parameters)
+            types.add(s.getType());
+        return types;
     }
 
     public List<Symbol> getLocalVariables() {
@@ -84,6 +104,7 @@ public class Method {
         }
         return "Method{\n" +
                 "\tname='" + name + "'\n" +
+                "\tuniqueName='" + uniqueName + "'\n" +
                 "\treturnType=" + returnType + "\n" +
                 "\tparamenters=" + parameters + "\n" +
                 "\tlocalVariables=\n" + varsString +

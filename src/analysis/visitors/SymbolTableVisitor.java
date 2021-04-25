@@ -6,6 +6,9 @@ import pt.up.fe.comp.jmm.JmmNode;
 import analysis.Method;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
+import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.specs.util.SpecsCheck;
 
 import java.util.*;
@@ -15,9 +18,13 @@ public class SymbolTableVisitor {
 
     private final Map<String, Consumer<JmmNode>> visitMap;
 
+    private final List<Report> reports;
+
     private final MySymbolTable symbolTable;
 
-    public SymbolTableVisitor(MySymbolTable symbolTable) {
+    public SymbolTableVisitor(MySymbolTable symbolTable, List<Report> reports) {
+        this.reports = reports;
+
         this.symbolTable = symbolTable;
         this.visitMap = new HashMap<>();
         this.visitMap.put("VarDeclaration", this::varDeclarationVisit);
@@ -36,11 +43,16 @@ public class SymbolTableVisitor {
             if (AstUtils.isMethodMain(ancestor))
                 m = symbolTable.getMethod("main");
             else
-                m = symbolTable.getMethod(AstUtils.getMethodName(ancestor));
-            m.addLocalVar(s);
+                m = symbolTable.getMethod(AstUtils.getUniqueMethodName(ancestor, symbolTable));
+
+            if (!m.addLocalVar(s))
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                        "Method defines multiple times the same variable with the name <" + s.getName() + ">"));
         } else {
             // Class field
-            symbolTable.addField(s);
+            if (!symbolTable.addField(s))
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                        "Class has multiple fields with the same name <" + s.getName() + ">"));
         }
     }
 
@@ -48,16 +60,18 @@ public class SymbolTableVisitor {
         if (AstUtils.isMethodMain(node)) {
             List<Symbol> symbols = new ArrayList<>();
             symbols.add(new Symbol(new Type("String",false), node.getChildren().get(0).get("stringArrayName")));
-            symbolTable.addMethod(new Method("main", new Type("void", false), symbols));
+            if (!symbolTable.addMethod(new Method("main", new Type("void", false), symbols)))
+                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                    "A class cannot have multiple main declarations"));
             return;
         }
 
-        JmmNode header = node.getChildren().get(0);
-        List<Symbol> symbols = new ArrayList<>();
-        for (int i = 1; i < header.getNumChildren(); i++) {
-            symbols.add(AstUtils.getChildSymbol(header, i));
-        }
-        symbolTable.addMethod(new Method(AstUtils.getChildSymbol(header, 0), symbols));
+        List<Symbol> symbols = AstUtils.getMethodParams(node);
+        Symbol methodHead = AstUtils.getChildSymbol(node.getChildren().get(0), 0);
+        Method m = new Method(methodHead, symbols);
+        if (!symbolTable.addMethod(m))
+            reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                    "Found multiple declarations of method with the same prototype: <" + m.getName() + "> with params <" + m.getParameters() + ">"));
     }
 
     private void classDeclarationVisit(JmmNode node) {

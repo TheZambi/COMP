@@ -90,7 +90,7 @@ public class OllirVisitor {
         }
 
         JmmNode ancestor = ancestorOpt.get();
-        String methodName = AstUtils.getMethodName(ancestor);
+        String methodName = AstUtils.getUniqueMethodName(ancestor, symbolTable);
         JmmNode methodHeader = ancestor.getChildren().get(0);
 
         for (int i = 1; i < methodHeader.getChildren().size(); i++) {
@@ -186,7 +186,8 @@ public class OllirVisitor {
 
     private OllirAssistant handleMethodHeader(JmmNode node, List<OllirAssistant> childrenResults) {
         StringBuilder value = new StringBuilder(".method public ");
-        Method method = symbolTable.getMethod(node.getChildren().get(0).get("name"));
+
+        Method method = symbolTable.getMethod(AstUtils.getUniqueMethodName(node.getParent(), symbolTable));
 
         value.append(method.getName()).append("(");
         for(int i = 0; i < method.getParameters().size(); ++i) {
