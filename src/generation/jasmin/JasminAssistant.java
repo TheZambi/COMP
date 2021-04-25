@@ -136,7 +136,7 @@ public class JasminAssistant {
                 instCode.append("return\n");
              }
             case PUTFIELD -> {
-
+                instCode.append(this.generatePutfield(method, (PutFieldInstruction) instruction));
             }
             case GETFIELD -> {
                 instCode.append(this.generateGetfield(method, (GetFieldInstruction) instruction));
@@ -184,12 +184,16 @@ public class JasminAssistant {
     private String generateGetfield(Method method, GetFieldInstruction instruction) {
 
         return getElement(method, instruction.getFirstOperand()) +
-                "getfield " + convertType(instruction.getSecondOperand().getType().getTypeOfElement()) +
-                " " + ((Operand) instruction.getSecondOperand()).getName() + "\n";
+                "getfield " + ((Operand) instruction.getSecondOperand()).getName() +
+                " " + convertType(instruction.getSecondOperand().getType().getTypeOfElement()) + "\n";
     }
 
     private String generatePutfield(Method method, PutFieldInstruction instruction) {
-        return "";
+
+        return getElement(method, instruction.getFirstOperand()) +
+                getElement(method, instruction.getThirdOperand()) +
+                "putfield " + ((Operand) instruction.getSecondOperand()).getName() +
+                " " + convertType(instruction.getSecondOperand().getType().getTypeOfElement()) + "\n";
     }
 
     private String generateCall(Method method, CallInstruction callInstruction) {

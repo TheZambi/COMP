@@ -29,17 +29,16 @@
 .method public index(I)I
 	.limit stack 99
 	.limit locals 99
-	iconst_1
+	iconst_0
+	iconst_2
+	isub
 	istore_2
 	aload_0
 	iconst_1
 	iload_2
 	invokevirtual Lazysort.add(II)I
 	istore_3
-	aload_0
-	getfield I field1
-	istore_6
-	iload_6
+	iload_3
 	ireturn
 .end method
 
