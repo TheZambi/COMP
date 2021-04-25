@@ -418,6 +418,9 @@ public class OllirVisitor {
 
         switch (returnChild.getType()) {
             case FIELD:
+                String fieldAux = createGetFieldAux(returnChild, auxCode);
+                value.append(fieldAux);
+                break;
             case VALUE:
             case LENGTH:
             case INDEXING:

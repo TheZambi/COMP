@@ -1,5 +1,6 @@
 .class public Lazysort
 .super java/lang/Object
+.field private field1 I
 
 .method public <init>()V
 	aload_0
@@ -35,7 +36,10 @@
 	iload_2
 	invokevirtual Lazysort.add(II)I
 	istore_3
-	iload_3
+	aload_0
+	getfield I field1
+	istore_6
+	iload_6
 	ireturn
 .end method
 

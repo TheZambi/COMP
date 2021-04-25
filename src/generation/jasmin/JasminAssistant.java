@@ -139,7 +139,7 @@ public class JasminAssistant {
 
             }
             case GETFIELD -> {
-
+                instCode.append(this.generateGetfield(method, (GetFieldInstruction) instruction));
             }
             case UNARYOPER -> {
 
@@ -179,6 +179,17 @@ public class JasminAssistant {
 
         }
         return instCode.toString();
+    }
+
+    private String generateGetfield(Method method, GetFieldInstruction instruction) {
+
+        return getElement(method, instruction.getFirstOperand()) +
+                "getfield " + convertType(instruction.getSecondOperand().getType().getTypeOfElement()) +
+                " " + ((Operand) instruction.getSecondOperand()).getName() + "\n";
+    }
+
+    private String generatePutfield(Method method, PutFieldInstruction instruction) {
+        return "";
     }
 
     private String generateCall(Method method, CallInstruction callInstruction) {
