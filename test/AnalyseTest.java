@@ -88,6 +88,12 @@ public class AnalyseTest {
         testAnalyse("./test/fixtures/public/TicTacToe.jmm");
     }
 
+    // CUSTOM TESTS
+    @Test
+    public void testOverloading() {
+        testAnalyse("./test/fixtures/public/Overloading.jmm");
+    }
+
 
     // MUST FAIL TESTS FROM HERE ON OUT
     @Test

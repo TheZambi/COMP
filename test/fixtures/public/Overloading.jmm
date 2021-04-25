@@ -1,0 +1,43 @@
+class Overloading {
+
+    int field1;
+    boolean field2;
+    int[] field3;
+
+    public static void main(String[] a) {
+
+    }
+
+    public int testing() {
+        boolean a;
+        boolean b;
+        int i1;
+        int i2;
+
+        a = true;
+        b = false;
+        i2 = 2;
+
+        i1 = this.overloadTest(i2, a);
+        i2 = this.overloadTest(b, i1);
+        i1 = this.overloadTest(i1, i2, b);
+
+        return i1;
+    }
+
+    public int overloadTest(int parametro1, boolean parametro2) {
+        int result;
+        result = this.overloadTest(true, 1);
+        return result;
+    }
+
+    public int overloadTest(boolean parametro1, int parametro2) {
+        int res;
+        res = this.overloadTest(1, parametro2, parametro1);
+        return res;
+    }
+
+    public int overloadTest(int parametro1, int parametro2, boolean parametro3) {
+        return 2;
+    }
+}

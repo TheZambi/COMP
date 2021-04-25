@@ -38,9 +38,10 @@ public class SyntacticPhase implements JmmParser {
 //			}
 
 			return new JmmParserResult(root, myJmm.reports);
-		} catch(ParseException e) {
-			myJmm.reports.add(new Report(ReportType.ERROR, Stage.SYNTATIC, -1, "Parse failed with exception"));
-//			throw new RuntimeException("Error while parsing", e);
+		} catch (ParseException e) {
+			myJmm.reports.add(new Report(ReportType.ERROR, Stage.SYNTATIC, e.currentToken.beginLine, e.currentToken.beginColumn, e.getMessage()));
+		} catch (Exception e) {
+			myJmm.reports.add(new Report(ReportType.ERROR, Stage.SYNTATIC, -1, -1, e.getMessage()));
 		}
 
 		return new JmmParserResult(null, myJmm.reports);
