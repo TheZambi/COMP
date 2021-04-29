@@ -119,8 +119,8 @@ public class OllirVisitor {
             }
 
         }
-//        name = name.replace("d","dd");
-//        name = name.replace("$","d");
+        name = name.replace("d","dd");
+        name = name.replace("$","d");
 
         // Add $ if value is a method parameter
         for (int i = 0; i < method.getParameters().size(); i++) {
@@ -819,7 +819,7 @@ public class OllirVisitor {
         auxCode.append(auxVar).append(" :=").append(typeString).append(" ").append(value).append(";\n");
 
         if(auxType == OllirAssistantType.UN_OP_NEW_OBJ) {
-            auxCode.append("invocespecial(").append(auxVar).append(", \"<init>\").V;\n");
+            auxCode.append("invokespecial(").append(auxVar).append(", \"<init>\").V;\n");
         }
         return auxVar;
     }
