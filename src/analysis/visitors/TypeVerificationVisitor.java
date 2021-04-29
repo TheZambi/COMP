@@ -1,10 +1,9 @@
 package analysis.visitors;
 
-import analysis.AstUtils;
-import analysis.Method;
-import analysis.MySymbolTable;
+import ast.AstUtils;
+import ast.Method;
+import ast.MySymbolTable;
 import pt.up.fe.comp.jmm.JmmNode;
-import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
@@ -30,7 +29,7 @@ public class TypeVerificationVisitor {
         NEW
     }
 
-    private static final Type ignore = new Type("-ignore", false);
+    public static final Type ignore = new Type("-ignore", false);
 
     private final Map<String, Function<JmmNode, Type>> visitMap;
     private final Set<String> typesToCheck;

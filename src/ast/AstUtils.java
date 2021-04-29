@@ -1,8 +1,7 @@
-package analysis;
+package ast;
 
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
-import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 
 import java.util.ArrayList;
@@ -13,10 +12,18 @@ public class AstUtils {
 
     public static String NOT_LITERAL = "object";
 
+    public static List<Type> reduceSymbolsToTypes(List<Symbol> symbols) {
+        List<Type> types = new ArrayList<>();
+        for (Symbol s: symbols) {
+            types.add(s == null ? null : s.getType());
+        }
+        return types;
+    }
+
     public static Symbol getChildSymbol(JmmNode node, int index) {
         JmmNode sNode = node.getChildren().get(index);
         if (!sNode.getKind().equals("Symbol"))
-            throw new RuntimeException("Child note at index " + index + " is not a Symbol");
+            throw new RuntimeException("Child note at index " + index + " is not a Symbol: <" + sNode.getKind() + ">");
         return new Symbol(getChildType(sNode, 0), sNode.get("name"));
     }
 
@@ -90,7 +97,22 @@ public class AstUtils {
         if (isMethodMain(node))
             return "main";
 
-        return symbolTable.getUniqueNameFromSymbols(getMethodName(node), getMethodParams(node));
+        return symbolTable.getUniqueName(getMethodName(node), reduceSymbolsToTypes(getMethodParams(node)));
+    }
+
+    public static String getUniqueMethodCallName(JmmNode node, MySymbolTable symbolTable) {
+        if (!node.getKind().equals("MethodCall"))
+            throw new RuntimeException("Node is not a MethodCall");
+
+        if (isMethodMain(node))
+            return "main";
+
+        String name = node.get("methodName");
+        List<Type> types = new ArrayList<>();
+
+
+
+        return symbolTable.getUniqueName(name, types);
     }
 
     public static Type getValueType(JmmNode node, MySymbolTable symbolTable) {

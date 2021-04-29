@@ -17,16 +17,86 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import pt.up.fe.comp.TestUtils;
+import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
+import pt.up.fe.comp.jmm.jasmin.JasminResult;
+import pt.up.fe.comp.jmm.ollir.OllirResult;
+import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
+
+import java.util.List;
 
 public class BackendTest {
 
+    private void testBackend(String filename) {
+        System.out.println("TEST " + filename);
+
+        JasminResult jasminResult = TestUtils.backend(SpecsIo.getResource(filename));
+
+        printReports(jasminResult.getReports());
+
+        TestUtils.noErrors(jasminResult.getReports());
+
+        var output = jasminResult.run();
+        assertEquals("Hello, World!", output.trim());
+    }
+
+    private static void printReports(List<Report> reports) {
+        if (reports.size() == 0)
+            System.out.println("No errors found");
+        for (Report r: reports) {
+            System.out.println(r);
+        }
+    }
+
+    @Test
+    public void testWhileAndIF() {
+        testBackend("./test/fixtures/public/WhileAndIF.jmm");
+    }
+
+    @Test
+    public void testFindMaximum() {
+        testBackend("./test/fixtures/public/FindMaximum.jmm");
+    }
+
     @Test
     public void testHelloWorld() {
-        var result = TestUtils.backend(SpecsIo.getResource("fixtures/public/HelloWorld.jmm"));
-        TestUtils.noErrors(result.getReports());
+        testBackend("./test/fixtures/public/HelloWorld.jmm");
+    }
 
-        var output = result.run();
-        assertEquals("Hello, World!", output.trim());
+    @Test
+    public void testLazysort() {
+        testBackend("./test/fixtures/public/Lazysort.jmm");
+    }
+
+    @Test
+    public void testLife() {
+        testBackend("./test/fixtures/public/Life.jmm");
+    }
+
+    @Test
+    public void testMonteCarloPi() {
+        testBackend("./test/fixtures/public/MonteCarloPi.jmm");
+    }
+
+    @Test
+    public void testQuickSort() {
+        testBackend("./test/fixtures/public/QuickSort.jmm");
+    }
+
+    @Test
+    public void testSimple() {
+        testBackend("./test/fixtures/public/Simple.jmm");
+    }
+
+    @Test
+    public void testTicTacToe() {
+        testBackend("./test/fixtures/public/TicTacToe.jmm");
+    }
+
+    // CUSTOM TESTS
+    @Test
+    public void testOverloading() {
+        testBackend("./test/fixtures/public/Overloading.jmm");
     }
 }
