@@ -9,12 +9,23 @@ public class OllirAssistant {
     private final String value;
     private final Type varType;
     private final String auxCode;
+    private boolean isVariable = false;
 
     OllirAssistant(OllirAssistantType type, String value, String auxCode, Type varType) {
         this.type = type;
         this.value = value;
         this.auxCode = auxCode;
         this.varType = varType;
+    }
+
+    public void setIsVariable()
+    {
+        this.isVariable = true;
+    }
+
+    public boolean isVariable()
+    {
+        return isVariable;
     }
 
     public OllirAssistantType getType() {
