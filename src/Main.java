@@ -18,7 +18,14 @@ public class Main {
             var semanticResult = new AnalysisStage().semanticAnalysis(parserResult);
             checkReports("semantic", semanticResult.getReports());
 
-//            var ollirResult = new OptimizationStage().toOllir(semanticResult);
+            var ollirResult = new OptimizationStage().toOllir(semanticResult);
+            if(ollirResult.getReports().size()> 0){
+                System.err.println("Failed on ollir generation");
+                return;
+            }
+
+            var jasminResult = new BackendStage().toJasmin(ollirResult);
+            jasminResult.run();
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -76,6 +76,10 @@ public class AstUtils {
         return node.getAncestor("SelectionStatement").isPresent() || node.getAncestor("IterationStatement").isPresent();
     }
 
+    public static boolean isVariable(JmmNode node)
+    {
+        return (node.get("type").equals("object")) && (node.get("object") != null);
+    }
 
 
     // POST SYMBOL TABLE

@@ -1,14 +1,15 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import generation.OllirAssistant;
-import generation.OllirVisitor;
+import generation.ollir.OllirAssistant;
+import generation.ollir.OllirVisitor;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.specs.util.SpecsIo;
 
 /**
  * Copyright 2021 SPeCS.
@@ -34,18 +35,26 @@ public class OptimizationStage implements JmmOptimization {
 
         OllirAssistant result = visitor.visit(node);
 
-//        System.out.println("\n\n");
-//        System.out.println(result.getAuxCode());
-//        System.out.println(result.getValue());
-
         // Convert the AST to a String containing the equivalent OLLIR code
         String ollirCode = ""; // Convert node ...
+
+        ollirCode = result.getValue();
+
+        try {
+            FileWriter myWriter = new FileWriter("./ollirCode.ollir");
+            myWriter.write(ollirCode);
+            myWriter.close();
+            System.err.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.err.println("An error occurred.");
+            e.printStackTrace();
+        }
 
         // More reports from this stage
         List<Report> reports = new ArrayList<>();
 
-//        return new OllirResult(semanticsResult, ollirCode, reports);
-        return null;
+        return new OllirResult(semanticsResult, ollirCode, reports);
+//        return null;
     }
 
     @Override

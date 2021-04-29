@@ -9,7 +9,6 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.report.Report;
 import analysis.visitors.SymbolTableVisitor;
 
-import java.util.HashSet;
 import java.util.List;
 
 public class AnalysisStage implements JmmAnalysis {
@@ -30,14 +29,7 @@ public class AnalysisStage implements JmmAnalysis {
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        System.out.println("--------------- // -----------------");
-//        System.out.println(symbolTable);
-//        System.out.println("--------------- // -----------------");
 
-//        HashSet<String> toPrint = new HashSet<>();
-//        toPrint.add("BinaryOp");
-//        PrintVisitor pv = new PrintVisitor(toPrint);
-//        pv.visit(root);
 
         TypeVerificationVisitor typeVerificationVisitor = new TypeVerificationVisitor(symbolTable, reports);
         try {

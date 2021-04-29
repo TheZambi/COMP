@@ -1,10 +1,12 @@
-package generation;
+package generation.ollir;
 
 public enum OllirAssistantType {
     BIN_OP,
-    UN_OP_NEW,
+    UN_OP_NEW_OBJ,
+    UN_OP_NEW_ARRAY,
     UN_OP_NEG,
     VALUE,
+    FIELD,
     STATEMENT_ASSIGN,
     STATEMENT,
     METHODCALL,
@@ -16,5 +18,12 @@ public enum OllirAssistantType {
     METHOD_HEADER,
     METHOD_DECLARATION,
     VAR_DECLARATION,
-    CLASS_DECLARATION
+    CLASS_DECLARATION,
+    LENGTH,
+    ARRAY,
+    CLASSOBJ,
+    ITERATION_STATEMENT,
+    COMPOUND_STATEMENT,
+    SELECTION_STATEMENT,
+    IMPORT
 }

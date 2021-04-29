@@ -1,0 +1,54 @@
+.class public Lazysort
+.super java/lang/Object
+.field private field1 I
+
+.method public <init>()V
+	aload_0
+	invokespecial java/lang/Object/<init>()V
+	return
+.end method
+
+.method public static main([Ljava/lang/String;)V
+	.limit stack 99
+	.limit locals 99
+	new Lazysort
+	dup
+	invokespecial Lazysort.<init>()V
+	astore_1
+	iconst_1
+	istore_3
+	iload_3
+	invokestatic io.println()V
+	aload_1
+	iconst_1
+	invokevirtual Lazysort.index(I)I
+	istore_3
+	return
+.end method
+
+.method public index(I)I
+	.limit stack 99
+	.limit locals 99
+	iconst_0
+	iconst_2
+	isub
+	istore_2
+	aload_0
+	iconst_1
+	iload_2
+	invokevirtual Lazysort.add(II)I
+	istore_3
+	iload_3
+	ireturn
+.end method
+
+.method public add(II)I
+	.limit stack 99
+	.limit locals 99
+	iload_1
+	iload_2
+	iadd
+	istore_3
+	iload_3
+	ireturn
+.end method
