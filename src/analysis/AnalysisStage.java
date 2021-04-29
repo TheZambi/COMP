@@ -1,3 +1,5 @@
+package analysis;
+
 import ast.MySymbolTable;
 import analysis.visitors.InitedVarsVisitor;
 import analysis.visitors.TypeVerificationVisitor;
