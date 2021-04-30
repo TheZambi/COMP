@@ -290,7 +290,7 @@ public class JasminAssistant {
         } else if(object.getType().getTypeOfElement() == ElementType.CLASS) { //static invoke
             return object.getName() + '.' + methodName;
         } else {
-            return ((ClassType)object.getType()).getName() + '.' + methodName;//TODO: methods without 'this'
+            return ((ClassType)object.getType()).getName() + '.' + methodName;
         }
     }
 
@@ -300,9 +300,15 @@ public class JasminAssistant {
         operands.add(instruction.getRightOperand());
         StringBuilder instCode = new StringBuilder();
 
-        for(Element operand : operands) {
-            instCode.append(getElement(method, operand));
+        OperationType opType = instruction.getUnaryOperation().getOpType();
+        if(opType != OperationType.NOTB) {
+            for (Element operand : operands) {
+                instCode.append(getElement(method, operand));
+            }
+        } else { //if this operation is a negation, we only want to load one side of the op as both sides will be the same
+            instCode.append(getElement(method, operands.get(0)));
         }
+
         instCode.append(convertTypeToInst(operands.get(0).getType().getTypeOfElement()));
         String opStr = "";
         switch(instruction.getUnaryOperation().getOpType()) {
@@ -335,10 +341,10 @@ public class JasminAssistant {
                 opStr = "add";
             }
             case ANDB -> {
-                opStr = "andb";
+                opStr = "and";
             }
-            case ORB -> {
-                opStr = "orb";
+            case NOTB -> {
+                opStr = "neg";
             }
         }
         instCode.append(opStr).append("\n");
@@ -348,10 +354,10 @@ public class JasminAssistant {
     private String getElement(Method method, Element operand) {
         StringBuilder instCode = new StringBuilder();
         ElementType elementType = operand.getType().getTypeOfElement();
-        if(operand.isLiteral()) {
+        if(operand.isLiteral()) { //if literal, create a const instruction
             int value = Integer.parseInt(((LiteralElement) operand).getLiteral());
             instCode.append(createConstInst(value));
-        } else {
+        } else { //if its a variable, load with its virtual reg
             if(operand.getType().getTypeOfElement() != ElementType.CLASS) {
                 instCode.append(createLoadInst(elementType, getVirtualReg(method, (Operand) operand)));
             }
@@ -363,7 +369,8 @@ public class JasminAssistant {
     private int getVirtualReg(Method method, Operand operand) {
         if(operand.getName().equals("this"))
             return 0;
-        return OllirAccesser.getVarTable(method).get(operand.getName()).getVirtualReg();
+
+        return method.getVarTable().get(operand.getName()).getVirtualReg();
     }
 
     private String createConstInst(int value) {
