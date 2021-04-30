@@ -10,10 +10,12 @@ import java.util.Locale;
 public class JasminAssistant {
     private ClassUnit ollirClass;
     private StringBuilder code;
+    private int lthBranch;
 
     public JasminAssistant(ClassUnit ollirClass) {
         this.code = new StringBuilder();
         this.ollirClass = ollirClass;
+        this.lthBranch = 0;
     }
 
     public JasminAssistant generate(){
@@ -295,18 +297,26 @@ public class JasminAssistant {
     }
 
     private String generateBiOpInstruction(Method method, BinaryOpInstruction instruction) {
+        OperationType opType = instruction.getUnaryOperation().getOpType();
+
         List<Element> operands = new ArrayList<>();
         operands.add(instruction.getLeftOperand());
         operands.add(instruction.getRightOperand());
         StringBuilder instCode = new StringBuilder();
 
-        OperationType opType = instruction.getUnaryOperation().getOpType();
         if(opType != OperationType.NOTB) {
             for (Element operand : operands) {
                 instCode.append(getElement(method, operand));
             }
         } else { //if this operation is a negation, we only want to load one side of the op as both sides will be the same
             instCode.append(getElement(method, operands.get(0)));
+        }
+
+        if(opType == OperationType.LTH) {
+            instCode.append("if_icmpge ").append(lthBranch++).append("\niconst_1\ngoto ").append(lthBranch++)
+                    .append("\n").append(lthBranch-2).append(": iconst_0\n").append(lthBranch-1).append(": ");
+
+            return instCode.toString();
         }
 
         instCode.append(convertTypeToInst(operands.get(0).getType().getTypeOfElement()));
@@ -323,22 +333,6 @@ public class JasminAssistant {
             }
             case DIV -> {
                 opStr = "div";
-            }
-            case LTH -> {
-                opStr = "add";
-            }
-            case GTH -> {
-                opStr = "add";
-            }
-            case EQ -> {
-            }
-            case NEQ -> {
-            }
-            case LTE -> {
-                opStr = "add";
-            }
-            case GTE -> {
-                opStr = "add";
             }
             case ANDB -> {
                 opStr = "and";
