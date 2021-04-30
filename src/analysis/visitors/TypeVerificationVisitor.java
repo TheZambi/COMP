@@ -267,7 +267,7 @@ public class TypeVerificationVisitor {
         // Postorder: 1st visit each children
         for (JmmNode child : node.getChildren()) {
             res = visit(child);
-            if (res != null) {
+            if (this.types != null && res != null) {
                 this.types.add(res);
                 res = null;
             }

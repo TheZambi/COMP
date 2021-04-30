@@ -83,9 +83,11 @@ public class AstUtils {
         return node.getAncestor("SelectionStatement").isPresent() || node.getAncestor("IterationStatement").isPresent();
     }
 
-    public static boolean isVariable(JmmNode node)
+    public static boolean isVariable(JmmNode node, MySymbolTable symbolTable)
     {
-        return (node.get("type").equals("object")) && (node.get("object") != null);
+        return (node.get("type").equals("object"))
+                && (node.get("object") != null)
+                && (!symbolTable.getImports().contains(node.get("object")));
     }
 
 

@@ -51,52 +51,52 @@ public class BackendTest {
 
     @Test
     public void testWhileAndIF() {
-        testBackend("./test/fixtures/public/WhileAndIF.jmm");
+        testBackend("fixtures/public/WhileAndIF.jmm");
     }
 
     @Test
     public void testFindMaximum() {
-        testBackend("./test/fixtures/public/FindMaximum.jmm");
+        testBackend("fixtures/public/FindMaximum.jmm");
     }
 
     @Test
     public void testHelloWorld() {
-        testBackend("./test/fixtures/public/HelloWorld.jmm");
+        testBackend("fixtures/public/HelloWorld.jmm");
     }
 
     @Test
     public void testLazysort() {
-        testBackend("./test/fixtures/public/Lazysort.jmm");
+        testBackend("fixtures/public/Lazysort.jmm");
     }
 
     @Test
     public void testLife() {
-        testBackend("./test/fixtures/public/Life.jmm");
+        testBackend("fixtures/public/Life.jmm");
     }
 
     @Test
     public void testMonteCarloPi() {
-        testBackend("./test/fixtures/public/MonteCarloPi.jmm");
+        testBackend("fixtures/public/MonteCarloPi.jmm");
     }
 
     @Test
     public void testQuickSort() {
-        testBackend("./test/fixtures/public/QuickSort.jmm");
+        testBackend("fixtures/public/QuickSort.jmm");
     }
 
     @Test
     public void testSimple() {
-        testBackend("./test/fixtures/public/Simple.jmm");
+        testBackend("fixtures/public/Simple.jmm");
     }
 
     @Test
     public void testTicTacToe() {
-        testBackend("./test/fixtures/public/TicTacToe.jmm");
+        testBackend("fixtures/public/TicTacToe.jmm");
     }
 
     // CUSTOM TESTS
     @Test
     public void testOverloading() {
-        testBackend("./test/fixtures/public/Overloading.jmm");
+        testBackend("fixtures/public/Overloading.jmm");
     }
 }

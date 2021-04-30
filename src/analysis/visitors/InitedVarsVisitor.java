@@ -63,7 +63,7 @@ public class InitedVarsVisitor {
 
         switch (st) {
             case UNINITIALIZED:
-                reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                reports.add(new Report(ReportType.WARNING, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                         "Local variable <" + name + "> was not initialized"));
                 break;
 //            case CONDITIONAL:
