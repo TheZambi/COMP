@@ -49,54 +49,54 @@ public class BackendTest {
         }
     }
 
-    @Test
-    public void testWhileAndIF() {
-        testBackend("fixtures/public/WhileAndIF.jmm");
-    }
+//    @Test
+//    public void testWhileAndIF() {
+//        testBackend("fixtures/public/WhileAndIF.jmm");
+//    }
+//
+//    @Test
+//    public void testFindMaximum() {
+//        testBackend("fixtures/public/FindMaximum.jmm");
+//    }
 
-    @Test
-    public void testFindMaximum() {
-        testBackend("fixtures/public/FindMaximum.jmm");
-    }
+//    @Test
+//    public void testHelloWorld() {
+//        testBackend("fixtures/public/HelloWorld.jmm");
+//    }
 
-    @Test
-    public void testHelloWorld() {
-        testBackend("fixtures/public/HelloWorld.jmm");
-    }
-
-    @Test
-    public void testLazysort() {
-        testBackend("fixtures/public/Lazysort.jmm");
-    }
-
-    @Test
-    public void testLife() {
-        testBackend("fixtures/public/Life.jmm");
-    }
-
-    @Test
-    public void testMonteCarloPi() {
-        testBackend("fixtures/public/MonteCarloPi.jmm");
-    }
-
-    @Test
-    public void testQuickSort() {
-        testBackend("fixtures/public/QuickSort.jmm");
-    }
+//    @Test
+//    public void testLazysort() {
+//        testBackend("fixtures/public/Lazysort.jmm");
+//    }
+//
+//    @Test
+//    public void testLife() {
+//        testBackend("fixtures/public/Life.jmm");
+//    }
+//
+//    @Test
+//    public void testMonteCarloPi() {
+//        testBackend("fixtures/public/MonteCarloPi.jmm");
+//    }
+//
+//    @Test
+//    public void testQuickSort() {
+//        testBackend("fixtures/public/QuickSort.jmm");
+//    }
 
     @Test
     public void testSimple() {
         testBackend("fixtures/public/Simple.jmm");
     }
 
-    @Test
-    public void testTicTacToe() {
-        testBackend("fixtures/public/TicTacToe.jmm");
-    }
-
-    // CUSTOM TESTS
-    @Test
-    public void testOverloading() {
-        testBackend("fixtures/public/Overloading.jmm");
-    }
+//    @Test
+//    public void testTicTacToe() {
+//        testBackend("fixtures/public/TicTacToe.jmm");
+//    }
+//
+//    // CUSTOM TESTS
+//    @Test
+//    public void testOverloading() {
+//        testBackend("fixtures/public/Overloading.jmm");
+//    }
 }

@@ -25,8 +25,8 @@ public class Main {
                 return;
             }
 
-//            var jasminResult = new generation.jasmin.BackendStage().toJasmin(ollirResult);
-//            jasminResult.run();
+            var jasminResult = new generation.jasmin.BackendStage().toJasmin(ollirResult);
+            jasminResult.run();
         }
         catch (Exception e) {
             e.printStackTrace();

@@ -174,8 +174,7 @@ public class JasminAssistant {
             }
         } else {
             instCode.append(this.generateInstruction(method, assignInstruction.getRhs()));
-            instCode.append(convertTypeToInst(leftOp.getType().getTypeOfElement())).append("store_")
-                    .append(getVirtualReg(method, leftOp)).append("\n");
+            instCode.append(createStoreInst(leftOp.getType().getTypeOfElement(),getVirtualReg(method, leftOp))).append("\n");
 
         }
         return instCode.toString();
@@ -211,7 +210,6 @@ public class JasminAssistant {
                 callCode.append(this.generateInvStatic(method, callInstruction));
                 break;
             case NEW:
-                callCode.append("WHDNDBHABAHBA");
                 break;
             case arraylength:
                 break;
@@ -230,6 +228,7 @@ public class JasminAssistant {
 
         StringBuilder params = new StringBuilder();
         for(Element param : callInstruction.getListOfOperands()) {
+            params.append(convertType(param.getType()));
             instCode.append(getElement(method, param));
         }
 
@@ -348,13 +347,13 @@ public class JasminAssistant {
 
     private String getElement(Method method, Element operand) {
         StringBuilder instCode = new StringBuilder();
-        instCode.append(convertTypeToInst(operand.getType().getTypeOfElement()));
+        ElementType elementType = operand.getType().getTypeOfElement();
         if(operand.isLiteral()) {
-            instCode.append("const_").append(((LiteralElement) operand).getLiteral());
+            int value = Integer.parseInt(((LiteralElement) operand).getLiteral());
+            instCode.append(createConstInst(value));
         } else {
             if(operand.getType().getTypeOfElement() != ElementType.CLASS) {
-                instCode.append("load_")
-                        .append(getVirtualReg(method, (Operand) operand));
+                instCode.append(createLoadInst(elementType, getVirtualReg(method, (Operand) operand)));
             }
         }
         instCode.append("\n");
@@ -367,14 +366,52 @@ public class JasminAssistant {
         return OllirAccesser.getVarTable(method).get(operand.getName()).getVirtualReg();
     }
 
+    private String createConstInst(int value) {
+
+        if(value == -1) {
+            return "iconst_m1";
+        } else if (value >= 0 && value <= 5) {
+            return "iconst_" + value;
+        } else if (value >= -128 && value <= 127) {
+            return "bipush " + value;
+        } else if (value >= -32768 && value <= 32767) {
+            return "sipush " + value;
+        } else {
+            return "ldc " + value;
+        }
+    }
+
+    private String createStoreInst(ElementType type, int virtualReg) {
+        StringBuilder storeInst = new StringBuilder();
+        storeInst.append(convertTypeToInst(type)).append("store");
+
+        if(virtualReg <= 3) { // istore_1
+            storeInst.append("_");
+        } else storeInst.append(" "); //istore 6
+
+        storeInst.append(virtualReg);
+        return storeInst.toString();
+    }
+
+    private String createLoadInst(ElementType type, int virtualReg) { //TODO: repeated code - see createStoreInst
+        StringBuilder storeInst = new StringBuilder();
+        storeInst.append(convertTypeToInst(type)).append("load");
+
+        if(virtualReg <= 3) { // iload_1
+            storeInst.append("_");
+        } else storeInst.append(" "); //iload 6
+
+        storeInst.append(virtualReg);
+        return storeInst.toString();
+    }
+
     private static String convertAccessModifier(AccessModifiers accessModifier) {
         return accessModifier.toString().toLowerCase();
     }
 
     private static String convertTypeToInst(ElementType type) {
         return switch (type) {
-            case INT32 -> "i";
-            case BOOLEAN -> "z";
+            case INT32, BOOLEAN -> "i";
             case ARRAYREF, OBJECTREF, THIS, CLASS -> "a";
             default -> throw new IllegalStateException("Unexpected value: " + type);
         };
