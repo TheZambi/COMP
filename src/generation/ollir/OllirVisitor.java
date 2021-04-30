@@ -121,6 +121,8 @@ public class OllirVisitor {
             name = name.replace("$", "d");
 
             name = name.replace("arr", "arrr");
+
+            name = name.replace("t", "tt");
         }
 
         // Add $ if value is a method parameter
@@ -292,9 +294,11 @@ public class OllirVisitor {
             case METHODCALL:
             case BIN_OP:
             case LENGTH:
+            case INDEXING:
                 String auxVar = createAux(childIndex.getValue(), childIndex.getVarType(), childIndex.getType(), auxCode);
                 value.append(auxVar);
                 break;
+
         }
 
         Type arrayValueType = new Type(childVar.getVarType().getName(), false);
@@ -415,7 +419,6 @@ public class OllirVisitor {
             // Has arguments
             OllirAssistant args = this.handleArgs(node, childrenResults);
             StringBuilder auxCode = new StringBuilder();
-            OllirAssistant.addAllAuxCode(auxCode, childrenResults);
             auxCode.append(args.getAuxCode());
 
             result = new OllirAssistant(OllirAssistantType.METHOD,
@@ -564,9 +567,9 @@ public class OllirVisitor {
                 case FIELD:
                     String auxVar1 = createAux(childrenResults.get(0).getValue(), childrenResults.get(0).getVarType(),
                             childrenResults.get(0).getType(), auxCode);
-                    String auxVar2 = createAux(auxVar1 + " !.bool " + auxVar1, new Type("boolean", false),
-                            null, auxCode);
-                    value.append(auxVar2);
+//                    String auxVar2 = createAux(auxVar1 + " !.bool " + auxVar1, new Type("boolean", false),
+//                            null, auxCode);
+                    value.append(auxVar1 + " !.bool " + auxVar1);
                     break;
                 case VALUE:
 //                    auxVar2 = createAux(childrenResults.get(0).getValue() + " !.bool " + childrenResults.get(0).getValue(), new Type("boolean", false),
@@ -747,6 +750,10 @@ public class OllirVisitor {
 
         switch (expression.getType()) {
             case UN_OP_NEG:
+                if(expression.getValue().split("!").length >= 2) {
+                    value.append(expression.getValue());
+                    break;
+                }
             case VALUE:
                 value.append(expression.getValue()).append(" &&.bool 1.bool");
                 break;
