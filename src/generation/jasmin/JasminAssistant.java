@@ -3,13 +3,11 @@ package generation.jasmin;
 import org.specs.comp.ollir.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 public class JasminAssistant {
-    private ClassUnit ollirClass;
-    private StringBuilder code;
+    private final ClassUnit ollirClass;
+    private final StringBuilder code;
     private int lthBranch;
 
     public JasminAssistant(ClassUnit ollirClass) {
@@ -24,12 +22,6 @@ public class JasminAssistant {
     }
 
     private void generateClass() {
-//            System.out.println("** Name of the package: " + this.classPackage);
-//            System.out.println("** Name of the class: " + this.className);
-//            System.out.println("\tAccess modifier: " + this.classAccessModifier);
-//            System.out.println("\tStatic class: " + this.staticClass);
-//            System.out.println("\tFinal class: " + this.finalClass);
-
         code.append(".class public ").append(ollirClass.getClassName()).append("\n");
         code.append(".super java/lang/Object").append("\n");
 
@@ -78,9 +70,6 @@ public class JasminAssistant {
 
         for(int i = 0; i < method.getParams().size(); ++i) {
             Element param = method.getParam(i);
-//            if(i > 0) {
-//                code.append(", ");
-//            }
             code.append(convertType(param.getType()));
         }
 
@@ -166,11 +155,13 @@ public class JasminAssistant {
         Operand leftOp = (Operand) assignInstruction.getDest();
 
         if(assignInstruction.getRhs().getInstType() == InstructionType.CALL
-            && OllirAccesser.getCallInvocation((CallInstruction)(assignInstruction.getRhs())) == CallType.NEW) {
-            CallInstruction callInstruction = (CallInstruction) (assignInstruction.getRhs());
-            if(callInstruction.getReturnType().getTypeOfElement() == ElementType.ARRAYREF) {
-
-            } else {
+            && ((CallInstruction)(assignInstruction.getRhs())).getInvocationType() == CallType.NEW) {  //Assign with 'new' operation
+            CallInstruction callInstruction = (CallInstruction) (assignInstruction.getRhs()); //right side of the assignment
+            if(callInstruction.getReturnType().getTypeOfElement() == ElementType.ARRAYREF) { //new array
+                instCode.append(getElement(method, callInstruction.getListOfOperands().get(0)));
+                instCode.append("\nnewarray int\n");
+                instCode.append(createStoreInst(ElementType.ARRAYREF, getVirtualReg(method, leftOp))).append("\n");
+            } else { //new class object
                 instCode.append("new ").append(((ClassType) callInstruction.getReturnType()).getName()).append("\n");
                 instCode.append("dup").append("\n");
             }
@@ -199,11 +190,9 @@ public class JasminAssistant {
 
     private String generateCall(Method method, CallInstruction callInstruction) {
         StringBuilder callCode = new StringBuilder();
-        switch(OllirAccesser.getCallInvocation(callInstruction)) {
+        switch(callInstruction.getInvocationType()) {
             case invokevirtual:
                 callCode.append(this.generateInvVirtual(method, callInstruction));
-                break;
-            case invokeinterface:
                 break;
             case invokespecial: //does not work for class constructor, only for NEW OBJREF operations!!
                 callCode.append(this.generateInvSpecial(method, callInstruction));
@@ -211,10 +200,9 @@ public class JasminAssistant {
             case invokestatic:
                 callCode.append(this.generateInvStatic(method, callInstruction));
                 break;
+            case invokeinterface:
             case NEW:
-                break;
             case arraylength:
-                break;
             case ldc:
                 break;
             default:
@@ -224,7 +212,7 @@ public class JasminAssistant {
     }
 
     private String generateInvStatic(Method method, CallInstruction callInstruction) {
-        StringBuilder instCode = new StringBuilder("");
+        StringBuilder instCode = new StringBuilder();
         Operand firstArg = (Operand) callInstruction.getFirstArg();
         LiteralElement methodElement = (LiteralElement) callInstruction.getSecondArg();
 
@@ -244,7 +232,7 @@ public class JasminAssistant {
     }
 
     private String generateInvSpecial(Method method, CallInstruction callInstruction) {
-        StringBuilder instCode = new StringBuilder("");
+        StringBuilder instCode = new StringBuilder();
 
         StringBuilder params = new StringBuilder();
         for(Element param : callInstruction.getListOfOperands()) {
@@ -264,7 +252,7 @@ public class JasminAssistant {
     }
 
     private String generateInvVirtual(Method method, CallInstruction callInstruction) {
-        StringBuilder instCode = new StringBuilder("");
+        StringBuilder instCode = new StringBuilder();
         Operand firstArg = (Operand) callInstruction.getFirstArg();
         LiteralElement methodElement = (LiteralElement) callInstruction.getSecondArg();
 
@@ -313,8 +301,17 @@ public class JasminAssistant {
         }
 
         if(opType == OperationType.LTH) {
-            instCode.append("if_icmpge ").append(lthBranch++).append("\niconst_1\ngoto ").append(lthBranch++)
-                    .append("\n").append(lthBranch-2).append(": iconst_0\n").append(lthBranch-1).append(": ");
+            /*
+            if arg1 >= arg2 goto 0
+            -> const true
+            goto 1
+            0: -> const false
+            1: --continue---
+            */
+            instCode.append("if_icmpge ").append(lthBranch++)
+                    .append("\niconst_1\ngoto ").append(lthBranch++)
+                    .append("\n").append(lthBranch-2).append(": iconst_0\n")
+                    .append(lthBranch-1).append(": ");
 
             return instCode.toString();
         }
@@ -322,24 +319,12 @@ public class JasminAssistant {
         instCode.append(convertTypeToInst(operands.get(0).getType().getTypeOfElement()));
         String opStr = "";
         switch(instruction.getUnaryOperation().getOpType()) {
-            case ADD -> {
-                opStr = "add";
-            }
-            case SUB -> {
-                opStr = "sub";
-            }
-            case MUL -> {
-                opStr = "mul";
-            }
-            case DIV -> {
-                opStr = "div";
-            }
-            case ANDB -> {
-                opStr = "and";
-            }
-            case NOTB -> {
-                opStr = "neg";
-            }
+            case ADD -> opStr = "add";
+            case SUB -> opStr = "sub";
+            case MUL -> opStr = "mul";
+            case DIV -> opStr = "div";
+            case ANDB -> opStr = "and";
+            case NOTB -> opStr = "neg";
         }
         instCode.append(opStr).append("\n");
         return instCode.toString();
