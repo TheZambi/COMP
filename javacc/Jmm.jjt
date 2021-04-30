@@ -259,7 +259,7 @@ void MethodCall() #Method : {Token t;}
 
 }
 
-void ArgumentExpressionList() #Args : {}
+void ArgumentExpressionList() #void : {}
 {
 	Expression() ( "," Expression() )*
 }

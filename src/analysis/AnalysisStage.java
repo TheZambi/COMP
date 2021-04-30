@@ -1,6 +1,7 @@
-import analysis.MySymbolTable;
+package analysis;
+
+import ast.MySymbolTable;
 import analysis.visitors.InitedVarsVisitor;
-import analysis.visitors.PrintVisitor;
 import analysis.visitors.TypeVerificationVisitor;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.JmmParserResult;
@@ -9,7 +10,6 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.report.Report;
 import analysis.visitors.SymbolTableVisitor;
 
-import java.util.HashSet;
 import java.util.List;
 
 public class AnalysisStage implements JmmAnalysis {

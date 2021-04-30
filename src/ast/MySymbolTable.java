@@ -1,5 +1,6 @@
-package analysis;
+package ast;
 
+import ast.Method;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.SymbolTable;
 import pt.up.fe.comp.jmm.analysis.table.Type;
@@ -76,13 +77,16 @@ public class MySymbolTable implements SymbolTable {
     }
 
     public Method getMethod(String name) {
-        return this.methods.get(name);
+        return name == null ? null : this.methods.get(name);
     }
 
     private String generateParamsString(List<Type> parameters) {
         StringBuilder mapName = new StringBuilder();
         boolean first = true;
         for (Type t: parameters) {
+            if (t == null)
+                throw new RuntimeException("Received unexpected null Type");
+
             if (!first) mapName.append("-");
             else first = false;
 
@@ -99,13 +103,6 @@ public class MySymbolTable implements SymbolTable {
         if (overloads == null)
             return null;
         return overloads.get(generateParamsString(parameters));
-    }
-
-    public String getUniqueNameFromSymbols(String name, List<Symbol> parameters) {
-        List<Type> types = new ArrayList<>();
-        for (Symbol s: parameters)
-            types.add(s.getType());
-        return getUniqueName(name, types);
     }
 
     @Override
@@ -135,19 +132,19 @@ public class MySymbolTable implements SymbolTable {
 
     @Override
     public Type getReturnType(String methodName) {
-        Method m = methods.get(methodName);
+        Method m = getMethod(methodName);
         return m == null ? null : m.getReturnType();
     }
 
     @Override
     public List<Symbol> getParameters(String methodName) {
-        Method m = methods.get(methodName);
+        Method m = getMethod(methodName);
         return m == null ? null : m.getParameters();
     }
 
     @Override
     public List<Symbol> getLocalVariables(String methodName) {
-        Method m = methods.get(methodName);
+        Method m = getMethod(methodName);
         return m == null ? null : m.getLocalVariables();
     }
 

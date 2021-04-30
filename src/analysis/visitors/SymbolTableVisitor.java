@@ -1,9 +1,9 @@
 package analysis.visitors;
 
-import analysis.AstUtils;
-import analysis.MySymbolTable;
+import ast.AstUtils;
+import ast.MySymbolTable;
 import pt.up.fe.comp.jmm.JmmNode;
-import analysis.Method;
+import ast.Method;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
 import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.report.Report;

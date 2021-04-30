@@ -1,4 +1,5 @@
-import pt.up.fe.comp.jmm.ollir.OllirResult;
+import analysis.AnalysisStage;
+import generation.ollir.OptimizationStage;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
@@ -24,8 +25,8 @@ public class Main {
                 return;
             }
 
-            var jasminResult = new BackendStage().toJasmin(ollirResult);
-            jasminResult.run();
+//            var jasminResult = new generation.jasmin.BackendStage().toJasmin(ollirResult);
+//            jasminResult.run();
         }
         catch (Exception e) {
             e.printStackTrace();
