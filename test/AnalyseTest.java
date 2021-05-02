@@ -133,11 +133,6 @@ public class AnalyseTest {
     }
 
     @Test
-    public void failVarNotInit() {
-        testAnalyseFail("fixtures/public/fail/semantic/varNotInit.jmm");
-    }
-
-    @Test
     public void failExtraMissType() {
         testAnalyseFail("fixtures/public/fail/semantic/extra/miss_type.jmm");
     }

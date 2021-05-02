@@ -28,7 +28,7 @@ import java.util.List;
 
 public class BackendTest {
 
-    private void testBackend(String filename) {
+    private void testBackend(String filename, String desiredOutput) {
         System.out.println("TEST " + filename);
 
         JasminResult jasminResult = TestUtils.backend(SpecsIo.getResource(filename));
@@ -38,7 +38,7 @@ public class BackendTest {
         TestUtils.noErrors(jasminResult.getReports());
 
         var output = jasminResult.run();
-        assertEquals("Hello, World!", output.trim());
+        assertEquals(desiredOutput, output.trim());
     }
 
     private static void printReports(List<Report> reports) {
@@ -59,10 +59,10 @@ public class BackendTest {
 //        testBackend("fixtures/public/FindMaximum.jmm");
 //    }
 
-//    @Test
-//    public void testHelloWorld() {
-//        testBackend("fixtures/public/HelloWorld.jmm");
-//    }
+    @Test
+    public void testHelloWorld() {
+        testBackend("fixtures/public/HelloWorld.jmm", "Hello, World!");
+    }
 
 //    @Test
 //    public void testLazysort() {
@@ -86,7 +86,7 @@ public class BackendTest {
 
     @Test
     public void testSimple() {
-        testBackend("fixtures/public/Simple.jmm");
+        testBackend("fixtures/public/Simple.jmm", "30");
     }
 
 //    @Test
