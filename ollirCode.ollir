@@ -1,0 +1,28 @@
+Simple {
+
+	.construct Simple().V {
+		invokespecial(this, "<init>").V;
+	}
+
+	.method public static main(args.array.String).V  {
+		
+		c.bool :=.bool 1.bool;
+		
+		dd.bool :=.bool 0.bool;
+		
+		c.bool :=.bool c.bool !.bool c.bool;
+		
+		if(c.bool &&.bool dd.bool) goto Then0;
+			b.i32 :=.i32 3.i32;
+			goto Endif0;
+		Then0:
+			a.i32 :=.i32 1.i32;
+			b.i32 :=.i32 2.i32;
+		Endif0:
+		
+		a.i32 :=.i32 1.i32;
+
+		ret.V;
+	}
+
+}

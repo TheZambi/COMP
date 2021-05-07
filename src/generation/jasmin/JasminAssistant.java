@@ -4,6 +4,7 @@ import org.specs.comp.ollir.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class JasminAssistant {
     private final ClassUnit ollirClass;
@@ -100,6 +101,13 @@ public class JasminAssistant {
     private String generateInstruction(Method method, Instruction instruction) {
         StringBuilder instCode = new StringBuilder();
 
+        // Find if instruction has labels
+        for(Map.Entry<String, Instruction> entry : method.getLabels().entrySet()) {
+            if(entry.getValue().equals(instruction)) {
+                instCode.append(processLabelName(entry.getKey())).append(":\n");
+            }
+        }
+
         switch(instruction.getInstType()) {
             case ASSIGN -> {
                 AssignInstruction assignInstruction = (AssignInstruction) instruction;
@@ -110,10 +118,12 @@ public class JasminAssistant {
                 instCode.append(this.generateCall(method, callInstruction));
             }
             case GOTO -> {
-
+                GotoInstruction gotoInstruction = (GotoInstruction) instruction;
+                instCode.append(this.generateGoto(method, gotoInstruction));
             }
             case BRANCH -> {
-
+                CondBranchInstruction branchInstruction = (CondBranchInstruction) instruction;
+                instCode.append(this.generateBranch(method, branchInstruction));
             }
             case RETURN -> {
                 ReturnInstruction returnInstruction = (ReturnInstruction) instruction;
@@ -314,6 +324,20 @@ public class JasminAssistant {
                     .append(lthBranch-1).append(": ");
 
             return instCode.toString();
+        } else if(opType == OperationType.NOTB) {
+            /*
+            if a != false goto 0
+            -> const true
+            goto 1
+            0: -> const false
+            1: --continue--
+            */
+            instCode.append("ifne ").append(lthBranch++)
+                    .append("\niconst_1\ngoto ").append(lthBranch++)
+                    .append("\n").append(lthBranch-2).append(": iconst_0\n")
+                    .append(lthBranch-1).append(": ");
+
+            return instCode.toString();
         }
 
         instCode.append(convertTypeToInst(operands.get(0).getType().getTypeOfElement()));
@@ -324,10 +348,66 @@ public class JasminAssistant {
             case MUL -> opStr = "mul";
             case DIV -> opStr = "div";
             case ANDB -> opStr = "and";
-            case NOTB -> opStr = "neg";
+//            case NOTB -> opStr = "neg";
         }
         instCode.append(opStr).append("\n");
         return instCode.toString();
+    }
+
+    private String generateBranch(Method method, CondBranchInstruction instruction) {
+        StringBuilder instCode = new StringBuilder();
+
+        instCode.append(getElement(method, instruction.getLeftOperand()));
+
+        OperationType operationType = instruction.getCondOperation().getOpType();
+
+        //'not' operation only needs one of the operands. 'and' operation will only check the left first and then right
+        if(operationType != OperationType.NOTB && operationType != OperationType.AND) {
+            instCode.append(getElement(method, instruction.getRightOperand()));
+        }
+
+        switch(operationType) {
+            case AND -> {
+                instCode.append("ifeq");
+            }
+//            case OR -> {
+//            }
+            case LTH -> {
+                instCode.append("ifeq");
+            }
+            case GTH -> {
+                instCode.append("ifeq");
+            }
+            case EQ -> {
+            }
+            case NEQ -> {
+            }
+            case LTE -> {
+            }
+            case GTE -> {
+            }
+            case NOTB -> {
+            }
+            case NOT -> {
+            }
+        }
+        instCode.append(" ").append(processLabelName(instruction.getLabel()));
+
+        return instCode.toString();
+    }
+
+    private String generateGoto(Method method, GotoInstruction instruction) {
+        StringBuilder instCode = new StringBuilder();
+
+        return instCode.toString();
+    }
+
+    /*Making sure labels have not the same name as Jasmin generated labels (not and lth)*/
+    static String processLabelName(String labelName) {
+        labelName.replaceAll("_", "__");
+        if(labelName.matches("^-?\\d+$")) //label name is integer (can be the same name as a generated label, so we add a character)
+            labelName += "_";
+        return labelName;
     }
 
     private String getElement(Method method, Element operand) {
