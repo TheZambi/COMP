@@ -1,3 +1,4 @@
+import io;
 Simple {
 
 	.construct Simple().V {
@@ -6,23 +7,23 @@ Simple {
 
 	.method public static main(args.array.String).V  {
 		
-		a.i32 :=.i32 2.i32;
+		a.i32 :=.i32 1.i32;
 		
-		b.i32 :=.i32 3.i32;
+		b.i32 :=.i32 2.i32;
 		
 		c.bool :=.bool 1.bool;
 		
-		dd.bool :=.bool 0.bool;
+		dd.bool :=.bool 1.bool;
 		
-		c.bool :=.bool c.bool !.bool c.bool;
-		
-		if(dd.bool &&.bool 1.bool) goto Else0;
+		if(b.i32 <.bool a.i32) goto Else0;
 			a.i32 :=.i32 1.i32;
 			b.i32 :=.i32 2.i32;
 			goto Endif0;
 		Else0:
-			b.i32 :=.i32 3.i32;
+			a.i32 :=.i32 120.i32;
 		Endif0:
+		
+		invokestatic(io, "println", a.i32).V;
 		
 		a.i32 :=.i32 1.i32;
 

@@ -750,24 +750,22 @@ public class OllirVisitor {
 
         switch (expression.getType()) {
             case UN_OP_NEG:
-                String[] splitNeg = expression.getValue().split("!.bool");
-                if(splitNeg.length >= 2) {
-                    value.append(splitNeg[0]).append("&&.bool 1.bool");
+                if(expression.getValue().split("!").length >= 2) {
+                    value.append(expression.getValue());
                     break;
                 }
             case VALUE:
-                value.append(expression.getValue()).append(" !.bool ").append(expression.getValue());
+                value.append(expression.getValue()).append(" &&.bool 1.bool");
                 break;
             case METHODCALL:
                 String auxVar = createAux(expression.getValue(), expression.getVarType(), OllirAssistantType.METHODCALL, auxCode);
-                value.append(auxVar).append(" !.bool ").append(auxVar);
+                value.append(auxVar).append(" &&.bool 1.bool");
                 break;
             default:
-                String expressionValue = expression.getValue().replaceAll("&&.bool", "||.bool");
-                expressionValue = expressionValue.replaceAll("<.bool", ">=.bool");
-                value.append(expressionValue);
+                value.append(expression.getValue());
                 break;
         }
+
 
         value.append(") goto Else").append(ifCounter).append(";\n");
         value.append(thenStatement.getValue());

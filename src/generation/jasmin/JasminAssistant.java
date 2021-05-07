@@ -302,7 +302,7 @@ public class JasminAssistant {
         operands.add(instruction.getRightOperand());
         StringBuilder instCode = new StringBuilder();
 
-        if(opType != OperationType.NOTB) {
+        if(opType != OperationType.NOTB && opType != OperationType.ANDB) {
             for (Element operand : operands) {
                 instCode.append(getElement(method, operand));
             }
@@ -338,6 +338,15 @@ public class JasminAssistant {
                     .append(lthBranch-1).append(": ");
 
             return instCode.toString();
+        } else if(opType == OperationType.ANDB) {
+            instCode.append("ifeq ").append(lthBranch++).append("\n")
+                    .append(getElement(method, operands.get(1)))
+                    .append("\nifeq ").append(lthBranch)
+                    .append("\niconst_1\ngoto ").append(lthBranch++)
+                    .append("\n").append(lthBranch-2).append(": iconst_0\n")
+                    .append(lthBranch-1).append(": ");
+
+            return instCode.toString();
         }
 
         instCode.append(convertTypeToInst(operands.get(0).getType().getTypeOfElement()));
@@ -347,7 +356,7 @@ public class JasminAssistant {
             case SUB -> opStr = "sub";
             case MUL -> opStr = "mul";
             case DIV -> opStr = "div";
-            case ANDB -> opStr = "and";
+//            case ANDB -> opStr = "and";
 //            case NOTB -> opStr = "neg";
         }
         instCode.append(opStr).append("\n");
@@ -359,19 +368,35 @@ public class JasminAssistant {
 
         instCode.append(getElement(method, instruction.getLeftOperand()));
 
+        String firstLabel = processLabelName(instruction.getLabel());
+//        String secondLabel = "";
+
+//        //check next goto instruction to get the other label
+//        for(int i = method.getInstructions().indexOf(instruction) + 1; i < method.getInstructions().size(); ++i) {
+//            Instruction auxInstruction = method.getInstructions().get(i);
+//            if(auxInstruction.getInstType() == InstructionType.GOTO) {
+//                secondLabel = processLabelName(((GotoInstruction)auxInstruction).getLabel());
+//                break;
+//            }
+//        }
+
         OperationType operationType = instruction.getCondOperation().getOpType();
 
         //'not' operation only needs one of the operands. 'and' operation will only check the left first and then right
-        if(operationType != OperationType.NOTB && operationType != OperationType.AND) {
+        if(operationType != OperationType.NOTB && operationType != OperationType.ANDB && operationType != OperationType.OR) {
             instCode.append(getElement(method, instruction.getRightOperand()));
         }
 
         switch(operationType) {
-            case AND -> {
+            case ANDB -> {
+                instCode.append("ifeq ").append(firstLabel).append("\n");
+                instCode.append(getElement(method, instruction.getRightOperand()));
+                instCode.append("ifeq ").append(firstLabel).append("\n");
             }
-//            case OR -> {
-//            }
+            case OR -> {
+            }
             case LTH -> {
+                instCode.append("if_icmpge ").append(firstLabel).append("\n");
             }
             case GTH -> {
             }
@@ -384,19 +409,18 @@ public class JasminAssistant {
             case GTE -> {
             }
             case NOTB -> {
+                instCode.append("ifne ").append(firstLabel).append("\n");
             }
             case NOT -> {
             }
         }
-        instCode.append(" ").append(processLabelName(instruction.getLabel()));
+//        instCode.append(" ").append(processLabelName(instruction.getLabel()));
 
         return instCode.toString();
     }
 
     private String generateGoto(Method method, GotoInstruction instruction) {
-        StringBuilder instCode = new StringBuilder();
-
-        return instCode.toString();
+        return "goto " + instruction.getLabel() + "\n";
     }
 
     /*Making sure labels have not the same name as Jasmin generated labels (not and lth)*/

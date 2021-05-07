@@ -8,10 +8,13 @@ class A {
         boolean c;
         boolean d;
         c = true;
-        d = !c;
-        if(c || d) {
+        d = false;
+        d = c && d;
+        if(a < b) {
             a = 1;
             b = 2;
+        } else {
+            a = 3;
         }
     }
 }
