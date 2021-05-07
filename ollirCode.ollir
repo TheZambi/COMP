@@ -6,18 +6,22 @@ Simple {
 
 	.method public static main(args.array.String).V  {
 		
+		a.i32 :=.i32 2.i32;
+		
+		b.i32 :=.i32 3.i32;
+		
 		c.bool :=.bool 1.bool;
 		
 		dd.bool :=.bool 0.bool;
 		
 		c.bool :=.bool c.bool !.bool c.bool;
 		
-		if(c.bool &&.bool dd.bool) goto Then0;
-			b.i32 :=.i32 3.i32;
-			goto Endif0;
-		Then0:
+		if(dd.bool &&.bool 1.bool) goto Else0;
 			a.i32 :=.i32 1.i32;
 			b.i32 :=.i32 2.i32;
+			goto Endif0;
+		Else0:
+			b.i32 :=.i32 3.i32;
 		Endif0:
 		
 		a.i32 :=.i32 1.i32;

@@ -750,27 +750,30 @@ public class OllirVisitor {
 
         switch (expression.getType()) {
             case UN_OP_NEG:
-                if(expression.getValue().split("!").length >= 2) {
-                    value.append(expression.getValue());
+                String[] splitNeg = expression.getValue().split("!.bool");
+                if(splitNeg.length >= 2) {
+                    value.append(splitNeg[0]).append("&&.bool 1.bool");
                     break;
                 }
             case VALUE:
-                value.append(expression.getValue()).append(" &&.bool 1.bool");
+                value.append(expression.getValue()).append(" !.bool ").append(expression.getValue());
                 break;
             case METHODCALL:
                 String auxVar = createAux(expression.getValue(), expression.getVarType(), OllirAssistantType.METHODCALL, auxCode);
-                value.append(auxVar).append(" &&.bool 1.bool");
+                value.append(auxVar).append(" !.bool ").append(auxVar);
                 break;
             default:
-                value.append(expression.getValue());
+                String expressionValue = expression.getValue().replaceAll("&&.bool", "||.bool");
+                expressionValue = expressionValue.replaceAll("<.bool", ">=.bool");
+                value.append(expressionValue);
                 break;
         }
 
-        value.append(") goto Then").append(ifCounter).append(";\n");
-        value.append(elseStatement.getValue());
+        value.append(") goto Else").append(ifCounter).append(";\n");
+        value.append(thenStatement.getValue());
         value.append("\tgoto Endif").append(ifCounter).append(";\n");
 
-        value.append("Then").append(ifCounter).append(":\n").append(thenStatement.getValue());
+        value.append("Else").append(ifCounter).append(":\n").append(elseStatement.getValue());
         value.append("Endif").append(ifCounter).append(":");
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.SELECTION_STATEMENT, value.toString(), auxCode.toString(), null);

@@ -368,15 +368,12 @@ public class JasminAssistant {
 
         switch(operationType) {
             case AND -> {
-                instCode.append("ifeq");
             }
 //            case OR -> {
 //            }
             case LTH -> {
-                instCode.append("ifeq");
             }
             case GTH -> {
-                instCode.append("ifeq");
             }
             case EQ -> {
             }

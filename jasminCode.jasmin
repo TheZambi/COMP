@@ -10,28 +10,32 @@
 .method public static main([Ljava/lang/String;)V
 	.limit stack 99
 	.limit locals 99
-	iconst_1
+	iconst_2
 	istore_1
-	iconst_0
+	iconst_3
 	istore_2
-	iload_1
+	iconst_1
+	istore_3
+	iconst_0
+	istore 4
+	iload_3
 	ifne 0
 	iconst_1
 	goto 1
 	0: iconst_0
-	1: istore_1
-	iload_1
-	iload_2
-	 Then0
-	iconst_3
-	istore_3
-	Then0:
+	1: istore_3
+	iload 4
 	iconst_1
-	istore 4
+	 Else0
+	iconst_1
+	istore_1
 	iconst_2
-	istore_3
+	istore_2
+	Else0:
+	iconst_3
+	istore_2
 	Endif0:
 	iconst_1
-	istore 4
+	istore_1
 	return
 .end method
