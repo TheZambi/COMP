@@ -161,8 +161,8 @@ public class JasminAssistant {
 
     private String generateAssign(Method method, AssignInstruction assignInstruction) {
         StringBuilder instCode = new StringBuilder();
-
         Operand leftOp = (Operand) assignInstruction.getDest();
+
 
         if(assignInstruction.getRhs().getInstType() == InstructionType.CALL
             && ((CallInstruction)(assignInstruction.getRhs())).getInvocationType() == CallType.NEW) {  //Assign with 'new' operation
@@ -170,15 +170,22 @@ public class JasminAssistant {
             if(callInstruction.getReturnType().getTypeOfElement() == ElementType.ARRAYREF) { //new array
                 instCode.append(getElement(method, callInstruction.getListOfOperands().get(0)));
                 instCode.append("\nnewarray int\n");
-                instCode.append(createStoreInst(ElementType.ARRAYREF, getVirtualReg(method, leftOp))).append("\n");
+                instCode.append(createStoreInst(ElementType.ARRAYREF, false, getVirtualReg(method, leftOp))).append("\n");
             } else { //new class object
                 instCode.append("new ").append(((ClassType) callInstruction.getReturnType()).getName()).append("\n");
                 instCode.append("dup").append("\n");
             }
         } else {
-            instCode.append(this.generateInstruction(method, assignInstruction.getRhs()));
-            instCode.append(createStoreInst(leftOp.getType().getTypeOfElement(),getVirtualReg(method, leftOp))).append("\n");
+            boolean isArrayAssign = false;
 
+            // Array element assignment
+            if(leftOp instanceof ArrayOperand) {
+                isArrayAssign = true;
+                ArrayOperand leftOpAux = (ArrayOperand)leftOp;
+                instCode.append(getElementArrayAssign(method, assignInstruction.getDest()));
+            }
+            instCode.append(this.generateInstruction(method, assignInstruction.getRhs()));
+            instCode.append(createStoreInst(leftOp.getType().getTypeOfElement(), isArrayAssign, getVirtualReg(method, leftOp))).append("\n");
         }
         return instCode.toString();
     }
@@ -432,6 +439,8 @@ public class JasminAssistant {
     }
 
     private String getElement(Method method, Element operand) {
+        boolean isArray = operand instanceof ArrayOperand;
+
         StringBuilder instCode = new StringBuilder();
         ElementType elementType = operand.getType().getTypeOfElement();
         if(operand.isLiteral()) { //if literal, create a const instruction
@@ -439,10 +448,28 @@ public class JasminAssistant {
             instCode.append(createConstInst(value));
         } else { //if its a variable, load with its virtual reg
             if(operand.getType().getTypeOfElement() != ElementType.CLASS) {
-                instCode.append(createLoadInst(elementType, getVirtualReg(method, (Operand) operand)));
+
+                if(isArray) {
+                    instCode.append(createLoadInst(elementType, isArray, getVirtualReg(method, (Operand) operand))).append("\n");
+                    instCode.append(getElement(method, ((ArrayOperand) operand).getIndexOperands().get(0))).append("\n");
+                    instCode.append(convertTypeToInst(elementType)).append("aload\n");
+                } else {
+                    instCode.append(createLoadInst(elementType, isArray, getVirtualReg(method, (Operand) operand)));
+                }
             }
         }
         instCode.append("\n");
+        return instCode.toString();
+    }
+
+    // to be used in assignments. If it is an array store, assign = true
+    private String getElementArrayAssign(Method method, Element operand) {
+        StringBuilder instCode = new StringBuilder();
+        ElementType elementType = operand.getType().getTypeOfElement();
+
+        instCode.append(createLoadInst(elementType, true, getVirtualReg(method, (Operand) operand))).append("\n");
+        instCode.append(getElement(method, ((ArrayOperand) operand).getIndexOperands().get(0)));
+
         return instCode.toString();
     }
 
@@ -468,27 +495,30 @@ public class JasminAssistant {
         }
     }
 
-    private String createStoreInst(ElementType type, int virtualReg) {
+    private String createStoreInst(ElementType type, boolean isArray, int virtualReg) {
         StringBuilder storeInst = new StringBuilder();
-        storeInst.append(convertTypeToInst(type)).append("store");
+        storeInst.append(convertTypeToInst(type)).append(isArray ? "a" : "").append("store");
 
-        if(virtualReg <= 3) { // istore_1
-            storeInst.append("_");
-        } else storeInst.append(" "); //istore 6
+        if(!isArray) {
+            if (virtualReg <= 3) { // istore_1
+                storeInst.append("_");
+            } else storeInst.append(" "); //istore 6
 
-        storeInst.append(virtualReg);
+            storeInst.append(virtualReg);
+        }
         return storeInst.toString();
     }
 
-    private String createLoadInst(ElementType type, int virtualReg) { //TODO: repeated code - see createStoreInst
+    private String createLoadInst(ElementType type, boolean isArray, int virtualReg) { //TODO: repeated code - see createStoreInst
         StringBuilder storeInst = new StringBuilder();
-        storeInst.append(convertTypeToInst(type)).append("load");
+        storeInst.append(isArray ? "a" : convertTypeToInst(type)).append("load");
 
-        if(virtualReg <= 3) { // iload_1
+        if (virtualReg <= 3) { // iload_1
             storeInst.append("_");
         } else storeInst.append(" "); //iload 6
 
         storeInst.append(virtualReg);
+
         return storeInst.toString();
     }
 

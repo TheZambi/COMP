@@ -12,25 +12,41 @@
 	.limit locals 99
 	iconst_1
 	istore_1
-	iconst_2
+	iconst_3
 	istore_2
+	bipush 6
+	newarray int
+	astore_3
 	iconst_1
-	istore_3
-	iconst_1
-	istore 4
-	Loop0:
-	iload_1
+	istore 5
+	aload_3
+	iload 5
+	iconst_3
+	iastore
 	iconst_5
-	if_icmpge EndLoop0
-	iload_1
+	newarray int
+	astore 6
+	iconst_4
+	istore 7
+	aload 6
+	iload 7
+	bipush 7
+	iastore
+	aload 6
+	iload_2
+	bipush 13
+	iastore
 	iconst_1
-	iadd
-	istore_1
-	goto Loop0
-	EndLoop0:
-	iload_1
+	istore 8
+	aload_3
+	iload 8
+	iaload
+	istore 9
+	aload 6
+	iload 9
+	iaload
+	istore 10
+	iload 10
 	invokestatic io.println(I)V
-	iconst_1
-	istore_1
 	return
 .end method
