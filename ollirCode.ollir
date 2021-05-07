@@ -15,13 +15,11 @@ Simple {
 		
 		dd.bool :=.bool 1.bool;
 		
-		if(b.i32 <.bool a.i32) goto Else0;
-			a.i32 :=.i32 1.i32;
-			b.i32 :=.i32 2.i32;
-			goto Endif0;
-		Else0:
-			a.i32 :=.i32 120.i32;
-		Endif0:
+		Loop0:
+			if (a.i32 <.bool 5.i32) goto EndLoop0;
+			a.i32 :=.i32 a.i32 +.i32 1.i32;
+			goto Loop0;
+		EndLoop0:
 		
 		invokestatic(io, "println", a.i32).V;
 		

@@ -10,11 +10,9 @@ class A {
         c = true;
         d = false;
         d = c && d;
-        if(a < b) {
+        while(a < b) {
             a = 1;
             b = 2;
-        } else {
-            a = 3;
         }
     }
 }

@@ -723,7 +723,7 @@ public class OllirVisitor {
             value.append(childExpression.getValue());
         }
 
-        value.append(") goto Body").append(whileCounter).append(";\n\tgoto EndLoop").append(whileCounter).append(";\nBody").append(whileCounter).append(":\n");
+        value.append(") goto EndLoop").append(whileCounter).append(";\n");
         value.append(compoundStatement.getValue());
         value.append("\tgoto Loop").append(whileCounter).append(";\n").append("EndLoop").append(whileCounter).append(":\n");
 

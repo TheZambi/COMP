@@ -18,18 +18,16 @@
 	istore_3
 	iconst_1
 	istore 4
-	iload_2
+	Loop0:
 	iload_1
-	if_icmpge Else0
+	iconst_5
+	if_icmpge EndLoop0
+	iload_1
 	iconst_1
+	iadd
 	istore_1
-	iconst_2
-	istore_2
-	goto Endif0
-	Else0:
-	bipush 120
-	istore_1
-	Endif0:
+	goto Loop0
+	EndLoop0:
 	iload_1
 	invokestatic io.println(I)V
 	iconst_1
