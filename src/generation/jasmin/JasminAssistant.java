@@ -10,6 +10,7 @@ public class JasminAssistant {
     private final ClassUnit ollirClass;
     private final StringBuilder code;
     private int lthBranch;
+    private String superClass;
 
     public JasminAssistant(ClassUnit ollirClass) {
         this.code = new StringBuilder();
@@ -24,7 +25,16 @@ public class JasminAssistant {
 
     private void generateClass() {
         code.append(".class public ").append(ollirClass.getClassName()).append("\n");
-        code.append(".super java/lang/Object").append("\n");
+        code.append(".super ");
+        if(ollirClass.getSuperClass() == null) {
+            superClass = "java/lang/Object";
+            code.append(superClass);
+        }
+        else {
+            superClass = ollirClass.getSuperClass();
+            code.append(superClass);
+        }
+        code.append("\n");
 
         this.generateFields();
 
@@ -58,7 +68,7 @@ public class JasminAssistant {
         code.append("\n.method ");
         if(method.isConstructMethod()) {
             code.append("public ")
-                    .append("<init>()V\n\taload_0\n\tinvokespecial java/lang/Object/<init>()V\n\treturn\n.end method\n");
+                    .append("<init>()V\n\taload_0\n\tinvokespecial ").append(superClass).append(".<init>()V\n\treturn\n.end method\n");
             return;
         }
         code.append(convertAccessModifier(method.getMethodAccessModifier())).append(" ");

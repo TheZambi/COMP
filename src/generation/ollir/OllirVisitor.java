@@ -150,7 +150,8 @@ public class OllirVisitor {
 
     private OllirAssistant handleClassDeclaration(JmmNode node, List<OllirAssistant> childrenResults) {
         StringBuilder value = new StringBuilder();
-        value.append(symbolTable.getClassName()).append(" {\n");
+        value.append(symbolTable.getClassName()).append(!(symbolTable.getSuper() == null) ? (" extends " + symbolTable.getSuper())  : "")
+                .append(" {\n");
         boolean inMethods = false;
 
         for (OllirAssistant child : childrenResults) {
