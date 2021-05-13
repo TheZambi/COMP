@@ -1,29 +1,278 @@
 import io;
-Simple {
+import MathUtils;
+import BlackJackTest;
+BlackJack {
+	.field private ddeck.array.i32;
 
-	.construct Simple().V {
+	.construct BlackJack().V {
 		invokespecial(this, "<init>").V;
+	}
+
+	.method public shuffledDeck0().i32 {
+		t0.array.i32 :=.array.i32 new(array, 52.i32).array.i32;
+		putfield(this, ddeck.array.i32, t0.array.i32).V;
+		t1.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t2.i32 :=.i32 0.i32;
+		t1[t2.i32].i32 :=.i32 2.i32;
+		t3.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t4.i32 :=.i32 1.i32;
+		t3[t4.i32].i32 :=.i32 2.i32;
+		t5.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t6.i32 :=.i32 2.i32;
+		t5[t6.i32].i32 :=.i32 2.i32;
+		t7.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t8.i32 :=.i32 3.i32;
+		t7[t8.i32].i32 :=.i32 2.i32;
+		t9.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t10.i32 :=.i32 4.i32;
+		t9[t10.i32].i32 :=.i32 3.i32;
+		t11.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t12.i32 :=.i32 5.i32;
+		t11[t12.i32].i32 :=.i32 3.i32;
+		t13.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t14.i32 :=.i32 6.i32;
+		t13[t14.i32].i32 :=.i32 3.i32;
+		t15.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t16.i32 :=.i32 7.i32;
+		t15[t16.i32].i32 :=.i32 3.i32;
+		t17.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t18.i32 :=.i32 8.i32;
+		t17[t18.i32].i32 :=.i32 4.i32;
+		t19.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t20.i32 :=.i32 9.i32;
+		t19[t20.i32].i32 :=.i32 4.i32;
+		t21.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t22.i32 :=.i32 10.i32;
+		t21[t22.i32].i32 :=.i32 4.i32;
+		t23.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t24.i32 :=.i32 11.i32;
+		t23[t24.i32].i32 :=.i32 4.i32;
+		t25.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t26.i32 :=.i32 12.i32;
+		t25[t26.i32].i32 :=.i32 5.i32;
+		t27.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t28.i32 :=.i32 13.i32;
+		t27[t28.i32].i32 :=.i32 5.i32;
+		t29.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t30.i32 :=.i32 14.i32;
+		t29[t30.i32].i32 :=.i32 5.i32;
+		t31.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t32.i32 :=.i32 15.i32;
+		t31[t32.i32].i32 :=.i32 5.i32;
+		t33.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t34.i32 :=.i32 16.i32;
+		t33[t34.i32].i32 :=.i32 6.i32;
+		t35.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t36.i32 :=.i32 17.i32;
+		t35[t36.i32].i32 :=.i32 6.i32;
+		t37.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t38.i32 :=.i32 18.i32;
+		t37[t38.i32].i32 :=.i32 6.i32;
+		t39.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t40.i32 :=.i32 19.i32;
+		t39[t40.i32].i32 :=.i32 6.i32;
+		t41.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t42.i32 :=.i32 20.i32;
+		t41[t42.i32].i32 :=.i32 7.i32;
+		t43.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t44.i32 :=.i32 21.i32;
+		t43[t44.i32].i32 :=.i32 7.i32;
+		t45.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t46.i32 :=.i32 22.i32;
+		t45[t46.i32].i32 :=.i32 7.i32;
+		t47.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t48.i32 :=.i32 23.i32;
+		t47[t48.i32].i32 :=.i32 7.i32;
+		t49.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t50.i32 :=.i32 24.i32;
+		t49[t50.i32].i32 :=.i32 8.i32;
+		t51.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t52.i32 :=.i32 25.i32;
+		t51[t52.i32].i32 :=.i32 8.i32;
+		t53.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t54.i32 :=.i32 26.i32;
+		t53[t54.i32].i32 :=.i32 8.i32;
+		t55.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t56.i32 :=.i32 27.i32;
+		t55[t56.i32].i32 :=.i32 8.i32;
+		t57.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t58.i32 :=.i32 28.i32;
+		t57[t58.i32].i32 :=.i32 9.i32;
+		t59.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t60.i32 :=.i32 29.i32;
+		t59[t60.i32].i32 :=.i32 9.i32;
+		t61.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t62.i32 :=.i32 30.i32;
+		t61[t62.i32].i32 :=.i32 9.i32;
+		t63.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t64.i32 :=.i32 31.i32;
+		t63[t64.i32].i32 :=.i32 9.i32;
+		t65.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t66.i32 :=.i32 32.i32;
+		t65[t66.i32].i32 :=.i32 10.i32;
+		t67.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t68.i32 :=.i32 33.i32;
+		t67[t68.i32].i32 :=.i32 10.i32;
+		t69.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t70.i32 :=.i32 34.i32;
+		t69[t70.i32].i32 :=.i32 10.i32;
+		t71.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t72.i32 :=.i32 35.i32;
+		t71[t72.i32].i32 :=.i32 10.i32;
+		t73.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t74.i32 :=.i32 36.i32;
+		t73[t74.i32].i32 :=.i32 10.i32;
+		t75.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t76.i32 :=.i32 37.i32;
+		t75[t76.i32].i32 :=.i32 10.i32;
+		t77.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t78.i32 :=.i32 38.i32;
+		t77[t78.i32].i32 :=.i32 10.i32;
+		t79.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t80.i32 :=.i32 39.i32;
+		t79[t80.i32].i32 :=.i32 10.i32;
+		t81.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t82.i32 :=.i32 40.i32;
+		t81[t82.i32].i32 :=.i32 10.i32;
+		t83.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t84.i32 :=.i32 41.i32;
+		t83[t84.i32].i32 :=.i32 10.i32;
+		t85.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t86.i32 :=.i32 42.i32;
+		t85[t86.i32].i32 :=.i32 10.i32;
+		t87.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t88.i32 :=.i32 43.i32;
+		t87[t88.i32].i32 :=.i32 10.i32;
+		t89.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t90.i32 :=.i32 44.i32;
+		t89[t90.i32].i32 :=.i32 10.i32;
+		t91.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t92.i32 :=.i32 45.i32;
+		t91[t92.i32].i32 :=.i32 10.i32;
+		t93.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t94.i32 :=.i32 46.i32;
+		t93[t94.i32].i32 :=.i32 10.i32;
+		t95.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t96.i32 :=.i32 47.i32;
+		t95[t96.i32].i32 :=.i32 10.i32;
+		t97.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t98.i32 :=.i32 48.i32;
+		t97[t98.i32].i32 :=.i32 1.i32;
+		t99.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t100.i32 :=.i32 49.i32;
+		t99[t100.i32].i32 :=.i32 1.i32;
+		t101.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t102.i32 :=.i32 50.i32;
+		t101[t102.i32].i32 :=.i32 1.i32;
+		t103.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+		t104.i32 :=.i32 51.i32;
+		t103[t104.i32].i32 :=.i32 1.i32;
+		
+		ret.i32 1.i32;
+	}
+
+	.method public getRandomCard0().i32 {
+		
+		conttinue.bool :=.bool 1.bool;
+		
+		carddValue.i32 :=.i32 0.i32;
+		
+		Loop0:
+			if (conttinue.bool &&.bool 1.bool) goto EndLoop0;
+			randdInddex.i32 :=.i32 invokestatic(MathUtils, "random", 0.i32, 51.i32).i32;
+			t105.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+			carddValue.i32 :=.i32 t105[randdInddex.i32].i32;
+			if(0.i32 <.bool carddValue.i32) goto Else0;
+			conttinue.bool :=.bool 0.bool;
+			t106.array.i32 :=.array.i32 getfield(this, ddeck.array.i32).array.i32;
+			t106[randdInddex.i32].i32 :=.i32 0.i32;
+			goto Endif0;
+		Else0:
+		Endif0:
+			goto Loop0;
+		EndLoop0:
+		
+		ret.i32 carddValue.i32;
+	}
+
+	.method public handValue0(handd.array.i32).i32 {
+		
+		i.i32 :=.i32 0.i32;
+		
+		value.i32 :=.i32 0.i32;
+		
+		Loop1:
+			if (i.i32 <.bool 5.i32) goto EndLoop1;
+			value.i32 :=.i32 value.i32 +.i32 handd[i.i32].i32;
+			i.i32 :=.i32 i.i32 +.i32 1.i32;
+			goto Loop1;
+		EndLoop1:
+		
+		ret.i32 value.i32;
 	}
 
 	.method public static main(args.array.String).V  {
 		
-		i.i32 :=.i32 1.i32;
+		computterHandd.array.i32 :=.array.i32 new(array, 10.i32).array.i32;
 		
-		i1.i32 :=.i32 3.i32;
+		handd.array.i32 :=.array.i32 new(array, 10.i32).array.i32;
 		
-		b.array.i32 :=.array.i32 new(array, 6.i32).array.i32;
-		t0.i32 :=.i32 1.i32;
-		b[t0.i32].i32 :=.i32 3.i32;
+		computterValue.i32 :=.i32 0.i32;
 		
-		a.array.i32 :=.array.i32 new(array, 5.i32).array.i32;
-		t1.i32 :=.i32 4.i32;
-		a[t1.i32].i32 :=.i32 7.i32;
+		play.i32 :=.i32 0.i32;
 		
-		a[i1.i32].i32 :=.i32 13.i32;
-		t2.i32 :=.i32 1.i32;
-		t3.i32 :=.i32 b[t2.i32].i32;
-		t4.i32 :=.i32 a[t3.i32].i32;
-		invokestatic(io, "println", t4.i32).V;
+		myValue.i32 :=.i32 0.i32;
+		
+		bj.BlackJack :=.BlackJack new(BlackJack).BlackJack;
+		invokespecial(bj.BlackJack, "<init>").V;
+		
+		invokevirtual(bj.BlackJack, "shuffledDeck0").i32;
+		t107.i32 :=.i32 0.i32;
+		handd[t107.i32].i32 :=.i32 invokevirtual(bj.BlackJack, "getRandomCard0").i32;
+		t108.i32 :=.i32 1.i32;
+		handd[t108.i32].i32 :=.i32 invokevirtual(bj.BlackJack, "getRandomCard0").i32;
+		
+		inddex.i32 :=.i32 1.i32;
+		
+		invokestatic(BlackJackTest, "printHand", handd.array.i32, 1.i32).V;
+		
+		play.i32 :=.i32 invokestatic(BlackJackTest, "getInput").i32;
+		
+		Loop2:
+			if (play.i32 <.bool 2.i32) goto EndLoop2;
+			inddex.i32 :=.i32 inddex.i32 +.i32 1.i32;
+			handd[inddex.i32].i32 :=.i32 invokevirtual(bj.BlackJack, "getRandomCard0").i32;
+			myValue.i32 :=.i32 invokevirtual(bj.BlackJack, "handValue0", handd.array.i32).i32;
+			if(myValue.i32 <.bool 22.i32) goto Else1;
+			invokestatic(BlackJackTest, "printHand", handd.array.i32, 1.i32).V;
+			play.i32 :=.i32 invokestatic(BlackJackTest, "getInput").i32;
+			goto Endif1;
+		Else1:
+			play.i32 :=.i32 3.i32;
+		Endif1:
+			goto Loop2;
+		EndLoop2:
+		
+		inddex.i32 :=.i32 0.i32;
+		
+		if(myValue.i32 <.bool 22.i32) goto Else2;
+			Loop3:
+			t109.bool :=.bool computterValue.i32 <.bool myValue.i32;
+			t110.bool :=.bool computterValue.i32 <.bool 22.i32;
+			if (t109.bool &&.bool t110.bool) goto EndLoop3;
+			computterHandd[inddex.i32].i32 :=.i32 invokevirtual(bj.BlackJack, "getRandomCard0").i32;
+			computterValue.i32 :=.i32 invokevirtual(bj.BlackJack, "handValue0", computterHandd.array.i32).i32;
+			inddex.i32 :=.i32 inddex.i32 +.i32 1.i32;
+			goto Loop3;
+		EndLoop3:
+		
+			goto Endif2;
+		Else2:
+		Endif2:
+		
+		invokestatic(BlackJackTest, "printHand", computterHandd.array.i32, 2.i32).V;
+		
+		invokestatic(BlackJackTest, "printWinner", myValue.i32, computterValue.i32).V;
 
 		ret.V;
 	}

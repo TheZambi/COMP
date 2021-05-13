@@ -1,0 +1,23 @@
+import io;
+import OverloadingTest;
+
+class ExternalOverloading {
+    public static void main(String[] sssss) {
+        int i;
+        ExternalOverloading ext;
+
+        ext = new ExternalOverloading();
+
+        i = ext.memes(OverloadingTest.retInt(), 2);
+        i = ext.memes(OverloadingTest.retInt(), true);
+        io.println(i);
+    }
+
+    public int memes(int a, int b) {
+        return 3;
+    }
+
+    public int memes(int a, boolean b) {
+        return 4;
+    }
+}
