@@ -384,6 +384,7 @@ public class JasminAssistant {
 
             return instCode.toString();
         } else if(opType == OperationType.NOTB) {
+            currentInstructionLimit--;
             /*
             if a != false goto 0
             -> const true
@@ -428,16 +429,6 @@ public class JasminAssistant {
         instCode.append(getElement(method, instruction.getLeftOperand()));
 
         String firstLabel = processLabelName(instruction.getLabel());
-//        String secondLabel = "";
-
-//        //check next goto instruction to get the other label
-//        for(int i = method.getInstructions().indexOf(instruction) + 1; i < method.getInstructions().size(); ++i) {
-//            Instruction auxInstruction = method.getInstructions().get(i);
-//            if(auxInstruction.getInstType() == InstructionType.GOTO) {
-//                secondLabel = processLabelName(((GotoInstruction)auxInstruction).getLabel());
-//                break;
-//            }
-//        }
 
         OperationType operationType = instruction.getCondOperation().getOpType();
 
