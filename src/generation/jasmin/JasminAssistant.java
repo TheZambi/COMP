@@ -3,6 +3,7 @@ package generation.jasmin;
 import org.specs.comp.ollir.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,11 +12,13 @@ public class JasminAssistant {
     private final StringBuilder code;
     private int lthBranch;
     private String superClass;
+    private HashMap<String, Integer> stackLimits;
 
     public JasminAssistant(ClassUnit ollirClass) {
         this.code = new StringBuilder();
         this.ollirClass = ollirClass;
         this.lthBranch = 0;
+        stackLimits = new HashMap<>();
     }
 
     public JasminAssistant generate(){
@@ -65,6 +68,8 @@ public class JasminAssistant {
 
     private void generateMethod(Method method) {
 
+        stackLimits.put(method.getMethodName(), 0);
+
         code.append("\n.method ");
         if(method.isConstructMethod()) {
             code.append("public ")
@@ -87,25 +92,34 @@ public class JasminAssistant {
         code.append(")").append(convertType(method.getReturnType())).append("\n");
         char prefix = '\t';
 
+        StringBuilder tempCode = new StringBuilder();
         //TODO: change stack and locals limit
-        code.append(prefix).append(".limit stack 99\n");
-        code.append(prefix).append(".limit locals 105\n");
+
+        int locals_size = method.getVarTable().size();
+        if(method.getVarTable().get("this") == null)
+            locals_size++;
+
+
+        tempCode.append(prefix).append(".limit locals ").append(locals_size).append("\n");
 
         for(Instruction instruction : method.getInstructions()) {
             String instructionCode = this.generateInstruction(method, instruction, false);
             String [] lines = instructionCode.split("\n");
             for(String line : lines) {
                 if(line.length() > 0)
-                    code.append("\t").append(line).append("\n");
+                    tempCode.append("\t").append(line).append("\n");
             }
         }
 
         int lastInstIndex = method.getInstructions().size()-1;
         if(lastInstIndex < 0 || method.getInstructions().get(lastInstIndex).getInstType() != InstructionType.RETURN) {
-            code.append("\treturn\n");
+            tempCode.append("\treturn\n");
         }
 
-        code.append(".end method\n");
+        tempCode.append(".end method\n");
+
+        code.append(prefix).append(".limit stack 99").append("\n");
+        code.append(tempCode);
     }
 
     private String generateInstruction(Method method, Instruction instruction, boolean inAssign) {
