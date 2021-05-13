@@ -79,10 +79,10 @@ public class JasminAssistant {
 
         //TODO: change stack and locals limit
         code.append(prefix).append(".limit stack 99\n");
-        code.append(prefix).append(".limit locals 99\n");
+        code.append(prefix).append(".limit locals 105\n");
 
         for(Instruction instruction : method.getInstructions()) {
-            String instructionCode = this.generateInstruction(method, instruction);
+            String instructionCode = this.generateInstruction(method, instruction, false);
             String [] lines = instructionCode.split("\n");
             for(String line : lines) {
                 if(line.length() > 0)
@@ -98,7 +98,7 @@ public class JasminAssistant {
         code.append(".end method\n");
     }
 
-    private String generateInstruction(Method method, Instruction instruction) {
+    private String generateInstruction(Method method, Instruction instruction, boolean inAssign) {
         StringBuilder instCode = new StringBuilder();
 
         // Find if instruction has labels
@@ -116,6 +116,8 @@ public class JasminAssistant {
             case CALL -> {
                 CallInstruction callInstruction = (CallInstruction) instruction;
                 instCode.append(this.generateCall(method, callInstruction));
+                if(!inAssign && !callInstruction.getReturnType().getTypeOfElement().equals(ElementType.VOID))
+                    instCode.append("pop\n");
             }
             case GOTO -> {
                 GotoInstruction gotoInstruction = (GotoInstruction) instruction;
@@ -184,7 +186,7 @@ public class JasminAssistant {
                 ArrayOperand leftOpAux = (ArrayOperand)leftOp;
                 instCode.append(getElementArrayAssign(method, assignInstruction.getDest()));
             }
-            instCode.append(this.generateInstruction(method, assignInstruction.getRhs()));
+            instCode.append(this.generateInstruction(method, assignInstruction.getRhs(), true));
             instCode.append(createStoreInst(leftOp.getType().getTypeOfElement(), isArrayAssign, getVirtualReg(method, leftOp))).append("\n");
         }
         return instCode.toString();
@@ -194,7 +196,7 @@ public class JasminAssistant {
 
         return getElement(method, instruction.getFirstOperand()) +
                 "getfield " + ollirClass.getClassName() + '/' + ((Operand) instruction.getSecondOperand()).getName() +
-                " " + convertType(instruction.getSecondOperand().getType().getTypeOfElement()) + "\n";
+                " " + convertType(instruction.getSecondOperand().getType()) + "\n";
     }
 
     private String generatePutfield(Method method, PutFieldInstruction instruction) {
@@ -202,7 +204,7 @@ public class JasminAssistant {
         return getElement(method, instruction.getFirstOperand()) +
                 getElement(method, instruction.getThirdOperand()) +
                 "putfield " + ollirClass.getClassName() + '/' + ((Operand) instruction.getSecondOperand()).getName() +
-                " " + convertType(instruction.getSecondOperand().getType().getTypeOfElement()) + "\n";
+                " " + convertType(instruction.getSecondOperand().getType()) + "\n";
     }
 
     private String generateCall(Method method, CallInstruction callInstruction) {
@@ -217,9 +219,13 @@ public class JasminAssistant {
             case invokestatic:
                 callCode.append(this.generateInvStatic(method, callInstruction));
                 break;
+            case arraylength:
+                callCode.append(createLoadInst(callInstruction.getFirstArg().getType().getTypeOfElement(),
+                        true, getVirtualReg(method, (Operand)callInstruction.getFirstArg())));
+                callCode.append("\narraylength\n");
+                break;
             case invokeinterface:
             case NEW:
-            case arraylength:
             case ldc:
                 break;
             default:
@@ -346,9 +352,9 @@ public class JasminAssistant {
 
             return instCode.toString();
         } else if(opType == OperationType.ANDB) {
-            instCode.append("ifeq ").append(lthBranch++).append("\n")
+            instCode.append("ifeq ").append(lthBranch).append("\n")
                     .append(getElement(method, operands.get(1)))
-                    .append("\nifeq ").append(lthBranch)
+                    .append("\nifeq ").append(lthBranch++)
                     .append("\niconst_1\ngoto ").append(lthBranch++)
                     .append("\n").append(lthBranch-2).append(": iconst_0\n")
                     .append(lthBranch-1).append(": ");
@@ -405,20 +411,8 @@ public class JasminAssistant {
             case LTH -> {
                 instCode.append("if_icmpge ").append(firstLabel).append("\n");
             }
-            case GTH -> {
-            }
-            case EQ -> {
-            }
-            case NEQ -> {
-            }
-            case LTE -> {
-            }
-            case GTE -> {
-            }
             case NOTB -> {
                 instCode.append("ifne ").append(firstLabel).append("\n");
-            }
-            case NOT -> {
             }
         }
 //        instCode.append(" ").append(processLabelName(instruction.getLabel()));
@@ -571,9 +565,6 @@ public class JasminAssistant {
             }
             case BOOLEAN -> {
                 return "Z";
-            }
-            case THIS -> {
-                return "";
             }
             case STRING -> {
                 return "Ljava/lang/String;";

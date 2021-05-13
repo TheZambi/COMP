@@ -286,7 +286,7 @@ public class OllirVisitor {
 
         switch (childIndex.getType()) {
             case FIELD:
-                String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                String auxVarF = createGetFieldAux(childIndex, auxCode);
                 value.append(auxVarF);
                 break;
             case VALUE:
@@ -534,7 +534,7 @@ public class OllirVisitor {
                     break;
 
                 case FIELD:
-                    String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                    String auxVarF = createGetFieldAux(childResult, auxCode);
                     values.add(auxVarF);
                     break;
                 case INDEXING:
@@ -774,10 +774,11 @@ public class OllirVisitor {
 
 
         value.append(") goto Else").append(ifCounter).append(";\n");
+        value.append(thenStatement.getAuxCode());
         value.append(thenStatement.getValue());
         value.append("\tgoto Endif").append(ifCounter).append(";\n");
 
-        value.append("Else").append(ifCounter).append(":\n").append(elseStatement.getValue());
+        value.append("Else").append(ifCounter).append(":\n").append(elseStatement.getAuxCode()).append(elseStatement.getValue());
         value.append("Endif").append(ifCounter).append(":");
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.SELECTION_STATEMENT, value.toString(), auxCode.toString(), null);
