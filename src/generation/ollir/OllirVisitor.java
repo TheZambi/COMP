@@ -22,8 +22,6 @@ public class OllirVisitor {
 
     private final MySymbolTable symbolTable;
 
-    private final MethodGetter methodGetter;
-
     private int auxVarCounter;
 
     private int ifCounter;
@@ -31,7 +29,6 @@ public class OllirVisitor {
 
     public OllirVisitor(SymbolTable symbolTable) {
         this.symbolTable = (MySymbolTable) symbolTable;
-        this.methodGetter = new MethodGetter(this.symbolTable);
 
         this.visitMap = new HashMap<>();
         this.visitMap.put("Value", this::handleValue);
@@ -92,13 +89,9 @@ public class OllirVisitor {
         if (ancestorOpt.isEmpty()) {
             throw new RuntimeException("Value not inside method");
         }
-
-        JmmNode ancestor = ancestorOpt.get();
-        Method method = methodGetter.getMethodFromMethodDeclaration(ancestor);
-
+        Method method = symbolTable.getMethod(ancestorOpt.get().get("uniqueName"));
 
         OllirAssistantType oat = OllirAssistantType.VALUE;
-
 
         if (AstUtils.isVariable(node, symbolTable) && type != null) {
             boolean notFound = true;
@@ -200,7 +193,7 @@ public class OllirVisitor {
     private OllirAssistant handleMethodHeader(JmmNode node, List<OllirAssistant> childrenResults) {
         StringBuilder value = new StringBuilder(".method public ");
 
-        Method method = methodGetter.getMethodFromMethodHeader(node);
+        Method method = symbolTable.getMethod(node.getParent().get("uniqueName"));
 
         value.append(method.getUniqueName()).append("(");
         for (int i = 0; i < method.getParameters().size(); ++i) {
@@ -343,10 +336,7 @@ public class OllirVisitor {
                 if (ancestorOptMethod.isEmpty()) {
                     throw new RuntimeException("Value not inside method");
                 }
-
-                JmmNode ancestorMethod = ancestorOptMethod.get();
-
-                Method method = methodGetter.getMethodFromMethodDeclaration(ancestorMethod);
+                Method method = symbolTable.getMethod(ancestorOptMethod.get().get("uniqueName"));
 
                 String varName;
                 boolean notIndex = true;
@@ -403,16 +393,16 @@ public class OllirVisitor {
 
     private OllirAssistant handleMethod(JmmNode node, List<OllirAssistant> childrenResults) {
         OllirAssistant result;
-        Method m = methodGetter.getMethodFromMethod(node);
         String name;
         Type retType;
 
-        if (m == null) {
-            name = node.get("methodName");
-            retType = null;
-        } else {
+        try {
+            Method m = symbolTable.getMethod(node.getParent().get("uniqueName"));
             name = m.getUniqueName();
             retType = m.getReturnType();
+        } catch (NullPointerException e) {
+            name = node.get("methodName");
+            retType = null;
         }
 
         if (node.getNumChildren() > 0) {

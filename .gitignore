@@ -8,4 +8,8 @@ gradlew
 gradlew.bat
 .idea/
 test.txt
-out.json
+/out.json
+/out_semantic.json
+/ollirCode.ollir
+/jasminCode.jasmin
+/*.dot
