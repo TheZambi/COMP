@@ -117,12 +117,7 @@ public class OllirVisitor {
         }
 
         if (AstUtils.isVariable(node, symbolTable)) {
-            name = name.replace("d", "dd");
-            name = name.replace("$", "d");
-
-            name = name.replace("arr", "arrr");
-
-            name = name.replace("t", "tt");
+            name = convertVarName(name);
         }
 
         // Add $ if value is a method parameter
@@ -184,10 +179,21 @@ public class OllirVisitor {
             return null;
 
         Symbol childSymbol = AstUtils.getChildSymbol(node, 0);
-        String value = ".field private " + childSymbol.getName() + convertTypeToString(childSymbol.getType()) + ";";
+
+        String name = childSymbol.getName();
+        name = convertVarName(name);
+
+        String value = ".field private " + name + convertTypeToString(childSymbol.getType()) + ";";
 
 
         return new OllirAssistant(OllirAssistantType.VAR_DECLARATION, value, "", childSymbol.getType());
+    }
+
+    private String convertVarName(String name) {
+        name = name.replace("d", "dd");
+        name = name.replace("$", "d");
+        name = name.replace("arr", "arrr");
+        return name.replace("t", "tt");
     }
 
     private OllirAssistant handleMethodDeclaration(JmmNode node, List<OllirAssistant> childrenResults) {

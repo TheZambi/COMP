@@ -193,7 +193,7 @@ public class JasminAssistant {
     private String generateGetfield(Method method, GetFieldInstruction instruction) {
 
         return getElement(method, instruction.getFirstOperand()) +
-                "getfield " + ((Operand) instruction.getSecondOperand()).getName() +
+                "getfield " + ollirClass.getClassName() + '/' + ((Operand) instruction.getSecondOperand()).getName() +
                 " " + convertType(instruction.getSecondOperand().getType().getTypeOfElement()) + "\n";
     }
 
@@ -201,7 +201,7 @@ public class JasminAssistant {
 
         return getElement(method, instruction.getFirstOperand()) +
                 getElement(method, instruction.getThirdOperand()) +
-                "putfield " + ((Operand) instruction.getSecondOperand()).getName() +
+                "putfield " + ollirClass.getClassName() + '/' + ((Operand) instruction.getSecondOperand()).getName() +
                 " " + convertType(instruction.getSecondOperand().getType().getTypeOfElement()) + "\n";
     }
 
@@ -263,7 +263,7 @@ public class JasminAssistant {
         instCode.append(params);
 
         instCode.append(")V\n");
-        instCode.append("astore_").append(getVirtualReg(method, (Operand) callInstruction.getFirstArg())).append("\n");
+        instCode.append(createStoreInst(ElementType.CLASS, false, getVirtualReg(method, (Operand) callInstruction.getFirstArg())));
 
         return instCode.toString();
     }
