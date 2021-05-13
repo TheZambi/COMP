@@ -1,52 +1,687 @@
-.class public Simple
+.class public BlackJack
 .super java/lang/Object
+.field private ddeck [I
 
 .method public <init>()V
 	aload_0
-	invokespecial java/lang/Object/<init>()V
+	invokespecial java/lang/Object.<init>()V
 	return
+.end method
+
+.method public shuffledDeck0()I
+	.limit stack 99
+	.limit locals 108
+	bipush 52
+	newarray int
+	astore_1
+	aload_0
+	aload_1
+	putfield BlackJack/ddeck [I
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore_3
+	iconst_0
+	istore 4
+	aload_3
+	iload 4
+	iconst_2
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 5
+	iconst_1
+	istore 6
+	aload 5
+	iload 6
+	iconst_2
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 7
+	iconst_2
+	istore 8
+	aload 7
+	iload 8
+	iconst_2
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 9
+	iconst_3
+	istore 10
+	aload 9
+	iload 10
+	iconst_2
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 11
+	iconst_4
+	istore 12
+	aload 11
+	iload 12
+	iconst_3
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 13
+	iconst_5
+	istore 14
+	aload 13
+	iload 14
+	iconst_3
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 15
+	bipush 6
+	istore 16
+	aload 15
+	iload 16
+	iconst_3
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 17
+	bipush 7
+	istore 18
+	aload 17
+	iload 18
+	iconst_3
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 19
+	bipush 8
+	istore 20
+	aload 19
+	iload 20
+	iconst_4
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 21
+	bipush 9
+	istore 22
+	aload 21
+	iload 22
+	iconst_4
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 23
+	bipush 10
+	istore 24
+	aload 23
+	iload 24
+	iconst_4
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 25
+	bipush 11
+	istore 26
+	aload 25
+	iload 26
+	iconst_4
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 27
+	bipush 12
+	istore 28
+	aload 27
+	iload 28
+	iconst_5
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 29
+	bipush 13
+	istore 30
+	aload 29
+	iload 30
+	iconst_5
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 31
+	bipush 14
+	istore 32
+	aload 31
+	iload 32
+	iconst_5
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 33
+	bipush 15
+	istore 34
+	aload 33
+	iload 34
+	iconst_5
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 35
+	bipush 16
+	istore 36
+	aload 35
+	iload 36
+	bipush 6
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 37
+	bipush 17
+	istore 38
+	aload 37
+	iload 38
+	bipush 6
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 39
+	bipush 18
+	istore 40
+	aload 39
+	iload 40
+	bipush 6
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 41
+	bipush 19
+	istore 42
+	aload 41
+	iload 42
+	bipush 6
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 43
+	bipush 20
+	istore 44
+	aload 43
+	iload 44
+	bipush 7
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 45
+	bipush 21
+	istore 46
+	aload 45
+	iload 46
+	bipush 7
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 47
+	bipush 22
+	istore 48
+	aload 47
+	iload 48
+	bipush 7
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 49
+	bipush 23
+	istore 50
+	aload 49
+	iload 50
+	bipush 7
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 51
+	bipush 24
+	istore 52
+	aload 51
+	iload 52
+	bipush 8
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 53
+	bipush 25
+	istore 54
+	aload 53
+	iload 54
+	bipush 8
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 55
+	bipush 26
+	istore 56
+	aload 55
+	iload 56
+	bipush 8
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 57
+	bipush 27
+	istore 58
+	aload 57
+	iload 58
+	bipush 8
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 59
+	bipush 28
+	istore 60
+	aload 59
+	iload 60
+	bipush 9
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 61
+	bipush 29
+	istore 62
+	aload 61
+	iload 62
+	bipush 9
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 63
+	bipush 30
+	istore 64
+	aload 63
+	iload 64
+	bipush 9
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 65
+	bipush 31
+	istore 66
+	aload 65
+	iload 66
+	bipush 9
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 67
+	bipush 32
+	istore 68
+	aload 67
+	iload 68
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 69
+	bipush 33
+	istore 70
+	aload 69
+	iload 70
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 71
+	bipush 34
+	istore 72
+	aload 71
+	iload 72
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 73
+	bipush 35
+	istore 74
+	aload 73
+	iload 74
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 75
+	bipush 36
+	istore 76
+	aload 75
+	iload 76
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 77
+	bipush 37
+	istore 78
+	aload 77
+	iload 78
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 79
+	bipush 38
+	istore 80
+	aload 79
+	iload 80
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 81
+	bipush 39
+	istore 82
+	aload 81
+	iload 82
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 83
+	bipush 40
+	istore 84
+	aload 83
+	iload 84
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 85
+	bipush 41
+	istore 86
+	aload 85
+	iload 86
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 87
+	bipush 42
+	istore 88
+	aload 87
+	iload 88
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 89
+	bipush 43
+	istore 90
+	aload 89
+	iload 90
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 91
+	bipush 44
+	istore 92
+	aload 91
+	iload 92
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 93
+	bipush 45
+	istore 94
+	aload 93
+	iload 94
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 95
+	bipush 46
+	istore 96
+	aload 95
+	iload 96
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 97
+	bipush 47
+	istore 98
+	aload 97
+	iload 98
+	bipush 10
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 99
+	bipush 48
+	istore 100
+	aload 99
+	iload 100
+	iconst_1
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 101
+	bipush 49
+	istore 102
+	aload 101
+	iload 102
+	iconst_1
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 103
+	bipush 50
+	istore 104
+	aload 103
+	iload 104
+	iconst_1
+	iastore
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 105
+	bipush 51
+	istore 106
+	aload 105
+	iload 106
+	iconst_1
+	iastore
+	iconst_1
+	ireturn
+.end method
+
+.method public getRandomCard0()I
+	.limit stack 99
+	.limit locals 8
+	iconst_1
+	istore_1
+	iconst_0
+	istore_2
+	Loop0:
+	iload_1
+	ifeq EndLoop0
+	iconst_1
+	ifeq EndLoop0
+	iconst_0
+	bipush 51
+	invokestatic MathUtils.random(II)I
+	istore_3
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 5
+	aload 5
+	iload_3
+	iaload
+	istore_2
+	iconst_0
+	iload_2
+	if_icmpge Else0
+	iconst_0
+	istore_1
+	aload_0
+	getfield BlackJack/ddeck [I
+	astore 6
+	aload 6
+	iload_3
+	iconst_0
+	iastore
+	goto Endif0
+	Endif0:
+	Else0:
+	goto Loop0
+	EndLoop0:
+	iload_2
+	ireturn
+.end method
+
+.method public handValue0([I)I
+	.limit stack 99
+	.limit locals 4
+	iconst_0
+	istore_2
+	iconst_0
+	istore_3
+	Loop1:
+	iload_2
+	iconst_5
+	if_icmpge EndLoop1
+	iload_3
+	aload_1
+	iload_2
+	iaload
+	iadd
+	istore_3
+	iload_2
+	iconst_1
+	iadd
+	istore_2
+	goto Loop1
+	EndLoop1:
+	iload_3
+	ireturn
 .end method
 
 .method public static main([Ljava/lang/String;)V
 	.limit stack 99
-	.limit locals 99
-	iconst_1
-	istore_1
-	iconst_3
-	istore_2
-	bipush 6
+	.limit locals 16
+	bipush 10
+	newarray int
+	astore_1
+	bipush 10
 	newarray int
 	astore_3
-	iconst_1
+	iconst_0
+	istore 4
+	iconst_0
 	istore 5
+	iconst_0
+	istore 6
+	new BlackJack
+	dup
+	invokespecial BlackJack.<init>()V
+	astore 7
+	aload 7
+	invokevirtual BlackJack.shuffledDeck0()I
+	pop
+	iconst_0
+	istore 9
 	aload_3
-	iload 5
-	iconst_3
-	iastore
-	iconst_5
-	newarray int
-	astore 6
-	iconst_4
-	istore 7
-	aload 6
-	iload 7
-	bipush 7
-	iastore
-	aload 6
-	iload_2
-	bipush 13
+	iload 9
+	aload 7
+	invokevirtual BlackJack.getRandomCard0()I
 	iastore
 	iconst_1
-	istore 8
-	aload_3
-	iload 8
-	iaload
-	istore 9
-	aload 6
-	iload 9
-	iaload
 	istore 10
+	aload_3
 	iload 10
-	invokestatic io.println(I)V
+	aload 7
+	invokevirtual BlackJack.getRandomCard0()I
+	iastore
+	iconst_1
+	istore 11
+	aload_3
+	iconst_1
+	invokestatic BlackJackTest.printHand([II)V
+	invokestatic BlackJackTest.getInput()I
+	istore 5
+	Loop2:
+	iload 5
+	iconst_2
+	if_icmpge EndLoop2
+	iload 11
+	iconst_1
+	iadd
+	istore 11
+	aload_3
+	iload 11
+	aload 7
+	invokevirtual BlackJack.getRandomCard0()I
+	iastore
+	aload 7
+	aload_3
+	invokevirtual BlackJack.handValue0([I)I
+	istore 6
+	iload 6
+	bipush 22
+	if_icmpge Else1
+	aload_3
+	iconst_1
+	invokestatic BlackJackTest.printHand([II)V
+	invokestatic BlackJackTest.getInput()I
+	istore 5
+	goto Endif1
+	Else1:
+	iconst_3
+	istore 5
+	Endif1:
+	goto Loop2
+	EndLoop2:
+	iconst_0
+	istore 11
+	iload 6
+	bipush 22
+	if_icmpge Else2
+	Loop3:
+	iload 4
+	iload 6
+	if_icmpge 0
+	iconst_1
+	goto 1
+	0: iconst_0
+	1: istore 13
+	iload 4
+	bipush 22
+	if_icmpge 2
+	iconst_1
+	goto 3
+	2: iconst_0
+	3: istore 14
+	iload 13
+	ifeq EndLoop3
+	iload 14
+	ifeq EndLoop3
+	aload_1
+	iload 11
+	aload 7
+	invokevirtual BlackJack.getRandomCard0()I
+	iastore
+	aload 7
+	aload_1
+	invokevirtual BlackJack.handValue0([I)I
+	istore 4
+	iload 11
+	iconst_1
+	iadd
+	istore 11
+	goto Loop3
+	EndLoop3:
+	goto Endif2
+	Endif2:
+	Else2:
+	aload_1
+	iconst_2
+	invokestatic BlackJackTest.printHand([II)V
+	iload 6
+	iload 4
+	invokestatic BlackJackTest.printWinner(II)V
 	return
 .end method

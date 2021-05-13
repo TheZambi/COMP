@@ -90,9 +90,40 @@ public class MySymbolTable implements SymbolTable {
             if (!first) mapName.append("-");
             else first = false;
 
-            mapName.append(t.getName()).append(t.isArray() ? "[]" : "");
+            if (t.getName().equals("-ignore"))
+                mapName.append("?");
+            else
+                mapName.append(t.getName()).append(t.isArray() ? "[]" : "");
         }
         return mapName.toString();
+    }
+
+    private String getCompatibleMethod(Map<String, String> overloads, String paramString, String methodName) {
+        String[] params = paramString.split("-");
+
+        String found = null;
+        for (String s: overloads.keySet()) {
+            String[] ovrld = s.split("-");
+            if (ovrld.length != params.length)
+                continue;
+
+            boolean diff = false;
+            for (int i = 0; i < ovrld.length; i++) {
+                if (!params[i].equals("?") && !params[i].equals(ovrld[i])) {
+                    diff = true;
+                    break;
+                }
+            }
+
+            if (!diff) {
+                if (found == null)
+                    found = overloads.get(s);
+                else
+                    throw new IndistinguishableMethod("Multiple " + methodName + " methods found with a signature matching " + paramString);
+            }
+        }
+
+        return found;
     }
 
     public String getUniqueName(String name, List<Type> parameters) {
@@ -102,7 +133,15 @@ public class MySymbolTable implements SymbolTable {
         Map<String, String> overloads = this.overloadingMap.get(name);
         if (overloads == null)
             return null;
-        return overloads.get(generateParamsString(parameters));
+
+        String paramString = generateParamsString(parameters);
+        if (paramString.contains("?")) {
+            // Deduce type
+            return getCompatibleMethod(overloads, paramString, name);
+        } else {
+            // Simple lookup
+            return overloads.get(paramString);
+        }
     }
 
     @Override

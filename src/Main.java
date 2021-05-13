@@ -15,16 +15,19 @@ public class Main {
             var fileContents = SpecsIo.read("./test.txt");
             var parserResult = new SyntacticPhase().parse(fileContents);
             checkReports("parser", parserResult.getReports());
-
+            System.out.println("SEMANTIC");
             var semanticResult = new AnalysisStage().semanticAnalysis(parserResult);
             checkReports("semantic", semanticResult.getReports());
+            System.out.println(semanticResult.getReports());
 
+            System.out.println("OLLIR");
             var ollirResult = new OptimizationStage().toOllir(semanticResult);
             if(ollirResult.getReports().size()> 0){
                 System.err.println("Failed on ollir generation");
                 return;
             }
-
+            System.out.println(ollirResult.getReports());
+            System.out.println("JASMIN");
             var jasminResult = new generation.jasmin.BackendStage().toJasmin(ollirResult);
             jasminResult.run();
         }

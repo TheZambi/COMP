@@ -1,6 +1,7 @@
 package analysis.visitors;
 
 import ast.AstUtils;
+import ast.IndistinguishableMethod;
 import ast.Method;
 import ast.MySymbolTable;
 import pt.up.fe.comp.jmm.JmmNode;
@@ -141,8 +142,18 @@ public class TypeVerificationVisitor {
         }
 
         String name = AstUtils.getMethodCallName(node);
-        String uniqueName = symbolTable.getUniqueName(name, types.subList(1, types.size()));
-        Method method = symbolTable.getMethod(uniqueName);
+        Method method;
+        try {
+            String uniqueName = symbolTable.getUniqueName(name, types.subList(1, types.size()));
+            method = symbolTable.getMethod(uniqueName);
+        } catch (IndistinguishableMethod e) {
+            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                    "Method <" + name + "> with params " + types.subList(1, types.size()) + " of class <" + calledOn.getName() + "> has multiple conflicting signatures"));
+            return ignore;
+        }
+
+        if (method != null)
+            node.put("uniqueName", method.getUniqueName());
 
         if (method == null) {
             if (symbolTable.getSuper() == null) {
