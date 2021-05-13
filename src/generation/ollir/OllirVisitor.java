@@ -13,8 +13,7 @@ import pt.up.fe.specs.util.SpecsCheck;
 import java.util.*;
 import java.util.function.BiFunction;
 
-import static generation.ollir.OllirAssistant.addAllAuxCode;
-import static generation.ollir.OllirAssistant.convertTypeToString;
+import static generation.ollir.OllirAssistant.*;
 
 public class OllirVisitor {
 
@@ -215,7 +214,7 @@ public class OllirVisitor {
             if (i > 0) {
                 value.append(", ");
             }
-            value.append(s.getName()).append(convertTypeToString(s.getType()));
+            value.append(convertVarName(s.getName())).append(convertTypeToString(s.getType()));
         }
 
         value.append(")").append(convertTypeToString(method.getReturnType()));
@@ -496,7 +495,7 @@ public class OllirVisitor {
                     sb.append(auxVar);
                     break;
                 case FIELD:
-                    String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                    String auxVarF = createGetFieldAux(childResult, auxCode);
                     sb.append(auxVarF);
                     break;
                 case VALUE:
@@ -558,6 +557,8 @@ public class OllirVisitor {
 
         addAllAuxCode(auxCode, childrenResults);
 
+
+
         if (!node.get("op").equals("NEG")) {
             value.append(childrenResults.get(0).getValue());
             if (childrenResults.get(0).getType() == OllirAssistantType.CLASSOBJ) {
@@ -594,12 +595,18 @@ public class OllirVisitor {
         StringBuilder value = new StringBuilder();
         StringBuilder auxCode = new StringBuilder();
 
+        addAllAuxCode(auxCode, childrenResults);
+
+        for(OllirAssistant oa : childrenResults){
+            System.out.println(oa);
+        }
+
         OllirAssistant child = childrenResults.get(0);
 
         switch (child.getType()) {
             case FIELD:
-                String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
-                value.append(auxVarF);
+                String auxVarF = createGetFieldAux(child, auxCode);
+                value.append("arraylength(").append(auxVarF).append(").i32");
                 break;
             case VALUE:
                 value.append("arraylength(").append(child.getValue()).append(").i32");
@@ -611,13 +618,16 @@ public class OllirVisitor {
                 break;
         }
 
-
-        return new OllirAssistant(OllirAssistantType.LENGTH, value.toString(), auxCode.toString(), new Type("int", false));
+        OllirAssistant result = new OllirAssistant(OllirAssistantType.LENGTH, value.toString(), auxCode.toString(), new Type("int", false));
+        System.out.println(result.getAuxCode());
+        return result;
     }
 
     private OllirAssistant handleArray(JmmNode node, List<OllirAssistant> childrenResults) {
         StringBuilder value = new StringBuilder("new(array, ");
         StringBuilder auxCode = new StringBuilder();
+
+        addAllAuxCode(auxCode, childrenResults);
 
         switch (childrenResults.get(0).getType()) {
             case BIN_OP:
