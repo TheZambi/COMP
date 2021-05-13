@@ -95,7 +95,6 @@ public class MySymbolTable implements SymbolTable {
             else
                 mapName.append(t.getName()).append(t.isArray() ? "[]" : "");
         }
-        System.out.println(mapName.toString());
         return mapName.toString();
     }
 
