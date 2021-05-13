@@ -30,12 +30,6 @@ public class SyntacticPhase implements JmmParser {
 				System.err.println("An error occurred.");
 				e.printStackTrace();
 			}
-//			System.out.println(root.toJson());
-//			if(myJmm.reports.size() != 0) {
-//				for(Report r: myJmm.reports) //prints errors
-//	            	System.out.println(r.toString());
-//				throw new ParseException();
-//			}
 
 			return new JmmParserResult(root, myJmm.reports);
 		} catch (ParseException e) {
