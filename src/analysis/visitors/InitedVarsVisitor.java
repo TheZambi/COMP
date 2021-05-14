@@ -125,7 +125,6 @@ public class InitedVarsVisitor {
         assignment.put("col", "-1");
         assignment.put("line", "-1");
         methodNode.add(assignment, assignmentNodeIndex);
-        assignment.setParent(methodNode);
 
         JmmNodeImpl var = new JmmNodeImpl("Value");
         var.put("col", "-1");
@@ -133,7 +132,6 @@ public class InitedVarsVisitor {
         var.put("type", node.get("type"));
         var.put("object", node.get("object"));
         assignment.add(var);
-        var.setParent(assignment);
 
         if (varType.isArray()) {
             JmmNodeImpl unaryOp = new JmmNodeImpl("UnaryOp");
@@ -141,13 +139,11 @@ public class InitedVarsVisitor {
             unaryOp.put("line", "-1");
             unaryOp.put("op", "NEW");
             assignment.add(unaryOp);
-            unaryOp.setParent(assignment);
 
             JmmNodeImpl array = new JmmNodeImpl("Array");
             array.put("col", "-1");
             array.put("line", "-1");
             unaryOp.add(array);
-            array.setParent(unaryOp);
 
             JmmNodeImpl arraySize = new JmmNodeImpl("Value");
             arraySize.put("col", "-1");
@@ -155,7 +151,6 @@ public class InitedVarsVisitor {
             arraySize.put("type", "int");
             arraySize.put("object", "0");
             array.add(arraySize);
-            arraySize.setParent(array);
 
             ret = "new int[0]";
         } else {
@@ -175,7 +170,6 @@ public class InitedVarsVisitor {
                 System.err.println("We do not initialize classes");
             }
             assignment.add(init);
-            init.setParent(assignment);
         }
 
         return ret;

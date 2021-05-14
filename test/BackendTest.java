@@ -23,6 +23,7 @@ import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
+import pt.up.fe.specs.util.SpecsStrings;
 
 import java.util.List;
 
@@ -38,7 +39,7 @@ public class BackendTest {
         TestUtils.noErrors(jasminResult.getReports());
 
         var output = jasminResult.run();
-        assertEquals(desiredOutput, output.trim());
+        assertEquals(SpecsStrings.normalizeFileContents(desiredOutput), SpecsStrings.normalizeFileContents(output.trim()));
     }
 
     private static void printReports(List<Report> reports) {
@@ -64,10 +65,10 @@ public class BackendTest {
         testBackend("fixtures/public/HelloWorld.jmm", "Hello, World!");
     }
 
-//        Requires Missing Quicksort Import
+//        Requires setting the random seed
 //    @Test
 //    public void testLazysort() {
-//        testBackend("fixtures/public/Lazysort.jmm", "");
+//        testBackend("fixtures/public/Lazysort.jmm", "1\r\n2\r\n3\r\n4\r\n5\r\n6\r\n7\r\n8\r\n9\r\n10");
 //    }
 
     //        Requires Input
