@@ -85,6 +85,20 @@ public class AnalyseTest {
         testAnalyse("fixtures/public/Overloading.jmm");
     }
 
+    @Test
+    public void testOverloadingWithIncludes() {
+        testAnalyse("fixtures/public/OverloadingWithIncludes.jmm");
+    }
+
+    @Test
+    public void testBlackJack() {
+        testAnalyse("fixtures/public/TestBlackJack.jmm");
+    }
+
+    @Test
+    public void testBubbleSort() {
+        testAnalyse("fixtures/public/TestBubbleSort.jmm");
+    }
 
     // MUST FAIL TESTS FROM HERE ON OUT
     @Test

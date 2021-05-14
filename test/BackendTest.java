@@ -103,4 +103,9 @@ public class BackendTest {
     public void testOverloading() {
         testBackend("fixtures/public/Overloading.jmm", "");
     }
+
+    @Test
+    public void testOverloadingWithIncludes() {
+        testBackend("fixtures/public/OverloadingWithIncludes.jmm", "1\r\n2\r\n3\r\n4");
+    }
 }

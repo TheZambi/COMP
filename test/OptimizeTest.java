@@ -92,4 +92,19 @@ public class OptimizeTest {
     public void testOverloading() {
         testOptimize("fixtures/public/Overloading.jmm");
     }
+
+    @Test
+    public void testOverloadingWithIncludes() {
+        testOptimize("fixtures/public/OverloadingWithIncludes.jmm");
+    }
+
+    @Test
+    public void testBlackJack() {
+        testOptimize("fixtures/public/TestBlackJack.jmm");
+    }
+
+    @Test
+    public void testBubbleSort() {
+        testOptimize("fixtures/public/TestBubbleSort.jmm");
+    }
 }

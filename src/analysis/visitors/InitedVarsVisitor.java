@@ -83,13 +83,13 @@ public class InitedVarsVisitor {
                 this.nodesToInit.add(node);
                 holder.initStatus = InitStatus.INITIALIZED;
                 reports.add(new Report(ReportType.WARNING, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
-                        "Local variable <" + name + "> was not initialized: Initialized it with default value ''"));
+                        "Local variable <" + name + "> was not initialized: Initialized it with a default value"));
                 break;
             case CONDITIONAL:
 //                this.nodesToInit.add(node);
-                holder.initStatus = InitStatus.INITIALIZED;
-                reports.add(new Report(ReportType.WARNING, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
-                        "Local variable <" + name + "> may not have been initialized: Initialized with default value ''"));
+//                holder.initStatus = InitStatus.INITIALIZED;
+//                reports.add(new Report(ReportType.WARNING, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+//                        "Local variable <" + name + "> may not have been initialized: Initialized with default value ''"));
                 break;
             default:
                 break;
@@ -156,6 +156,8 @@ public class InitedVarsVisitor {
             arraySize.put("object", "0");
             array.add(arraySize);
             arraySize.setParent(array);
+
+            ret = "new int[0]";
         } else {
             JmmNodeImpl init = new JmmNodeImpl("Value");
             init.put("col", "-1");

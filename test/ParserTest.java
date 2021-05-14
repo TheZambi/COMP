@@ -53,7 +53,6 @@ public class ParserTest {
     @Test
     public void testHelloWorld() {
         testParse("./test/fixtures/public/HelloWorld.jmm");
-
     }
 
     @Test
@@ -86,6 +85,27 @@ public class ParserTest {
         testParse("./test/fixtures/public/TicTacToe.jmm");
     }
 
+
+    // CUSTOM TESTS
+    @Test
+    public void testOverloading() {
+        testParse("fixtures/public/Overloading.jmm");
+    }
+
+    @Test
+    public void testOverloadingWithIncludes() {
+        testParse("fixtures/public/OverloadingWithIncludes.jmm");
+    }
+
+    @Test
+    public void testBlackJack() {
+        testParse("fixtures/public/TestBlackJack.jmm");
+    }
+
+    @Test
+    public void testBubbleSort() {
+        testParse("fixtures/public/TestBubbleSort.jmm");
+    }
 
     // MUST FAIL TESTS FROM HERE ON OUT
     @Test
