@@ -86,7 +86,7 @@ public class OllirVisitor {
 
         Optional<JmmNode> ancestorOpt = node.getAncestor("MethodDeclaration");
         if (ancestorOpt.isEmpty()) {
-            throw new RuntimeException("Value not inside method");
+            throw new RuntimeException("Value <" + node.get("object") + "> not inside method (line " + node.get("line") + " col " + node.get("col") + ")");
         }
         Method method = symbolTable.getMethod(ancestorOpt.get().get("uniqueName"));
 
@@ -587,9 +587,9 @@ public class OllirVisitor {
 
         addAllAuxCode(auxCode, childrenResults);
 
-        for(OllirAssistant oa : childrenResults){
-            System.out.println(oa);
-        }
+//        for(OllirAssistant oa : childrenResults){
+//            System.out.println(oa);
+//        }
 
         OllirAssistant child = childrenResults.get(0);
 
@@ -609,7 +609,7 @@ public class OllirVisitor {
         }
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.LENGTH, value.toString(), auxCode.toString(), new Type("int", false));
-        System.out.println(result.getAuxCode());
+//        System.out.println(result.getAuxCode());
         return result;
     }
 
