@@ -1,29 +1,13 @@
-import io;
-Simple {
+import ioPlus;
+HelloWorld {
 
-	.construct Simple().V {
+	.construct HelloWorld().V {
 		invokespecial(this, "<init>").V;
 	}
 
 	.method public static main(args.array.String).V  {
 		
-		i.i32 :=.i32 1.i32;
-		
-		i1.i32 :=.i32 3.i32;
-		
-		b.array.i32 :=.array.i32 new(array, 6.i32).array.i32;
-		t0.i32 :=.i32 1.i32;
-		b[t0.i32].i32 :=.i32 3.i32;
-		
-		a.array.i32 :=.array.i32 new(array, 5.i32).array.i32;
-		t1.i32 :=.i32 4.i32;
-		a[t1.i32].i32 :=.i32 7.i32;
-		
-		a[i1.i32].i32 :=.i32 13.i32;
-		t2.i32 :=.i32 1.i32;
-		t3.i32 :=.i32 b[t2.i32].i32;
-		t4.i32 :=.i32 a[t3.i32].i32;
-		invokestatic(io, "println", t4.i32).V;
+		invokestatic(ioPlus, "printHelloWorld").V;
 
 		ret.V;
 	}

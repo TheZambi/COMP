@@ -44,7 +44,7 @@ public class BackendStage implements JasminBackend {
             ollirClass.buildCFGs(); // build the CFG of each method
             ollirClass.outputCFGs(); // output to .dot files the CFGs, one per method
             ollirClass.buildVarTables(); // build the table of variables for each method
-            ollirClass.show(); // print to console main information about the input OLLIR
+            // ollirClass.show(); // print to console main information about the input OLLIR
 
 
             JasminAssistant jasminAssistant = new JasminAssistant(ollirClass).generate();

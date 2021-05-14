@@ -12,6 +12,7 @@ import analysis.visitors.SymbolTableVisitor;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AnalysisStage implements JmmAnalysis {
@@ -22,7 +23,7 @@ public class AnalysisStage implements JmmAnalysis {
 
     @Override
     public JmmSemanticsResult semanticAnalysis(JmmParserResult parserResult) {
-        this.reports = parserResult.getReports();
+        this.reports = new ArrayList<>();
         this.root = parserResult.getRootNode();
         this.symbolTable = new MySymbolTable();
 
