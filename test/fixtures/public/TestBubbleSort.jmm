@@ -1,0 +1,64 @@
+import io;
+import BubbleSortTest;
+
+class BubbleSort{
+
+    public int[] sort(int[] a){
+        int len;
+        int temp;
+        int counter;
+        boolean finished;
+        int next;
+
+        finished = false;
+        len = a.length;
+        len = len - 1;
+        while(!finished){
+            finished = true;
+            counter = 0;
+            while(counter < len){
+                next = counter + 1;
+                if(a[next] < a[counter]){
+                    temp = a[counter];
+                    a[counter] = a[next];
+                    a[next] = temp;
+                    finished = false;
+                }
+                else {
+                }
+                counter = counter + 1;
+            }
+        }
+        return a;
+    }
+
+    public static void main(String[] ssss){
+        BubbleSort bs;
+        int[] input;
+        int counter;
+        int size;
+        int[] result;
+        int nextValue;
+
+        size = 0;
+        while(size < 1){
+            size = BubbleSortTest.getArraySize();
+        }
+
+
+
+        bs = new BubbleSort();
+        input = new int[size];
+        counter = 0;
+        nextValue = 0;
+        while(counter < size){
+            nextValue = BubbleSortTest.getInput();
+            input[counter] = nextValue;
+            counter = counter + 1;
+        }
+
+        result = bs.sort(input);
+        BubbleSortTest.printResult(result);
+
+    }
+}
