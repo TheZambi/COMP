@@ -100,6 +100,25 @@ class BlackJack {
         return value;
     }
 
+    public boolean deckNotEmpty(){
+        int i;
+        boolean value;
+        int cardVal;
+        cardVal = 0;
+        value = false;
+        i=0;
+
+        while(i<51){
+            cardVal = deck[i];
+            if(0 < cardVal)
+                value = true;
+            else{}
+            i = i + 1;
+        }
+
+        return value;
+    }
+
     public static void main(String[] sssss) {
         BlackJack bj;
         int play;
@@ -109,8 +128,7 @@ class BlackJack {
         int[] hand;
         int[] computerHand;
 
-        computerHand = new int[10];
-        hand = new int[10];
+
 
         computerValue = 0;
         play = 0;
@@ -119,37 +137,45 @@ class BlackJack {
         bj = new BlackJack();
         bj.shuffledDeck();
 
-        hand[0] = bj.getRandomCard();
-        hand[1] = bj.getRandomCard();
-        index = 1;
+        while(bj.deckNotEmpty()){
+            computerHand = new int[10];
+            hand = new int[10];
 
-        BlackJackTest.printHand(hand, 1);
-        play = BlackJackTest.getInput();
+            hand[0] = bj.getRandomCard();
+            hand[1] = bj.getRandomCard();
+            index = 1;
 
-        while(play < 2){
-            index = index + 1;
-            hand[index] = bj.getRandomCard();
-            myValue = bj.handValue(hand);
-            if(myValue < 22){
-                BlackJackTest.printHand(hand,1);
-                play = BlackJackTest.getInput();
-            }
-            else
-            {
-                play = 3;
-            }
-        }
+            BlackJackTest.printHand(hand, 1);
+            play = BlackJackTest.getInput();
 
-        index = 0;
 
-        if(myValue < 22){
-            while(computerValue < myValue && computerValue < 22){
-                computerHand[index] = bj.getRandomCard();
-                computerValue = bj.handValue(computerHand);
+            play = 1;
+
+            while(play < 2){
                 index = index + 1;
+                hand[index] = bj.getRandomCard();
+                myValue = bj.handValue(hand);
+                if(myValue < 22){
+                    BlackJackTest.printHand(hand,1);
+                    play = BlackJackTest.getInput();
+                }
+                else
+                {
+                    play = 3;
+                }
             }
-        }else{}
-        BlackJackTest.printHand(computerHand,2);
-        BlackJackTest.printWinner(myValue,computerValue);
+
+            index = 0;
+
+            if(myValue < 22){
+                while(computerValue < myValue && computerValue < 22){
+                    computerHand[index] = bj.getRandomCard();
+                    computerValue = bj.handValue(computerHand);
+                    index = index + 1;
+                }
+            }else{}
+            BlackJackTest.printHand(computerHand,2);
+            BlackJackTest.printWinner(myValue,computerValue);
+        }
     }
 }
