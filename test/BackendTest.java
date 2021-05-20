@@ -72,10 +72,10 @@ public class BackendTest {
 //    }
 
     //        Requires Input
-//    @Test
-//    public void testLife() {
-//        testBackend("fixtures/public/Life.jmm", "");
-//    }
+    @Test
+    public void testLife() {
+        testBackend("fixtures/public/Life.jmm", "");
+    }
 
 //        Requires Input
 //    @Test

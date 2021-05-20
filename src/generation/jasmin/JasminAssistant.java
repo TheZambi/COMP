@@ -208,6 +208,7 @@ public class JasminAssistant {
                 instCode.append("\nnewarray int\n");
                 instCode.append(createStoreInst(ElementType.ARRAYREF, false, getVirtualReg(method, leftOp))).append("\n");
             } else { //new class object
+                currentInstructionLimit+=2;
                 instCode.append("new ").append(((ClassType) callInstruction.getReturnType()).getName()).append("\n");
                 instCode.append("dup").append("\n");
             }
