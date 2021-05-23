@@ -436,6 +436,7 @@ public class JasminAssistant {
 
         //'not' operation only needs one of the operands. 'and' operation will only check the left first and then right
         if(operationType != OperationType.NOTB && operationType != OperationType.ANDB && operationType != OperationType.OR) {
+            currentInstructionLimit++;
             instCode.append(getElement(method, instruction.getRightOperand()));
         }
 
@@ -448,6 +449,7 @@ public class JasminAssistant {
             case OR -> {
             }
             case LTH -> {
+
                 instCode.append("if_icmpge ").append(firstLabel).append("\n");
             }
             case NOTB -> {

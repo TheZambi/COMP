@@ -107,6 +107,11 @@ public class ParserTest {
         testParse("fixtures/public/TestBubbleSort.jmm");
     }
 
+    @Test
+    public void testBinarySearch() {
+        testParse("fixtures/public/BinarySearch.jmm");
+    }
+
     // MUST FAIL TESTS FROM HERE ON OUT
     @Test
     public void failBlowUpTest() {

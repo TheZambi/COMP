@@ -107,4 +107,11 @@ public class OptimizeTest {
     public void testBubbleSort() {
         testOptimize("fixtures/public/TestBubbleSort.jmm");
     }
+
+    @Test
+    public void testBinarySearch() {
+        testOptimize("fixtures/public/BinarySearch.jmm");
+    }
+
+
 }

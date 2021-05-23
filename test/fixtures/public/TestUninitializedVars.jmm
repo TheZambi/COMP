@@ -1,0 +1,10 @@
+import io;
+class UninitializedVar {
+	public static void main(String[] args) {
+		int a;
+		int b;
+		a = 1;
+		a = a + b;
+		io.println(a);
+	}
+}

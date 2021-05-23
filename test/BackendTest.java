@@ -42,6 +42,19 @@ public class BackendTest {
         assertEquals(SpecsStrings.normalizeFileContents(desiredOutput), SpecsStrings.normalizeFileContents(output.trim()));
     }
 
+    private void testBackend(String filename, String desiredOutput, String input) {
+        System.out.println("TEST " + filename);
+
+        JasminResult jasminResult = TestUtils.backend(SpecsIo.getResource(filename));
+
+        printReports(jasminResult.getReports());
+
+        TestUtils.noErrors(jasminResult.getReports());
+
+        var output = jasminResult.run(input);
+        assertEquals(SpecsStrings.normalizeFileContents(desiredOutput), SpecsStrings.normalizeFileContents(output.trim()));
+    }
+
     private static void printReports(List<Report> reports) {
         if (reports.size() == 0)
             System.out.println("No errors found");
@@ -66,22 +79,22 @@ public class BackendTest {
     }
 
 //        Requires setting the random seed
-//    @Test
-//    public void testLazysort() {
-//        testBackend("fixtures/public/Lazysort.jmm", "1\r\n2\r\n3\r\n4\r\n5\r\n6\r\n7\r\n8\r\n9\r\n10");
-//    }
-
-    //        Requires Input
     @Test
-    public void testLife() {
-        testBackend("fixtures/public/Life.jmm", "");
+    public void testLazysort() {
+        testBackend("fixtures/public/Lazysort.jmm", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10");
     }
-
-//        Requires Input
+//
+//    //        Infinite loop
 //    @Test
-//    public void testMonteCarloPi() {
-//        testBackend("fixtures/public/MonteCarloPi.jmm", "");
+//    public void testLife() {
+//        testBackend("fixtures/public/Life.jmm", "","1");
 //    }
+
+//        Random
+    @Test
+    public void testMonteCarloPi() {
+        testBackend("fixtures/public/MonteCarloPi.jmm", "Insert number: Result: ???", "100");
+    }
 
     @Test
     public void testQuickSort() {
@@ -94,10 +107,10 @@ public class BackendTest {
     }
 
 //        Requires Input
-//    @Test
-//    public void testTicTacToe() {
-//        testBackend("fixtures/public/TicTacToe.jmm", "");
-//    }
+    @Test
+    public void testTicTacToe() {
+        testBackend("fixtures/public/TicTacToe.jmm",tictactoeString() ,SpecsIo.getResource("fixtures/public/TicTacToe.input"));
+    }
 
     // CUSTOM TESTS
     @Test
@@ -113,5 +126,62 @@ public class BackendTest {
     @Test
     public void testBinarySearch() {
         testBackend("fixtures/public/BinarySearch.jmm", "3");
+    }
+
+    @Test
+    public void testUninitializedVar() {
+        testBackend("fixtures/public/testUninitializedVars.jmm", "1");
+    }
+
+    // Until the game ends, basically infinite
+//    @Test
+//    public void testBlackJack() {
+//        testBackend("fixtures/public/TestBlackJack.jmm", "", "2");
+//    }
+
+
+    private String tictactoeString() {
+        return "0|0|0\n" +
+                "- - -\n" +
+                "0|0|0\n" +
+                "- - -\n" +
+                "0|0|0\n" +
+                "\n" +
+                "Player 1 turn! Enter the row(0-2):  Enter the column(0-2): \n" +
+                "1|0|0\n" +
+                "- - -\n" +
+                "0|0|0\n" +
+                "- - -\n" +
+                "0|0|0\n" +
+                "\n" +
+                "Player 2 turn! Enter the row(0-2):  Enter the column(0-2): \n" +
+                "1|2|0\n" +
+                "- - -\n" +
+                "0|0|0\n" +
+                "- - -\n" +
+                "0|0|0\n" +
+                "\n" +
+                "Player 1 turn! Enter the row(0-2):  Enter the column(0-2): \n" +
+                "1|2|0\n" +
+                "- - -\n" +
+                "0|1|0\n" +
+                "- - -\n" +
+                "0|0|0\n" +
+                "\n" +
+                "Player 2 turn! Enter the row(0-2):  Enter the column(0-2): \n" +
+                "1|2|0\n" +
+                "- - -\n" +
+                "2|1|0\n" +
+                "- - -\n" +
+                "0|0|0\n" +
+                "\n" +
+                "Player 1 turn! Enter the row(0-2):  Enter the column(0-2): \n" +
+                "1|2|0\n" +
+                "- - -\n" +
+                "2|1|0\n" +
+                "- - -\n" +
+                "0|0|1\n" +
+                "\n" +
+                "Congratulations, 1, you have won the game.";
     }
 }

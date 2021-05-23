@@ -218,24 +218,24 @@ void Expression() #void: {}
 
 void LogicalANDExpression() #void : {}
 {
-	RelationalExpression() [ <And>  LogicalANDExpression() {jjtThis.put("op", "AND");} #BinaryOp(2) ]
+	RelationalExpression() ( <And>  RelationalExpression() {jjtThis.put("op", "AND");} #BinaryOp(2) )*
 }
 
 void RelationalExpression() #void : {}
 {
-	AdditiveExpression() [ "<" RelationalExpression() {jjtThis.put("op", "LESSER");} #BinaryOp(2) ]
+	AdditiveExpression() ( "<" RelationalExpression() {jjtThis.put("op", "LESSER");} #BinaryOp(2) )*
 }
 
 void AdditiveExpression() #void : {}
 {
-	MultiplicativeExpression() [ "+" AdditiveExpression() {jjtThis.put("op", "ADD");} #BinaryOp(2)
-	                            | "-" AdditiveExpression() {jjtThis.put("op", "SUBTRACT");} #BinaryOp(2)]
+	MultiplicativeExpression() ( "+" MultiplicativeExpression() {jjtThis.put("op", "ADD");} #BinaryOp(2)
+	                            | "-" MultiplicativeExpression() {jjtThis.put("op", "SUBTRACT");} #BinaryOp(2))*
 }
 
 void MultiplicativeExpression() #void : {}
 {
-	 NotExpression() [ "*" MultiplicativeExpression() {jjtThis.put("op", "MULTIPLY");} #BinaryOp(2)
-	                   | "/" MultiplicativeExpression() {jjtThis.put("op", "DIVIDE");} #BinaryOp(2)]
+	 NotExpression() ( "*" NotExpression() {jjtThis.put("op", "MULTIPLY");} #BinaryOp(2)
+	                   | "/" NotExpression() {jjtThis.put("op", "DIVIDE");} #BinaryOp(2))*
 }
 
 void NotExpression() #void : {}
