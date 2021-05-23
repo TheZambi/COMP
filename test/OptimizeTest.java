@@ -113,5 +113,10 @@ public class OptimizeTest {
         testOptimize("fixtures/public/BinarySearch.jmm");
     }
 
+    @Test
+    public void testUninitializedVar() {
+        testOptimize("fixtures/public/testUninitializedVars.jmm");
+    }
+
 
 }

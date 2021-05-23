@@ -105,6 +105,11 @@ public class AnalyseTest {
         testAnalyse("fixtures/public/BinarySearch.jmm");
     }
 
+    @Test
+    public void testUninitializedVar() {
+        testAnalyse("fixtures/public/testUninitializedVars.jmm");
+    }
+
     // MUST FAIL TESTS FROM HERE ON OUT
     @Test
     public void failArrIndexNotInt() {

@@ -112,6 +112,11 @@ public class ParserTest {
         testParse("fixtures/public/BinarySearch.jmm");
     }
 
+    @Test
+    public void testUninitializedVar() {
+        testParse("fixtures/public/testUninitializedVars.jmm");
+    }
+
     // MUST FAIL TESTS FROM HERE ON OUT
     @Test
     public void failBlowUpTest() {
