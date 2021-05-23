@@ -704,36 +704,80 @@ public class OllirVisitor {
     private OllirAssistant handleIterationStatement(JmmNode node, List<OllirAssistant> childrenResults) {
         StringBuilder value = new StringBuilder();
 
-        OllirAssistant childExpression = childrenResults.get(0);
-        OllirAssistant compoundStatement = childrenResults.get(1);
-
-        value.append("Loop").append(whileCounter).append(":\n");
-
-        if (!childExpression.getAuxCode().equals("")) {
-            for (String s : childExpression.getAuxCode().split("\n")) {
-                value.append("\t").append(s).append("\n");
+        OllirAssistant childExpression = childrenResults.get(0); //expression
+        OllirAssistant compoundStatement = childrenResults.get(1); //body
+        if(false)
+        {
+            if (!childExpression.getAuxCode().equals("")) {
+                for (String s : childExpression.getAuxCode().split("\n")) {
+                    value.append(s).append("\n");
+                }
             }
+
+            if (childExpression.getType() == OllirAssistantType.VALUE) {
+                value.append("if (");
+                value.append(childExpression.getValue()).append(" &&.bool 1.bool");
+            } else if (childExpression.getType() == OllirAssistantType.METHODCALL) {
+                StringBuilder auxCode = new StringBuilder();
+                String auxVar = createAux(childExpression.getValue(), childExpression.getVarType(), OllirAssistantType.METHODCALL, auxCode);
+                value.append(auxCode);
+                value.append("if (");
+                value.append(auxVar).append(" &&.bool 1.bool");
+            } else {
+                value.append("if (");
+                value.append(childExpression.getValue());
+            }
+            value.append(") goto EndLoop").append(whileCounter).append(";\n");
+            value.append("Loop").append(whileCounter).append(":\n");
+            value.append(compoundStatement.getValue());
+
+            if (childExpression.getType() == OllirAssistantType.VALUE) {
+                value.append("if (");
+                value.append(childExpression.getValue()).append(" &&.bool 1.bool");
+            } else if (childExpression.getType() == OllirAssistantType.METHODCALL) {
+                StringBuilder auxCode = new StringBuilder();
+                String auxVar = createAux(childExpression.getValue(), childExpression.getVarType(), OllirAssistantType.METHODCALL, auxCode);
+                value.append(auxCode);
+                value.append("if (");
+                value.append(auxVar).append(" &&.bool 1.bool");
+            } else {
+                value.append("if (");
+                value.append(childExpression.getValue());
+            }
+
+            value.append(") goto Loop").append(whileCounter).append(";\n");
+
+            value.append("EndLoop").append(whileCounter).append(":\n");
+
         }
+        else{
+            value.append("Loop").append(whileCounter).append(":\n");
+
+            if (!childExpression.getAuxCode().equals("")) {
+                for (String s : childExpression.getAuxCode().split("\n")) {
+                    value.append("\t").append(s).append("\n");
+                }
+            }
 
 
-        if (childExpression.getType() == OllirAssistantType.VALUE) {
-            value.append("\tif (");
-            value.append(childExpression.getValue()).append(" &&.bool 1.bool");
-        } else if (childExpression.getType() == OllirAssistantType.METHODCALL) {
-            StringBuilder auxCode = new StringBuilder();
-            String auxVar = createAux(childExpression.getValue(), childExpression.getVarType(), OllirAssistantType.METHODCALL, auxCode);
-            value.append(auxCode);
-            value.append("\tif (");
-            value.append(auxVar).append(" &&.bool 1.bool");
-        } else {
-            value.append("\tif (");
-            value.append(childExpression.getValue());
+            if (childExpression.getType() == OllirAssistantType.VALUE) {
+                value.append("\tif (");
+                value.append(childExpression.getValue()).append(" &&.bool 1.bool");
+            } else if (childExpression.getType() == OllirAssistantType.METHODCALL) {
+                StringBuilder auxCode = new StringBuilder();
+                String auxVar = createAux(childExpression.getValue(), childExpression.getVarType(), OllirAssistantType.METHODCALL, auxCode);
+                value.append(auxCode);
+                value.append("\tif (");
+                value.append(auxVar).append(" &&.bool 1.bool");
+            } else {
+                value.append("\tif (");
+                value.append(childExpression.getValue());
+            }
+
+            value.append(") goto EndLoop").append(whileCounter).append(";\n");
+            value.append(compoundStatement.getValue());
+            value.append("\tgoto Loop").append(whileCounter).append(";\n").append("EndLoop").append(whileCounter).append(":\n");
         }
-
-        value.append(") goto EndLoop").append(whileCounter).append(";\n");
-        value.append(compoundStatement.getValue());
-        value.append("\tgoto Loop").append(whileCounter).append(";\n").append("EndLoop").append(whileCounter).append(":\n");
-
         whileCounter++;
 
         return new OllirAssistant(OllirAssistantType.ITERATION_STATEMENT, value.toString(), "", null);
