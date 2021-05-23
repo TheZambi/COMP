@@ -41,6 +41,17 @@ public class Method {
         return true;
     }
 
+    public boolean removeLocalVar(String name) {
+        for (int i = 0; i < this.localVariables.size(); i++) {
+            if (this.localVariables.get(i).getName().equals(name)) {
+                this.localVariables.remove(i);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public String getName() {
         return name;
     }

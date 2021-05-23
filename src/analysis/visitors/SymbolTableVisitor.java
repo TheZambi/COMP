@@ -63,6 +63,7 @@ public class SymbolTableVisitor {
             if (!symbolTable.addMethod(new Method("main", new Type("void", false), symbols)))
                 reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                     "A class cannot have multiple main declarations"));
+            node.put("uniqueName", "main");
             return;
         }
 
@@ -72,6 +73,8 @@ public class SymbolTableVisitor {
         if (!symbolTable.addMethod(m))
             reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
                     "Found multiple declarations of method with the same prototype: <" + m.getName() + "> with params <" + m.getParameters() + ">"));
+
+        node.put("uniqueName", m.getUniqueName());
     }
 
     private void classDeclarationVisit(JmmNode node) {

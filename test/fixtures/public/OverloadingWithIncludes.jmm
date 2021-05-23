@@ -1,0 +1,37 @@
+import io;
+import OverloadingTest;
+
+class ExternalOverloading {
+    public static void main(String[] args) {
+        int i;
+        ExternalOverloading ext;
+
+        ext = new ExternalOverloading();
+
+        i = ext.overload(2, 2);
+        io.println(i);
+        i = ext.overload(2, true);
+        io.println(i);
+
+        i = ext.external_overload(OverloadingTest.retInt(), 2);
+        io.println(i);
+        i = ext.external_overload(OverloadingTest.retInt(), true);
+        io.println(i);
+    }
+
+    public int overload(int a, int b) {
+        return 1;
+    }
+
+    public int overload(int a, boolean b) {
+        return 2;
+    }
+
+    public int external_overload(int a, int b) {
+        return 3;
+    }
+
+    public int external_overload(int a, boolean b) {
+        return 4;
+    }
+}

@@ -1,0 +1,181 @@
+import io;
+import MathUtils;
+import BlackJackTest;
+
+class BlackJack {
+    int[] deck;
+    public int shuffledDeck()
+    {
+        deck = new int[52];
+        deck[0] = 2;
+        deck[1] = 2;
+        deck[2] = 2;
+        deck[3] = 2;
+        deck[4] = 3;
+        deck[5] = 3;
+        deck[6] = 3;
+        deck[7] = 3;
+        deck[8] = 4;
+        deck[9] = 4;
+        deck[10] = 4;
+        deck[11] = 4;
+        deck[12] = 5;
+        deck[13] = 5;
+        deck[14] = 5;
+        deck[15] = 5;
+        deck[16] = 6;
+        deck[17] = 6;
+        deck[18] = 6;
+        deck[19] = 6;
+        deck[20] = 7;
+        deck[21] = 7;
+        deck[22] = 7;
+        deck[23] = 7;
+        deck[24] = 8;
+        deck[25] = 8;
+        deck[26] = 8;
+        deck[27] = 8;
+        deck[28] = 9;
+        deck[29] = 9;
+        deck[30] = 9;
+        deck[31] = 9;
+        deck[32] = 10;
+        deck[33] = 10;
+        deck[34] = 10;
+        deck[35] = 10;
+        deck[36] = 10;
+        deck[37] = 10;
+        deck[38] = 10;
+        deck[39] = 10;
+        deck[40] = 10;
+        deck[41] = 10;
+        deck[42] = 10;
+        deck[43] = 10;
+        deck[44] = 10;
+        deck[45] = 10;
+        deck[46] = 10;
+        deck[47] = 10;
+        deck[48] = 1;
+        deck[49] = 1;
+        deck[50] = 1;
+        deck[51] = 1;
+
+        return 1;
+    }
+
+    public int getRandomCard(){
+        int randIndex;
+        int cardValue;
+        boolean continue;
+
+        continue = true;
+        cardValue = 0;
+
+        while(continue)
+        {
+            randIndex = MathUtils.random(0,51);
+            cardValue = deck[randIndex];
+            if(0 < cardValue){
+                continue = false;
+                deck[randIndex] = 0;
+            }
+            else{
+            }
+        }
+        return cardValue;
+    }
+
+    public int handValue(int[] hand){
+        int value;
+        int i;
+
+        i=0;
+        value = 0;
+
+        while(i<5){
+            value = value + hand[i];
+            i = i + 1;
+        }
+
+        return value;
+    }
+
+    public boolean deckNotEmpty(){
+        int i;
+        boolean value;
+        int cardVal;
+        cardVal = 0;
+        value = false;
+        i=0;
+
+        while(i<51){
+            cardVal = deck[i];
+            if(0 < cardVal)
+                value = true;
+            else{}
+            i = i + 1;
+        }
+
+        return value;
+    }
+
+    public static void main(String[] sssss) {
+        BlackJack bj;
+        int play;
+        int index;
+        int computerValue;
+        int myValue;
+        int[] hand;
+        int[] computerHand;
+
+
+
+        computerValue = 0;
+        play = 0;
+        myValue = 0;
+
+        bj = new BlackJack();
+        bj.shuffledDeck();
+
+        while(bj.deckNotEmpty()){
+            computerHand = new int[10];
+            hand = new int[10];
+
+            hand[0] = bj.getRandomCard();
+            hand[1] = bj.getRandomCard();
+            index = 1;
+
+            BlackJackTest.printHand(hand, 1);
+            play = BlackJackTest.getInput();
+
+
+            play = 1;
+
+            while(play < 2){
+                index = index + 1;
+                hand[index] = bj.getRandomCard();
+                myValue = bj.handValue(hand);
+                if(myValue < 22){
+                    BlackJackTest.printHand(hand,1);
+                    play = BlackJackTest.getInput();
+                }
+                else
+                {
+                    play = 3;
+                }
+            }
+
+            index = 0;
+
+            if(myValue < 22){
+                while(computerValue < myValue && computerValue < 22){
+                    computerHand[index] = bj.getRandomCard();
+                    computerValue = bj.handValue(computerHand);
+                    index = index + 1;
+                }
+            }else{}
+            BlackJackTest.printHand(computerHand,2);
+            BlackJackTest.printWinner(myValue,computerValue);
+        }
+    }
+}

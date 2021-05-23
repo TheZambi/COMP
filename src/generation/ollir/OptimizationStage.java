@@ -56,7 +56,6 @@ public class OptimizationStage implements JmmOptimization {
         List<Report> reports = new ArrayList<>();
 
         return new OllirResult(semanticsResult, ollirCode, reports);
-//        return null;
     }
 
     @Override

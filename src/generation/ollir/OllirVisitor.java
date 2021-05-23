@@ -13,16 +13,13 @@ import pt.up.fe.specs.util.SpecsCheck;
 import java.util.*;
 import java.util.function.BiFunction;
 
-import static generation.ollir.OllirAssistant.addAllAuxCode;
-import static generation.ollir.OllirAssistant.convertTypeToString;
+import static generation.ollir.OllirAssistant.*;
 
 public class OllirVisitor {
 
     private final Map<String, BiFunction<JmmNode, List<OllirAssistant>, OllirAssistant>> visitMap;
 
     private final MySymbolTable symbolTable;
-
-    private final MethodGetter methodGetter;
 
     private int auxVarCounter;
 
@@ -31,7 +28,6 @@ public class OllirVisitor {
 
     public OllirVisitor(SymbolTable symbolTable) {
         this.symbolTable = (MySymbolTable) symbolTable;
-        this.methodGetter = new MethodGetter(this.symbolTable);
 
         this.visitMap = new HashMap<>();
         this.visitMap.put("Value", this::handleValue);
@@ -90,15 +86,11 @@ public class OllirVisitor {
 
         Optional<JmmNode> ancestorOpt = node.getAncestor("MethodDeclaration");
         if (ancestorOpt.isEmpty()) {
-            throw new RuntimeException("Value not inside method");
+            throw new RuntimeException("Value <" + node.get("object") + "> not inside method (line " + node.get("line") + " col " + node.get("col") + ")");
         }
-
-        JmmNode ancestor = ancestorOpt.get();
-        Method method = methodGetter.getMethodFromMethodDeclaration(ancestor);
-
+        Method method = symbolTable.getMethod(ancestorOpt.get().get("uniqueName"));
 
         OllirAssistantType oat = OllirAssistantType.VALUE;
-
 
         if (AstUtils.isVariable(node, symbolTable) && type != null) {
             boolean notFound = true;
@@ -117,12 +109,7 @@ public class OllirVisitor {
         }
 
         if (AstUtils.isVariable(node, symbolTable)) {
-            name = name.replace("d", "dd");
-            name = name.replace("$", "d");
-
-            name = name.replace("arr", "arrr");
-
-            name = name.replace("t", "tt");
+            name = convertVarName(name);
         }
 
         // Add $ if value is a method parameter
@@ -155,7 +142,8 @@ public class OllirVisitor {
 
     private OllirAssistant handleClassDeclaration(JmmNode node, List<OllirAssistant> childrenResults) {
         StringBuilder value = new StringBuilder();
-        value.append(symbolTable.getClassName()).append(" {\n");
+        value.append(symbolTable.getClassName()).append(!(symbolTable.getSuper() == null) ? (" extends " + symbolTable.getSuper())  : "")
+                .append(" {\n");
         boolean inMethods = false;
 
         for (OllirAssistant child : childrenResults) {
@@ -184,10 +172,21 @@ public class OllirVisitor {
             return null;
 
         Symbol childSymbol = AstUtils.getChildSymbol(node, 0);
-        String value = ".field private " + childSymbol.getName() + convertTypeToString(childSymbol.getType()) + ";";
+
+        String name = childSymbol.getName();
+        name = convertVarName(name);
+
+        String value = ".field private " + name + convertTypeToString(childSymbol.getType()) + ";";
 
 
         return new OllirAssistant(OllirAssistantType.VAR_DECLARATION, value, "", childSymbol.getType());
+    }
+
+    private String convertVarName(String name) {
+        name = name.replace("d", "dd");
+        name = name.replace("$", "d");
+        name = name.replace("arr", "arrr");
+        return name.replace("t", "tt");
     }
 
     private OllirAssistant handleMethodDeclaration(JmmNode node, List<OllirAssistant> childrenResults) {
@@ -200,7 +199,7 @@ public class OllirVisitor {
     private OllirAssistant handleMethodHeader(JmmNode node, List<OllirAssistant> childrenResults) {
         StringBuilder value = new StringBuilder(".method public ");
 
-        Method method = methodGetter.getMethodFromMethodHeader(node);
+        Method method = symbolTable.getMethod(node.getParent().get("uniqueName"));
 
         value.append(method.getUniqueName()).append("(");
         for (int i = 0; i < method.getParameters().size(); ++i) {
@@ -208,7 +207,7 @@ public class OllirVisitor {
             if (i > 0) {
                 value.append(", ");
             }
-            value.append(s.getName()).append(convertTypeToString(s.getType()));
+            value.append(convertVarName(s.getName())).append(convertTypeToString(s.getType()));
         }
 
         value.append(")").append(convertTypeToString(method.getReturnType()));
@@ -280,7 +279,7 @@ public class OllirVisitor {
 
         switch (childIndex.getType()) {
             case FIELD:
-                String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                String auxVarF = createGetFieldAux(childIndex, auxCode);
                 value.append(auxVarF);
                 break;
             case VALUE:
@@ -343,10 +342,7 @@ public class OllirVisitor {
                 if (ancestorOptMethod.isEmpty()) {
                     throw new RuntimeException("Value not inside method");
                 }
-
-                JmmNode ancestorMethod = ancestorOptMethod.get();
-
-                Method method = methodGetter.getMethodFromMethodDeclaration(ancestorMethod);
+                Method method = symbolTable.getMethod(ancestorOptMethod.get().get("uniqueName"));
 
                 String varName;
                 boolean notIndex = true;
@@ -403,16 +399,16 @@ public class OllirVisitor {
 
     private OllirAssistant handleMethod(JmmNode node, List<OllirAssistant> childrenResults) {
         OllirAssistant result;
-        Method m = methodGetter.getMethodFromMethod(node);
         String name;
         Type retType;
 
-        if (m == null) {
-            name = node.get("methodName");
-            retType = null;
-        } else {
+        try {
+            Method m = symbolTable.getMethod(node.getParent().get("uniqueName"));
             name = m.getUniqueName();
             retType = m.getReturnType();
+        } catch (NullPointerException e) {
+            name = node.get("methodName");
+            retType = null;
         }
 
         if (node.getNumChildren() > 0) {
@@ -489,7 +485,7 @@ public class OllirVisitor {
                     sb.append(auxVar);
                     break;
                 case FIELD:
-                    String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                    String auxVarF = createGetFieldAux(childResult, auxCode);
                     sb.append(auxVarF);
                     break;
                 case VALUE:
@@ -528,7 +524,7 @@ public class OllirVisitor {
                     break;
 
                 case FIELD:
-                    String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
+                    String auxVarF = createGetFieldAux(childResult, auxCode);
                     values.add(auxVarF);
                     break;
                 case INDEXING:
@@ -550,6 +546,8 @@ public class OllirVisitor {
         OllirAssistantType opType;
 
         addAllAuxCode(auxCode, childrenResults);
+
+
 
         if (!node.get("op").equals("NEG")) {
             value.append(childrenResults.get(0).getValue());
@@ -587,12 +585,18 @@ public class OllirVisitor {
         StringBuilder value = new StringBuilder();
         StringBuilder auxCode = new StringBuilder();
 
+        addAllAuxCode(auxCode, childrenResults);
+
+//        for(OllirAssistant oa : childrenResults){
+//            System.out.println(oa);
+//        }
+
         OllirAssistant child = childrenResults.get(0);
 
         switch (child.getType()) {
             case FIELD:
-                String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
-                value.append(auxVarF);
+                String auxVarF = createGetFieldAux(child, auxCode);
+                value.append("arraylength(").append(auxVarF).append(").i32");
                 break;
             case VALUE:
                 value.append("arraylength(").append(child.getValue()).append(").i32");
@@ -604,13 +608,16 @@ public class OllirVisitor {
                 break;
         }
 
-
-        return new OllirAssistant(OllirAssistantType.LENGTH, value.toString(), auxCode.toString(), new Type("int", false));
+        OllirAssistant result = new OllirAssistant(OllirAssistantType.LENGTH, value.toString(), auxCode.toString(), new Type("int", false));
+//        System.out.println(result.getAuxCode());
+        return result;
     }
 
     private OllirAssistant handleArray(JmmNode node, List<OllirAssistant> childrenResults) {
         StringBuilder value = new StringBuilder("new(array, ");
         StringBuilder auxCode = new StringBuilder();
+
+        addAllAuxCode(auxCode, childrenResults);
 
         switch (childrenResults.get(0).getType()) {
             case BIN_OP:
@@ -723,7 +730,7 @@ public class OllirVisitor {
             value.append(childExpression.getValue());
         }
 
-        value.append(") goto Body").append(whileCounter).append(";\n\tgoto EndLoop").append(whileCounter).append(";\nBody").append(whileCounter).append(":\n");
+        value.append(") goto EndLoop").append(whileCounter).append(";\n");
         value.append(compoundStatement.getValue());
         value.append("\tgoto Loop").append(whileCounter).append(";\n").append("EndLoop").append(whileCounter).append(":\n");
 
@@ -766,11 +773,13 @@ public class OllirVisitor {
                 break;
         }
 
-        value.append(") goto Then").append(ifCounter).append(";\n");
-        value.append(elseStatement.getValue());
+
+        value.append(") goto Else").append(ifCounter).append(";\n");
+        value.append(thenStatement.getAuxCode());
+        value.append(thenStatement.getValue());
         value.append("\tgoto Endif").append(ifCounter).append(";\n");
 
-        value.append("Then").append(ifCounter).append(":\n").append(thenStatement.getValue());
+        value.append("Else").append(ifCounter).append(":\n").append(elseStatement.getAuxCode()).append(elseStatement.getValue());
         value.append("Endif").append(ifCounter).append(":");
 
         OllirAssistant result = new OllirAssistant(OllirAssistantType.SELECTION_STATEMENT, value.toString(), auxCode.toString(), null);

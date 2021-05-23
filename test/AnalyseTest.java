@@ -85,6 +85,20 @@ public class AnalyseTest {
         testAnalyse("fixtures/public/Overloading.jmm");
     }
 
+    @Test
+    public void testOverloadingWithIncludes() {
+        testAnalyse("fixtures/public/OverloadingWithIncludes.jmm");
+    }
+
+    @Test
+    public void testBlackJack() {
+        testAnalyse("fixtures/public/TestBlackJack.jmm");
+    }
+
+    @Test
+    public void testBubbleSort() {
+        testAnalyse("fixtures/public/TestBubbleSort.jmm");
+    }
 
     // MUST FAIL TESTS FROM HERE ON OUT
     @Test
@@ -130,11 +144,6 @@ public class AnalyseTest {
     @Test
     public void failVarUndef() {
         testAnalyseFail("fixtures/public/fail/semantic/var_undef.jmm");
-    }
-
-    @Test
-    public void failVarNotInit() {
-        testAnalyseFail("fixtures/public/fail/semantic/varNotInit.jmm");
     }
 
     @Test

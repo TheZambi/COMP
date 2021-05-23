@@ -3,17 +3,23 @@ package generation.jasmin;
 import org.specs.comp.ollir.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class JasminAssistant {
     private final ClassUnit ollirClass;
     private final StringBuilder code;
     private int lthBranch;
+    private String superClass;
+    private HashMap<String, Integer> stackLimits;
+    private int currentInstructionLimit;
 
     public JasminAssistant(ClassUnit ollirClass) {
         this.code = new StringBuilder();
         this.ollirClass = ollirClass;
         this.lthBranch = 0;
+        stackLimits = new HashMap<>();
     }
 
     public JasminAssistant generate(){
@@ -23,7 +29,16 @@ public class JasminAssistant {
 
     private void generateClass() {
         code.append(".class public ").append(ollirClass.getClassName()).append("\n");
-        code.append(".super java/lang/Object").append("\n");
+        code.append(".super ");
+        if(ollirClass.getSuperClass() == null) {
+            superClass = "java/lang/Object";
+            code.append(superClass);
+        }
+        else {
+            superClass = ollirClass.getSuperClass();
+            code.append(superClass);
+        }
+        code.append("\n");
 
         this.generateFields();
 
@@ -54,10 +69,12 @@ public class JasminAssistant {
 
     private void generateMethod(Method method) {
 
+        stackLimits.put(method.getMethodName(), 0);
+
         code.append("\n.method ");
         if(method.isConstructMethod()) {
             code.append("public ")
-                    .append("<init>()V\n\taload_0\n\tinvokespecial java/lang/Object/<init>()V\n\treturn\n.end method\n");
+                    .append("<init>()V\n\taload_0\n\tinvokespecial ").append(superClass).append(".<init>()V\n\treturn\n.end method\n");
             return;
         }
         code.append(convertAccessModifier(method.getMethodAccessModifier())).append(" ");
@@ -76,29 +93,51 @@ public class JasminAssistant {
         code.append(")").append(convertType(method.getReturnType())).append("\n");
         char prefix = '\t';
 
+        StringBuilder tempCode = new StringBuilder();
         //TODO: change stack and locals limit
-        code.append(prefix).append(".limit stack 99\n");
-        code.append(prefix).append(".limit locals 99\n");
+
+        int locals_size = method.getVarTable().size();
+        if(method.getVarTable().get("this") == null)
+            locals_size++;
+
+
+        tempCode.append(prefix).append(".limit locals ").append(locals_size).append("\n");
 
         for(Instruction instruction : method.getInstructions()) {
-            String instructionCode = this.generateInstruction(method, instruction);
+            currentInstructionLimit = 0;
+            String instructionCode = this.generateInstruction(method, instruction, false);
+
+            if(currentInstructionLimit > stackLimits.get(method.getMethodName())) {
+                stackLimits.replace(method.getMethodName(), currentInstructionLimit);
+            }
+
             String [] lines = instructionCode.split("\n");
             for(String line : lines) {
                 if(line.length() > 0)
-                    code.append("\t").append(line).append("\n");
+                    tempCode.append("\t").append(line).append("\n");
             }
         }
 
         int lastInstIndex = method.getInstructions().size()-1;
         if(lastInstIndex < 0 || method.getInstructions().get(lastInstIndex).getInstType() != InstructionType.RETURN) {
-            code.append("\treturn\n");
+            tempCode.append("\treturn\n");
         }
 
-        code.append(".end method\n");
+        tempCode.append(".end method\n");
+
+        code.append(prefix).append(".limit stack ").append(stackLimits.get(method.getMethodName())).append("\n");
+        code.append(tempCode);
     }
 
-    private String generateInstruction(Method method, Instruction instruction) {
+    private String generateInstruction(Method method, Instruction instruction, boolean inAssign) {
         StringBuilder instCode = new StringBuilder();
+
+        // Find if instruction has labels
+        for(Map.Entry<String, Instruction> entry : method.getLabels().entrySet()) {
+            if(entry.getValue().equals(instruction)) {
+                instCode.append(processLabelName(entry.getKey())).append(":\n");
+            }
+        }
 
         switch(instruction.getInstType()) {
             case ASSIGN -> {
@@ -108,17 +147,22 @@ public class JasminAssistant {
             case CALL -> {
                 CallInstruction callInstruction = (CallInstruction) instruction;
                 instCode.append(this.generateCall(method, callInstruction));
+                if(!inAssign && !callInstruction.getReturnType().getTypeOfElement().equals(ElementType.VOID))
+                    instCode.append("pop\n");
             }
             case GOTO -> {
-
+                GotoInstruction gotoInstruction = (GotoInstruction) instruction;
+                instCode.append(this.generateGoto(method, gotoInstruction));
             }
             case BRANCH -> {
-
+                CondBranchInstruction branchInstruction = (CondBranchInstruction) instruction;
+                instCode.append(this.generateBranch(method, branchInstruction));
             }
             case RETURN -> {
                 ReturnInstruction returnInstruction = (ReturnInstruction) instruction;
 
                 if(returnInstruction.hasReturnValue()) {
+                    currentInstructionLimit += 1;
                     Element element = returnInstruction.getOperand();
                     instCode.append(getElement(method, element));
                     String typeStr = convertTypeToInst(element.getType().getTypeOfElement());
@@ -139,6 +183,7 @@ public class JasminAssistant {
                 instCode.append(this.generateBiOpInstruction(method, (BinaryOpInstruction) instruction));
             }
             case NOPER -> {
+                currentInstructionLimit++;
                 SingleOpInstruction noOperInstruction = (SingleOpInstruction) instruction;
                 Element element = noOperInstruction.getSingleOperand();
 
@@ -151,41 +196,50 @@ public class JasminAssistant {
 
     private String generateAssign(Method method, AssignInstruction assignInstruction) {
         StringBuilder instCode = new StringBuilder();
-
         Operand leftOp = (Operand) assignInstruction.getDest();
+
 
         if(assignInstruction.getRhs().getInstType() == InstructionType.CALL
             && ((CallInstruction)(assignInstruction.getRhs())).getInvocationType() == CallType.NEW) {  //Assign with 'new' operation
             CallInstruction callInstruction = (CallInstruction) (assignInstruction.getRhs()); //right side of the assignment
             if(callInstruction.getReturnType().getTypeOfElement() == ElementType.ARRAYREF) { //new array
+                currentInstructionLimit++;
                 instCode.append(getElement(method, callInstruction.getListOfOperands().get(0)));
                 instCode.append("\nnewarray int\n");
-                instCode.append(createStoreInst(ElementType.ARRAYREF, getVirtualReg(method, leftOp))).append("\n");
+                instCode.append(createStoreInst(ElementType.ARRAYREF, false, getVirtualReg(method, leftOp))).append("\n");
             } else { //new class object
+                currentInstructionLimit+=2;
                 instCode.append("new ").append(((ClassType) callInstruction.getReturnType()).getName()).append("\n");
                 instCode.append("dup").append("\n");
             }
         } else {
-            instCode.append(this.generateInstruction(method, assignInstruction.getRhs()));
-            instCode.append(createStoreInst(leftOp.getType().getTypeOfElement(),getVirtualReg(method, leftOp))).append("\n");
+            boolean isArrayAssign = false;
 
+            // Array element assignment
+            if(leftOp instanceof ArrayOperand) {
+                currentInstructionLimit += 2;
+                isArrayAssign = true;
+                instCode.append(getElementArrayAssign(method, assignInstruction.getDest()));
+            }
+            instCode.append(this.generateInstruction(method, assignInstruction.getRhs(), true));
+            instCode.append(createStoreInst(leftOp.getType().getTypeOfElement(), isArrayAssign, getVirtualReg(method, leftOp))).append("\n");
         }
         return instCode.toString();
     }
 
     private String generateGetfield(Method method, GetFieldInstruction instruction) {
-
+        currentInstructionLimit += 2;
         return getElement(method, instruction.getFirstOperand()) +
-                "getfield " + ((Operand) instruction.getSecondOperand()).getName() +
-                " " + convertType(instruction.getSecondOperand().getType().getTypeOfElement()) + "\n";
+                "getfield " + ollirClass.getClassName() + '/' + ((Operand) instruction.getSecondOperand()).getName() +
+                " " + convertType(instruction.getSecondOperand().getType()) + "\n";
     }
 
     private String generatePutfield(Method method, PutFieldInstruction instruction) {
-
+        currentInstructionLimit += 2;
         return getElement(method, instruction.getFirstOperand()) +
                 getElement(method, instruction.getThirdOperand()) +
-                "putfield " + ((Operand) instruction.getSecondOperand()).getName() +
-                " " + convertType(instruction.getSecondOperand().getType().getTypeOfElement()) + "\n";
+                "putfield " + ollirClass.getClassName() + '/' + ((Operand) instruction.getSecondOperand()).getName() +
+                " " + convertType(instruction.getSecondOperand().getType()) + "\n";
     }
 
     private String generateCall(Method method, CallInstruction callInstruction) {
@@ -200,9 +254,14 @@ public class JasminAssistant {
             case invokestatic:
                 callCode.append(this.generateInvStatic(method, callInstruction));
                 break;
+            case arraylength:
+                currentInstructionLimit++;
+                callCode.append(createLoadInst(callInstruction.getFirstArg().getType().getTypeOfElement(),
+                        true, getVirtualReg(method, (Operand)callInstruction.getFirstArg())));
+                callCode.append("\narraylength\n");
+                break;
             case invokeinterface:
             case NEW:
-            case arraylength:
             case ldc:
                 break;
             default:
@@ -226,7 +285,12 @@ public class JasminAssistant {
 
         instCode.append(params);
 
-        instCode.append(")").append(convertType(callInstruction.getReturnType())).append("\n");
+        Type returnType = callInstruction.getReturnType();
+
+        instCode.append(")").append(convertType(returnType)).append("\n");
+
+        int returnVoid = returnType.getTypeOfElement() == ElementType.VOID ? 0 : 1;
+        currentInstructionLimit += Math.max(returnVoid, callInstruction.getListOfOperands().size());
 
         return instCode.toString();
     }
@@ -246,7 +310,9 @@ public class JasminAssistant {
         instCode.append(params);
 
         instCode.append(")V\n");
-        instCode.append("astore_").append(getVirtualReg(method, (Operand) callInstruction.getFirstArg())).append("\n");
+        instCode.append(createStoreInst(ElementType.CLASS, false, getVirtualReg(method, (Operand) callInstruction.getFirstArg())));
+
+        currentInstructionLimit += Math.max(callInstruction.getListOfOperands().size(), 1);
 
         return instCode.toString();
     }
@@ -270,6 +336,8 @@ public class JasminAssistant {
 
         instCode.append(")").append(convertType(callInstruction.getReturnType())).append("\n");
 
+        currentInstructionLimit += 1 + callInstruction.getListOfOperands().size();
+
         return instCode.toString();
     }
 
@@ -285,6 +353,8 @@ public class JasminAssistant {
     }
 
     private String generateBiOpInstruction(Method method, BinaryOpInstruction instruction) {
+        currentInstructionLimit += 2;
+
         OperationType opType = instruction.getUnaryOperation().getOpType();
 
         List<Element> operands = new ArrayList<>();
@@ -292,7 +362,7 @@ public class JasminAssistant {
         operands.add(instruction.getRightOperand());
         StringBuilder instCode = new StringBuilder();
 
-        if(opType != OperationType.NOTB) {
+        if(opType != OperationType.NOTB && opType != OperationType.ANDB) {
             for (Element operand : operands) {
                 instCode.append(getElement(method, operand));
             }
@@ -314,6 +384,30 @@ public class JasminAssistant {
                     .append(lthBranch-1).append(": ");
 
             return instCode.toString();
+        } else if(opType == OperationType.NOTB) {
+            currentInstructionLimit--;
+            /*
+            if a != false goto 0
+            -> const true
+            goto 1
+            0: -> const false
+            1: --continue--
+            */
+            instCode.append("ifne ").append(lthBranch++)
+                    .append("\niconst_1\ngoto ").append(lthBranch++)
+                    .append("\n").append(lthBranch-2).append(": iconst_0\n")
+                    .append(lthBranch-1).append(": ");
+
+            return instCode.toString();
+        } else if(opType == OperationType.ANDB) {
+            instCode.append("ifeq ").append(lthBranch).append("\n")
+                    .append(getElement(method, operands.get(1)))
+                    .append("\nifeq ").append(lthBranch++)
+                    .append("\niconst_1\ngoto ").append(lthBranch++)
+                    .append("\n").append(lthBranch-2).append(": iconst_0\n")
+                    .append(lthBranch-1).append(": ");
+
+            return instCode.toString();
         }
 
         instCode.append(convertTypeToInst(operands.get(0).getType().getTypeOfElement()));
@@ -323,14 +417,62 @@ public class JasminAssistant {
             case SUB -> opStr = "sub";
             case MUL -> opStr = "mul";
             case DIV -> opStr = "div";
-            case ANDB -> opStr = "and";
-            case NOTB -> opStr = "neg";
+//            case ANDB -> opStr = "and";
+//            case NOTB -> opStr = "neg";
         }
         instCode.append(opStr).append("\n");
         return instCode.toString();
     }
 
+    private String generateBranch(Method method, CondBranchInstruction instruction) {
+        StringBuilder instCode = new StringBuilder();
+
+        instCode.append(getElement(method, instruction.getLeftOperand()));
+
+        String firstLabel = processLabelName(instruction.getLabel());
+
+        OperationType operationType = instruction.getCondOperation().getOpType();
+
+        //'not' operation only needs one of the operands. 'and' operation will only check the left first and then right
+        if(operationType != OperationType.NOTB && operationType != OperationType.ANDB && operationType != OperationType.OR) {
+            instCode.append(getElement(method, instruction.getRightOperand()));
+        }
+
+        switch(operationType) {
+            case ANDB -> {
+                instCode.append("ifeq ").append(firstLabel).append("\n");
+                instCode.append(getElement(method, instruction.getRightOperand()));
+                instCode.append("ifeq ").append(firstLabel).append("\n");
+            }
+            case OR -> {
+            }
+            case LTH -> {
+                instCode.append("if_icmpge ").append(firstLabel).append("\n");
+            }
+            case NOTB -> {
+                instCode.append("ifne ").append(firstLabel).append("\n");
+            }
+        }
+//        instCode.append(" ").append(processLabelName(instruction.getLabel()));
+
+        return instCode.toString();
+    }
+
+    private String generateGoto(Method method, GotoInstruction instruction) {
+        return "goto " + instruction.getLabel() + "\n";
+    }
+
+    /*Making sure labels have not the same name as Jasmin generated labels (not and lth)*/
+    static String processLabelName(String labelName) {
+        labelName.replaceAll("_", "__");
+        if(labelName.matches("^-?\\d+$")) //label name is integer (can be the same name as a generated label, so we add a character)
+            labelName += "_";
+        return labelName;
+    }
+
     private String getElement(Method method, Element operand) {
+        boolean isArray = operand instanceof ArrayOperand;
+
         StringBuilder instCode = new StringBuilder();
         ElementType elementType = operand.getType().getTypeOfElement();
         if(operand.isLiteral()) { //if literal, create a const instruction
@@ -338,10 +480,29 @@ public class JasminAssistant {
             instCode.append(createConstInst(value));
         } else { //if its a variable, load with its virtual reg
             if(operand.getType().getTypeOfElement() != ElementType.CLASS) {
-                instCode.append(createLoadInst(elementType, getVirtualReg(method, (Operand) operand)));
+
+                if(isArray) {
+                    currentInstructionLimit++;
+                    instCode.append(createLoadInst(elementType, isArray, getVirtualReg(method, (Operand) operand))).append("\n");
+                    instCode.append(getElement(method, ((ArrayOperand) operand).getIndexOperands().get(0))).append("\n");
+                    instCode.append(convertTypeToInst(elementType)).append("aload\n");
+                } else {
+                    instCode.append(createLoadInst(elementType, isArray, getVirtualReg(method, (Operand) operand)));
+                }
             }
         }
         instCode.append("\n");
+        return instCode.toString();
+    }
+
+    // to be used in assignments with array
+    private String getElementArrayAssign(Method method, Element operand) {
+        StringBuilder instCode = new StringBuilder();
+        ElementType elementType = operand.getType().getTypeOfElement();
+
+        instCode.append(createLoadInst(elementType, true, getVirtualReg(method, (Operand) operand))).append("\n");
+        instCode.append(getElement(method, ((ArrayOperand) operand).getIndexOperands().get(0)));
+
         return instCode.toString();
     }
 
@@ -367,27 +528,30 @@ public class JasminAssistant {
         }
     }
 
-    private String createStoreInst(ElementType type, int virtualReg) {
+    private String createStoreInst(ElementType type, boolean isArray, int virtualReg) {
         StringBuilder storeInst = new StringBuilder();
-        storeInst.append(convertTypeToInst(type)).append("store");
+        storeInst.append(convertTypeToInst(type)).append(isArray ? "a" : "").append("store");
 
-        if(virtualReg <= 3) { // istore_1
-            storeInst.append("_");
-        } else storeInst.append(" "); //istore 6
+        if(!isArray) {
+            if (virtualReg <= 3) { // istore_1
+                storeInst.append("_");
+            } else storeInst.append(" "); //istore 6
 
-        storeInst.append(virtualReg);
+            storeInst.append(virtualReg);
+        }
         return storeInst.toString();
     }
 
-    private String createLoadInst(ElementType type, int virtualReg) { //TODO: repeated code - see createStoreInst
+    private String createLoadInst(ElementType type, boolean isArray, int virtualReg) { //TODO: repeated code - see createStoreInst
         StringBuilder storeInst = new StringBuilder();
-        storeInst.append(convertTypeToInst(type)).append("load");
+        storeInst.append(isArray ? "a" : convertTypeToInst(type)).append("load");
 
-        if(virtualReg <= 3) { // iload_1
+        if (virtualReg <= 3) { // iload_1
             storeInst.append("_");
         } else storeInst.append(" "); //iload 6
 
         storeInst.append(virtualReg);
+
         return storeInst.toString();
     }
 
@@ -440,9 +604,6 @@ public class JasminAssistant {
             }
             case BOOLEAN -> {
                 return "Z";
-            }
-            case THIS -> {
-                return "";
             }
             case STRING -> {
                 return "Ljava/lang/String;";
