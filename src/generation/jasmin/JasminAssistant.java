@@ -425,6 +425,7 @@ public class JasminAssistant {
     }
 
     private String generateBranch(Method method, CondBranchInstruction instruction) {
+        currentInstructionLimit++;
         StringBuilder instCode = new StringBuilder();
 
         instCode.append(getElement(method, instruction.getLeftOperand()));
