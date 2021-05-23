@@ -109,4 +109,9 @@ public class BackendTest {
     public void testOverloadingWithIncludes() {
         testBackend("fixtures/public/OverloadingWithIncludes.jmm", "1\r\n2\r\n3\r\n4");
     }
+
+    @Test
+    public void testBinarySearch() {
+        testBackend("fixtures/public/BinarySearch.jmm", "3");
+    }
 }
