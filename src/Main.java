@@ -1,4 +1,5 @@
 import analysis.AnalysisStage;
+import com.sun.tools.jconsole.JConsoleContext;
 import generation.ollir.OptimizationStage;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
@@ -11,6 +12,8 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
+        boolean optimize = Arrays.asList(args).contains("-o");
+
         try {  // TODO: REMOVE THIS BECAUSE INTELLIJ IS BAD :(
             System.out.println("Executing with args: " + Arrays.toString(args));
 
@@ -21,7 +24,7 @@ public class Main {
             var semanticResult = new AnalysisStage().semanticAnalysis(parserResult);
             checkReports("SEMANTIC", Stage.SEMANTIC, semanticResult.getReports());
 
-            var ollirResult = new OptimizationStage().toOllir(semanticResult);
+            var ollirResult = new OptimizationStage().toOllir(semanticResult, optimize);
             checkReports("OLLIR", Stage.LLIR, ollirResult.getReports());
 
             var jasminResult = new generation.jasmin.BackendStage().toJasmin(ollirResult);

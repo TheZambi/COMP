@@ -25,9 +25,11 @@ public class OllirVisitor {
 
     private int ifCounter;
     private int whileCounter;
+    private boolean optimize;
 
-    public OllirVisitor(SymbolTable symbolTable) {
+    public OllirVisitor(SymbolTable symbolTable, boolean optimize) {
         this.symbolTable = (MySymbolTable) symbolTable;
+        this.optimize = optimize;
 
         this.visitMap = new HashMap<>();
         this.visitMap.put("Value", this::handleValue);
@@ -706,7 +708,7 @@ public class OllirVisitor {
 
         OllirAssistant childExpression = childrenResults.get(0); //expression
         OllirAssistant compoundStatement = childrenResults.get(1); //body
-        if(false)
+        if(this.optimize)
         {
             if (!childExpression.getAuxCode().equals("")) {
                 for (String s : childExpression.getAuxCode().split("\n")) {

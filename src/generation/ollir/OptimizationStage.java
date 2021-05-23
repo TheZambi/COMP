@@ -30,10 +30,15 @@ public class OptimizationStage implements JmmOptimization {
 
     @Override
     public OllirResult toOllir(JmmSemanticsResult semanticsResult) {
+        return toOllir(semanticsResult, false);
+    }
+
+    @Override
+    public OllirResult toOllir(JmmSemanticsResult semanticsResult, boolean optimize) {
 
         JmmNode node = semanticsResult.getRootNode();
 
-        OllirVisitor visitor = new OllirVisitor(semanticsResult.getSymbolTable());
+        OllirVisitor visitor = new OllirVisitor(semanticsResult.getSymbolTable(), optimize);
 
         OllirAssistant result = visitor.visit(node);
 
@@ -69,5 +74,7 @@ public class OptimizationStage implements JmmOptimization {
         // THIS IS JUST FOR CHECKPOINT 3
         return ollirResult;
     }
+
+
 
 }
