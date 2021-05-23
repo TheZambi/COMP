@@ -132,6 +132,12 @@ public class TypeVerificationVisitor {
                         "Cannot call method on primitive data types"));
                 return ignore;
             case "this":
+                Optional<JmmNode> ancestorOpt = node.getAncestor("MainBody");
+                if(ancestorOpt.isPresent())
+                {
+                    this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                            "Value 'this' can't be used in the 'main' function"));
+                }
                 calledOn = new Type(symbolTable.getClassName(), false);
                 break;
         }
