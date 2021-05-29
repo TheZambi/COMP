@@ -60,6 +60,7 @@ public class UnusedVarsVisitor {
     }
 
     private void valueVisit(JmmNode node) {
+
         if (!node.get("type").equals("object"))
             return;
 
@@ -72,18 +73,15 @@ public class UnusedVarsVisitor {
         if (ancestorOpt.isPresent()) {
             JmmNode ancestor = ancestorOpt.get();
             // Skip when this is the value being attributed
-            if (AstUtils.isAssignment(ancestor) && (ancestor.getChildren().get(0) != node || AstUtils.hasMethodCall(ancestor.getChildren().get(1)))) {
+            // or it being used in a method call
+            if (AstUtils.hasMethodCall(ancestor)
+                || ancestor.getChildren().get(0) != node && AstUtils.isAssignment(ancestor)) {
                 holder.used = true;
                 return;
             }
         } else {
-            ancestorOpt = node.getAncestor("Return");
-            if(ancestorOpt.isPresent())
-            {
-                this.initedVars.put(name, new VarHolder(InitStatus.INITIALIZED, (JmmNodeImpl) node));
-                this.initedVars.get(name).used = true;
-                return;
-            }
+            holder.used = true;
+            return;
         }
 
         switch (holder.initStatus) {
@@ -115,11 +113,13 @@ public class UnusedVarsVisitor {
         Method m = symbolTable.getMethod(node.get("uniqueName"));
 
         DeleteUnusedVarVisitor deleteUnusedVarVisitor = new DeleteUnusedVarVisitor();
-
         // Remove unused vars
-        for (Map.Entry<String, VarHolder> entry : initedVars.entrySet())
-            if (!entry.getValue().used)
+        for (Map.Entry<String, VarHolder> entry : initedVars.entrySet()) {
+            if (!entry.getValue().used) {
                 deleteUnusedVarVisitor.deleteVar(m, entry.getKey(), node, entry.getValue().node);
+//                System.out.println("Deleted " + entry.getKey() + " from method " + m.getName());
+            }
+        }
     }
 
     private void assignmentVisit(JmmNode node) {

@@ -27,8 +27,9 @@ public class DeleteUnusedVarVisitor {
 
         JmmNode child = node.getChildren().get(0);
 
-        if (child.getKind().equals("Value") && child.get("object").equals(varToDelete))
+        if (child.getKind().equals("Value") && child.get("object").equals(varToDelete)) {
             nodesToDelete.add(node);
+        }
     }
 
     private void visit(JmmNode node) {

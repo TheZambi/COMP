@@ -29,9 +29,14 @@ public class ConstantPropagationVisitor {
 
         this.visitMap.put("Statement", this::statementVisit);
         this.visitMap.put("Value", this::valueVisit);
+        this.visitMap.put("MethodDeclaration", this::methodDeclarationVisit);
 
         this.previsitMap = new HashMap<>();
 
+    }
+
+    private void methodDeclarationVisit(JmmNode node) {
+        this.valuesMap.clear();
     }
 
     private void valueVisit(JmmNode node) {
@@ -57,7 +62,12 @@ public class ConstantPropagationVisitor {
             return;
 
         String name = node.getChildren().get(0).get("object"),
-                type = node.getChildren().get(1).get("type");
+            type = node.getChildren().get(1).get("type");
+
+        if (AstUtils.isInsideConditionalBranch(node)) {
+            this.valuesMap.remove(name);
+            return;
+        }
 
         switch (type) {
             case "int", "boolean" -> this.valuesMap.put(name, new VarDescriptor(node.getChildren().get(1).get("object"), node.getChildren().get(1).get("type")));
