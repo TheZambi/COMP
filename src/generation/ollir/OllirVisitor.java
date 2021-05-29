@@ -733,6 +733,12 @@ public class OllirVisitor {
             value.append("Loop").append(whileCounter).append(":\n");
             value.append(compoundStatement.getValue());
 
+
+            if (!childExpression.getAuxCode().equals("")) {
+                for (String s : childExpression.getAuxCode().split("\n")) {
+                    value.append(s).append("\n");
+                }
+            }
             if (childExpression.getType() == OllirAssistantType.VALUE) {
                 value.append("if (");
                 value.append(childExpression.getValue()).append(" !.bool ").append(childExpression.getValue());
@@ -742,10 +748,7 @@ public class OllirVisitor {
                 value.append(auxCode);
                 value.append("if (");
                 value.append(auxVar).append(" !.bool ").append(auxVar);
-            } //else {
-//                value.append("if (");
-//                value.append(childExpression.getValue());
-//            }
+            }
 
             value.append(") goto Loop").append(whileCounter).append(";\n");
 
