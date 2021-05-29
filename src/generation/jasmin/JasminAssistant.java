@@ -213,6 +213,14 @@ public class JasminAssistant {
                 instCode.append("dup").append("\n");
             }
         } else {
+            Instruction rightSide = assignInstruction.getRhs();
+
+            String checkIncrement = this.checkIncrementAssign(method, leftOp, rightSide);
+            if(checkIncrement != null)
+                return checkIncrement;
+            // Check iinc cases (a = a + 2)
+
+
             boolean isArrayAssign = false;
 
             // Array element assignment
@@ -225,6 +233,52 @@ public class JasminAssistant {
             instCode.append(createStoreInst(leftOp.getType().getTypeOfElement(), isArrayAssign, getVirtualReg(method, leftOp))).append("\n");
         }
         return instCode.toString();
+    }
+
+    private String checkIncrementAssign(Method method, Operand leftOp, Instruction rightSide) {
+
+        //must be an int
+        if(leftOp.getType().getTypeOfElement() != ElementType.INT32)
+            return null;
+
+        //cannot be an array element
+        if(leftOp instanceof ArrayOperand)
+            return null;
+
+        //must be binary op (+ or -)
+        if(rightSide.getInstType() != InstructionType.BINARYOPER)
+            return null;
+
+        BinaryOpInstruction rightSideOp = (BinaryOpInstruction) rightSide;
+        OperationType opType = ((BinaryOpInstruction)rightSide).getUnaryOperation().getOpType();
+        if(opType != OperationType.ADD && opType != OperationType.SUB)
+            return null;
+
+        Element leftElement = rightSideOp.getLeftOperand();
+        Element rightElement = rightSideOp.getRightOperand();
+
+        //both operands must be int
+        if(leftElement.getType().getTypeOfElement() != ElementType.INT32 || rightElement.getType().getTypeOfElement() != ElementType.INT32)
+            return null;
+
+        if(leftElement instanceof Operand && rightElement.isLiteral()) {
+            int incValue = Integer.parseInt(((LiteralElement)rightElement).getLiteral());
+            if(incValue < -128 || incValue > 127) //increment value must be signed byte [-128,127]
+                return null;
+            if(opType == OperationType.SUB)
+                incValue *= -1;
+            // a = a + 1  or  a = a - 1
+            if(((Operand) leftElement).getName().equals(leftOp.getName())) {
+                return "iinc " + getVirtualReg(method, leftOp) + " " + incValue + "\n";
+            }
+        } else if(rightElement instanceof Operand && leftElement.isLiteral()) {
+            int incValue = Integer.parseInt(((LiteralElement)leftElement).getLiteral());
+            // a = 1 + a
+            if(((Operand) rightElement).getName().equals(leftOp.getName()) && opType == OperationType.ADD) {
+                return "iinc " + getVirtualReg(method, leftOp) + " " + incValue + "\n";
+            }
+        }
+        return null;
     }
 
     private String generateGetfield(Method method, GetFieldInstruction instruction) {
