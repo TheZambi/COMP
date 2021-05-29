@@ -2,7 +2,11 @@ class A {
 
     public static void main(String[] args){
         int a;
+        int b;
+        boolean c;
+
         a = 0;
-        a = a++;
+        b = 1;
+        c = 0 < 0;
     }
 }

@@ -427,22 +427,54 @@ public class JasminAssistant {
             instCode.append(getElement(method, operands.get(0)));
         }
 
-        if(opType == OperationType.LTH) {
-            /*
-            if arg1 >= arg2 goto 0
-            -> const true
-            goto 1
-            0: -> const false
-            1: --continue---
-            */
-            instCode.append("if_icmpge ").append(lthBranch++)
-                    .append("\niconst_1\ngoto ").append(lthBranch++)
-                    .append("\n").append(lthBranch-2).append(": iconst_0\n")
-                    .append(lthBranch-1).append(": ");
+        Element leftOperand = operands.get(0);
+        Element rightOperand = operands.get(1);
 
+        if(opType == OperationType.LTH) {
+            if(rightOperand.isLiteral() && ((LiteralElement)rightOperand).getLiteral().equals("0")) { // n < 0
+
+                // 0 < 0
+                if(leftOperand.isLiteral() && ((LiteralElement)leftOperand).getLiteral().equals("0")) {
+                    return "iconst_0\n";
+                }
+                instCode = new StringBuilder();
+                instCode.append(getElement(method, leftOperand));
+                instCode.append("ifge ");
+
+            } else if(leftOperand.isLiteral() && ((LiteralElement)leftOperand).getLiteral().equals("0")) { // 0 < n
+
+                // 0 < 0
+                if(rightOperand.isLiteral() && ((LiteralElement)rightOperand).getLiteral().equals("0")) {
+                    return "iconst_0\n";
+                }
+                instCode = new StringBuilder();
+                instCode.append(getElement(method, rightOperand));
+                instCode.append("ifle ");
+
+            } else {
+                /*
+                if arg1 >= arg2 goto 0
+                -> const true
+                goto 1
+                0: -> const false
+                1: --continue---
+                */
+                instCode.append("if_icmpge ");
+            }
+            instCode.append(lthBranch++).append("\niconst_1\ngoto ").append(lthBranch++)
+                    .append("\n").append(lthBranch - 2).append(": iconst_0\n")
+                    .append(lthBranch - 1).append(": ");
             return instCode.toString();
+
         } else if(opType == OperationType.NOTB) {
             currentInstructionLimit--;
+
+            if(leftOperand.isLiteral()) { // !false or !true
+                if(((LiteralElement)leftOperand).getLiteral().equals("0"))
+                    return "iconst_1\n";
+                else
+                    return "iconst_0\n";
+            }
             /*
             if a != false goto 0
             -> const true
@@ -457,6 +489,22 @@ public class JasminAssistant {
 
             return instCode.toString();
         } else if(opType == OperationType.ANDB) {
+
+            if(leftOperand.isLiteral()) {
+                if(rightOperand.isLiteral()) {
+                    if(((LiteralElement)rightOperand).getLiteral().equals("0")) // x && false
+                        return "iconst_0\n";
+                    else if(((LiteralElement)leftOperand).getLiteral().equals("1")) // true && true
+                        return "iconst_1\n";
+                }
+                if(((LiteralElement)leftOperand).getLiteral().equals("0")) // false && x
+                    return "iconst_0\n";
+
+            } else if(rightOperand.isLiteral()) {
+                if(((LiteralElement)rightOperand).getLiteral().equals("0")) // x && false
+                    return "iconst_0\n";
+            }
+
             instCode.append("ifeq ").append(lthBranch).append("\n")
                     .append(getElement(method, operands.get(1)))
                     .append("\nifeq ").append(lthBranch++)
