@@ -55,7 +55,7 @@ public class OptimizedBackendTest {
 
     @Test
     public void testWhileAndIF() {
-        testOptimizedBackend("fixtures/public/WhileAndIF.jmm", "10\r\n10\r\n10\r\n10\r\n10\r\n10\r\n10\r\n10\r\n10\r\n10");
+        testOptimizedBackend("fixtures/public/WhileAndIF.jmm", "10\n10\n10\n10\n10\n10\n10\n10\n10\n10");
     }
 
     @Test
@@ -83,12 +83,12 @@ public class OptimizedBackendTest {
     //        Random
     @Test
     public void testMonteCarloPi() {
-        testOptimizedBackend("fixtures/public/MonteCarloPi.jmm", "Insert number: Result: ???", "100");
+        testOptimizedBackend("fixtures/public/MonteCarloPi.jmm", "Insert number: Result: 314", "5000000");
     }
 
     @Test
     public void testQuickSort() {
-        testOptimizedBackend("fixtures/public/QuickSort.jmm", "1\r\n2\r\n3\r\n4\r\n5\r\n6\r\n7\r\n8\r\n9\r\n10");
+        testOptimizedBackend("fixtures/public/QuickSort.jmm", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10");
     }
 
     @Test
@@ -105,22 +105,22 @@ public class OptimizedBackendTest {
     // CUSTOM TESTS
     @Test
     public void testOverloading() {
-        testOptimizedBackend("fixtures/public/Overloading.jmm", "");
+        testOptimizedBackend("fixtures/custom/Overloading.jmm", "");
     }
 
     @Test
     public void testOverloadingWithIncludes() {
-        testOptimizedBackend("fixtures/public/OverloadingWithIncludes.jmm", "1\r\n2\r\n3\r\n4");
+        testOptimizedBackend("fixtures/custom/OverloadingWithIncludes.jmm", "1\n2\n3\n4");
     }
 
     @Test
     public void testBinarySearch() {
-        testOptimizedBackend("fixtures/public/BinarySearch.jmm", "3");
+        testOptimizedBackend("fixtures/custom/BinarySearch.jmm", "3");
     }
 
     @Test
     public void testUninitializedVar() {
-        testOptimizedBackend("fixtures/public/testUninitializedVars.jmm", "1");
+        testOptimizedBackend("fixtures/custom/TestUninitializedVars.jmm", "1");
     }
 
     // Until the game ends, basically infinite

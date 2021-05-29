@@ -21,6 +21,14 @@ public class ConstantPropagationVisitor {
             this.value = value;
             this.type = type;
         }
+
+        @Override
+        public String toString() {
+            return "VarDescriptor{" +
+                    "value='" + value + '\'' +
+                    ", type='" + type + '\'' +
+                    '}';
+        }
     }
 
     public ConstantPropagationVisitor() {
@@ -49,6 +57,8 @@ public class ConstantPropagationVisitor {
         VarDescriptor holder = this.valuesMap.get(name);
 
         if (holder != null) {
+            System.out.println(this.valuesMap);
+            System.out.println(holder);
             node.put("type", holder.type);
             node.put("object", holder.value);
         }
@@ -58,16 +68,17 @@ public class ConstantPropagationVisitor {
         if(!AstUtils.isAssignment(node))
             return;
 
-        if(!node.getChildren().get(0).getKind().equals("Value") || !node.getChildren().get(1).getKind().equals("Value"))
+        if(!node.getChildren().get(0).getKind().equals("Value"))
             return;
 
-        String name = node.getChildren().get(0).get("object"),
-            type = node.getChildren().get(1).get("type");
+        String name = node.getChildren().get(0).get("object");
 
-        if (AstUtils.isInsideConditionalBranch(node)) {
+        if (!node.getChildren().get(1).getKind().equals("Value") || AstUtils.isInsideConditionalBranch(node)) {
             this.valuesMap.remove(name);
             return;
         }
+
+        String type = node.getChildren().get(1).get("type");
 
         switch (type) {
             case "int", "boolean" -> this.valuesMap.put(name, new VarDescriptor(node.getChildren().get(1).get("object"), node.getChildren().get(1).get("type")));
@@ -81,15 +92,17 @@ public class ConstantPropagationVisitor {
         Consumer<JmmNode> visit = this.visitMap.get(node.getKind()),
                 preVisit = this.previsitMap.get(node.getKind());
 
-        if (preVisit != null)
+        if (preVisit != null) {
             preVisit.accept(node);
+        }
 
         // Preorder: 1st visit each children
         for (var child : node.getChildren())
             visit(child);
 
         // Preorder: then visit the node
-        if (visit != null)
+        if (visit != null) {
             visit.accept(node);
+        }
     }
 }

@@ -1,9 +1,7 @@
 import org.junit.Test;
 import pt.up.fe.comp.TestUtils;
-import pt.up.fe.comp.jmm.JmmParserResult;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
 
 import java.util.List;
@@ -82,32 +80,32 @@ public class AnalyseTest {
     // CUSTOM TESTS
     @Test
     public void testOverloading() {
-        testAnalyse("fixtures/public/Overloading.jmm");
+        testAnalyse("fixtures/custom/Overloading.jmm");
     }
 
     @Test
     public void testOverloadingWithIncludes() {
-        testAnalyse("fixtures/public/OverloadingWithIncludes.jmm");
+        testAnalyse("fixtures/custom/OverloadingWithIncludes.jmm");
     }
 
     @Test
     public void testBlackJack() {
-        testAnalyse("fixtures/public/TestBlackJack.jmm");
+        testAnalyse("fixtures/custom/TestBlackJack.jmm");
     }
 
     @Test
     public void testBubbleSort() {
-        testAnalyse("fixtures/public/TestBubbleSort.jmm");
+        testAnalyse("fixtures/custom/TestBubbleSort.jmm");
     }
 
     @Test
     public void testBinarySearch() {
-        testAnalyse("fixtures/public/BinarySearch.jmm");
+        testAnalyse("fixtures/custom/BinarySearch.jmm");
     }
 
     @Test
     public void testUninitializedVar() {
-        testAnalyse("fixtures/public/testUninitializedVars.jmm");
+        testAnalyse("fixtures/custom/TestUninitializedVars.jmm");
     }
 
     // MUST FAIL TESTS FROM HERE ON OUT

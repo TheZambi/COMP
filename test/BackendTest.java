@@ -17,11 +17,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Test;
 
 import pt.up.fe.comp.TestUtils;
-import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
-import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
 import pt.up.fe.specs.util.SpecsStrings;
 
@@ -93,7 +90,7 @@ public class BackendTest {
 //        Random
     @Test
     public void testMonteCarloPi() {
-        testBackend("fixtures/public/MonteCarloPi.jmm", "Insert number: Result: ???", "100");
+        testBackend("fixtures/public/MonteCarloPi.jmm", "Insert number: Result: 314", "5000000");
     }
 
     @Test
@@ -115,17 +112,17 @@ public class BackendTest {
     // CUSTOM TESTS
     @Test
     public void testOverloading() {
-        testBackend("fixtures/public/Overloading.jmm", "");
+        testBackend("fixtures/custom/Overloading.jmm", "");
     }
 
     @Test
     public void testOverloadingWithIncludes() {
-        testBackend("fixtures/public/OverloadingWithIncludes.jmm", "1\r\n2\r\n3\r\n4");
+        testBackend("fixtures/custom/OverloadingWithIncludes.jmm", "1\r\n2\r\n3\r\n4");
     }
 
     @Test
     public void testBinarySearch() {
-        testBackend("fixtures/public/BinarySearch.jmm", "3");
+        testBackend("fixtures/custom/BinarySearch.jmm", "3");
     }
 
     @Test

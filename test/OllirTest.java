@@ -1,5 +1,4 @@
 import org.junit.Test;
-import org.junit.Assert;
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
@@ -75,31 +74,31 @@ public class OllirTest {
     // CUSTOM TESTS
     @Test
     public void testOverloading() {
-        testOllir("fixtures/public/Overloading.jmm");
+        testOllir("fixtures/custom/Overloading.jmm");
     }
 
     @Test
     public void testOverloadingWithIncludes() {
-        testOllir("fixtures/public/OverloadingWithIncludes.jmm");
+        testOllir("fixtures/custom/OverloadingWithIncludes.jmm");
     }
 
     @Test
     public void testBlackJack() {
-        testOllir("fixtures/public/TestBlackJack.jmm");
+        testOllir("fixtures/custom/TestBlackJack.jmm");
     }
 
     @Test
     public void testBubbleSort() {
-        testOllir("fixtures/public/TestBubbleSort.jmm");
+        testOllir("fixtures/custom/TestBubbleSort.jmm");
     }
 
     @Test
     public void testBinarySearch() {
-        testOllir("fixtures/public/BinarySearch.jmm");
+        testOllir("fixtures/custom/BinarySearch.jmm");
     }
 
     @Test
     public void testUninitializedVar() {
-        testOllir("fixtures/public/testUninitializedVars.jmm");
+        testOllir("fixtures/custom/TestUninitializedVars.jmm");
     }
 }

@@ -12,13 +12,11 @@
  * specific language governing permissions and limitations under the License. under the License.
  */
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.specs.util.SpecsIo;
 
 import java.util.List;
@@ -91,32 +89,32 @@ public class OptimizeTest {
     // CUSTOM TESTS
     @Test
     public void testOverloading() {
-        testOptimize("fixtures/public/Overloading.jmm");
+        testOptimize("fixtures/custom/Overloading.jmm");
     }
 
     @Test
     public void testOverloadingWithIncludes() {
-        testOptimize("fixtures/public/OverloadingWithIncludes.jmm");
+        testOptimize("fixtures/custom/OverloadingWithIncludes.jmm");
     }
 
     @Test
     public void testBlackJack() {
-        testOptimize("fixtures/public/TestBlackJack.jmm");
+        testOptimize("fixtures/custom/TestBlackJack.jmm");
     }
 
     @Test
     public void testBubbleSort() {
-        testOptimize("fixtures/public/TestBubbleSort.jmm");
+        testOptimize("fixtures/custom/TestBubbleSort.jmm");
     }
 
     @Test
     public void testBinarySearch() {
-        testOptimize("fixtures/public/BinarySearch.jmm");
+        testOptimize("fixtures/custom/BinarySearch.jmm");
     }
 
     @Test
     public void testUninitializedVar() {
-        testOptimize("fixtures/public/testUninitializedVars.jmm");
+        testOptimize("fixtures/custom/TestUninitializedVars.jmm");
     }
 
 

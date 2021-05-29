@@ -40,11 +40,6 @@ class MonteCarloPi {
 
 		pi_estimate = 400 * samples_in_circle / n;
 
-		ioPlus.printResult(n);
-		ioPlus.printResult(samples_in_circle);
-		ioPlus.printResult(pi_estimate);
-
-
 		return pi_estimate;
 	}
 
