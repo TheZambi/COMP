@@ -261,24 +261,27 @@ public class JasminAssistant {
         if(leftElement.getType().getTypeOfElement() != ElementType.INT32 || rightElement.getType().getTypeOfElement() != ElementType.INT32)
             return null;
 
-        if(leftElement instanceof Operand && rightElement.isLiteral()) {
-            int incValue = Integer.parseInt(((LiteralElement)rightElement).getLiteral());
-            if(incValue < -128 || incValue > 127) //increment value must be signed byte [-128,127]
-                return null;
-            if(opType == OperationType.SUB)
+        int incValue = 0;
+        if(leftElement instanceof Operand && rightElement.isLiteral()) { // a = a + 1  or  a = a - 1
+            incValue = Integer.parseInt(((LiteralElement) rightElement).getLiteral());
+            if (opType == OperationType.SUB)
                 incValue *= -1;
-            // a = a + 1  or  a = a - 1
-            if(((Operand) leftElement).getName().equals(leftOp.getName())) {
-                return "iinc " + getVirtualReg(method, leftOp) + " " + incValue + "\n";
-            }
-        } else if(rightElement instanceof Operand && leftElement.isLiteral()) {
-            int incValue = Integer.parseInt(((LiteralElement)leftElement).getLiteral());
-            // a = 1 + a
-            if(((Operand) rightElement).getName().equals(leftOp.getName()) && opType == OperationType.ADD) {
-                return "iinc " + getVirtualReg(method, leftOp) + " " + incValue + "\n";
-            }
-        }
-        return null;
+            if(!((Operand) leftElement).getName().equals(leftOp.getName()))
+                return null;
+
+        } else if(rightElement instanceof Operand && leftElement.isLiteral()) { // a = 1 + a
+            incValue = Integer.parseInt(((LiteralElement)leftElement).getLiteral());
+            if(opType == OperationType.SUB)
+                return null;
+            if(!((Operand) rightElement).getName().equals(leftOp.getName()))
+                return null;
+        } else
+            return null;
+
+        if(incValue < -128 || incValue > 127) //increment value must be signed byte [-128,127]
+            return null;
+
+        return "iinc " + getVirtualReg(method, leftOp) + " " + incValue + "\n";
     }
 
     private String generateGetfield(Method method, GetFieldInstruction instruction) {
