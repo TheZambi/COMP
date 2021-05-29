@@ -1,14 +1,12 @@
 package analysis;
 
+import analysis.visitors.*;
 import ast.MySymbolTable;
-import analysis.visitors.InitedVarsVisitor;
-import analysis.visitors.TypeVerificationVisitor;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.JmmParserResult;
 import pt.up.fe.comp.jmm.analysis.JmmAnalysis;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.report.Report;
-import analysis.visitors.SymbolTableVisitor;
 
 import java.io.FileWriter;
 import java.io.IOException;

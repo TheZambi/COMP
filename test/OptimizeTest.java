@@ -12,6 +12,7 @@
  * specific language governing permissions and limitations under the License. under the License.
  */
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import pt.up.fe.comp.TestUtils;
@@ -27,7 +28,7 @@ public class OptimizeTest {
     private void testOptimize(String filename) {
         System.out.println("TEST " + filename);
 
-        OllirResult ollirResult = TestUtils.optimize(SpecsIo.getResource(filename));
+        OllirResult ollirResult = TestUtils.optimize(SpecsIo.getResource(filename), true);
 
         printReports(ollirResult.getReports());
 

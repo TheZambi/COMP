@@ -1,5 +1,7 @@
 package analysis.visitors;
 
+import analysis.enums.SemBinaryOp;
+import analysis.enums.SemUnaryOp;
 import ast.AstUtils;
 import ast.IndistinguishableMethod;
 import ast.Method;
@@ -15,20 +17,6 @@ import java.util.*;
 import java.util.function.Function;
 
 public class TypeVerificationVisitor {
-
-    private enum BiOperator {
-        AND,
-        LESSER,
-        ADD,
-        SUBTRACT,
-        MULTIPLY,
-        DIVIDE
-    }
-
-    private enum UnaryOperator {
-        NEG,
-        NEW
-    }
 
     public static final Type ignore = new Type("-ignore", false);
 
@@ -178,7 +166,7 @@ public class TypeVerificationVisitor {
             throw new RuntimeException("Unary operation without 1 child");
 
         Type ret;
-        switch (UnaryOperator.valueOf(node.get("op"))) {
+        switch (SemUnaryOp.valueOf(node.get("op"))) {
             case NEG:
                 ret = new Type("boolean", false);
                 if (ignore != this.types.get(0) && !this.types.get(0).equals(ret))
@@ -237,7 +225,7 @@ public class TypeVerificationVisitor {
 
         Type left = this.types.get(0), right = this.types.get(1);
         Type leftExpected, rightExpected, ret;
-        switch (BiOperator.valueOf(node.get("op"))) {
+        switch (SemBinaryOp.valueOf(node.get("op"))) {
             case AND:
                 leftExpected = new Type("boolean", false);
                 rightExpected = new Type("boolean", false);

@@ -10,6 +10,7 @@ gradlew.bat
 test.txt
 /out.json
 /out_semantic.json
+/out_optimized.json
 /ollirCode.ollir
 /jasminCode.jasmin
 /*.dot

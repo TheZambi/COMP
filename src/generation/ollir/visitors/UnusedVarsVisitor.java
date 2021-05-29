@@ -1,21 +1,17 @@
-package analysis.visitors;
+package generation.ollir.visitors;
 
 import ast.AstUtils;
 import ast.Method;
 import ast.MySymbolTable;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.table.Symbol;
-import pt.up.fe.comp.jmm.analysis.table.Type;
 import pt.up.fe.comp.jmm.ast.JmmNodeImpl;
-import pt.up.fe.comp.jmm.report.Report;
-import pt.up.fe.comp.jmm.report.ReportType;
-import pt.up.fe.comp.jmm.report.Stage;
 import pt.up.fe.specs.util.SpecsCheck;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-public class InitedVarsVisitor {
+public class UnusedVarsVisitor {
 
     private enum InitStatus {
         UNINITIALIZED,
@@ -32,22 +28,26 @@ public class InitedVarsVisitor {
             this.initStatus = initStatus;
             this.node = node;
         }
+
+        @Override
+        public String toString() {
+            return "VarHolder{" +
+                    "initStatus=" + initStatus +
+                    ", used=" + used +
+                    '}';
+        }
     }
 
+    private final MySymbolTable symbolTable;
 
     private final Map<String, Consumer<JmmNode>> visitMap, previsitMap;
-
-    private final List<Report> reports;
-
-    private final MySymbolTable symbolTable;
 
     private Map<String, VarHolder> initedVars;
     private List<JmmNode> nodesToInit;
 
-    public InitedVarsVisitor(MySymbolTable symbolTable, List<Report> reports) {
-        this.reports = reports;
-
+    public UnusedVarsVisitor(MySymbolTable symbolTable) {
         this.symbolTable = symbolTable;
+
         this.visitMap = new HashMap<>();
         this.visitMap.put("Value", this::valueVisit);
         this.visitMap.put("VarDeclaration", this::varDeclarationVisit);
@@ -72,7 +72,7 @@ public class InitedVarsVisitor {
         if (ancestorOpt.isPresent()) {
             JmmNode ancestor = ancestorOpt.get();
             // Skip when this is the value being attributed
-            if (AstUtils.isAssignment(ancestor) && ancestor.getChildren().get(0) == node) {
+            if (AstUtils.isAssignment(ancestor) && (ancestor.getChildren().get(0) != node || AstUtils.hasMethodCall(ancestor.getChildren().get(1)))) {
                 holder.used = true;
                 return;
             }
@@ -82,6 +82,7 @@ public class InitedVarsVisitor {
             {
                 this.initedVars.put(name, new VarHolder(InitStatus.INITIALIZED, (JmmNodeImpl) node));
                 this.initedVars.get(name).used = true;
+                return;
             }
         }
 
@@ -89,97 +90,14 @@ public class InitedVarsVisitor {
             case UNINITIALIZED:
                 this.nodesToInit.add(node);
                 holder.initStatus = InitStatus.INITIALIZED;
-                reports.add(new Report(ReportType.WARNING, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
-                        "Local variable <" + name + "> was not initialized: Initialized it with a default value"));
                 break;
             case CONDITIONAL:
 //                this.nodesToInit.add(node);
 //                holder.initStatus = InitStatus.INITIALIZED;
-//                reports.add(new Report(ReportType.WARNING, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
-//                        "Local variable <" + name + "> may not have been initialized: Initialized with default value ''"));
                 break;
             default:
                 break;
         }
-    }
-
-    private String addInit(JmmNode node) {
-        String ret = "";
-        JmmNodeImpl methodNode = (JmmNodeImpl) node.getAncestor("MethodDeclaration").get();
-        Method method = symbolTable.getMethod(methodNode.get("uniqueName"));
-        String varName = node.get("object");
-        Type varType = null;
-        List<Symbol> localVariables = method.getLocalVariables();
-
-        for (Symbol s: localVariables) {
-            if (s.getName().equals(varName)) {
-                varType = s.getType();
-                break;
-            }
-        }
-
-        methodNode = (JmmNodeImpl) methodNode.getChildren().get(1);
-        int assignmentNodeIndex = 0;
-        for (int i = 0; i < methodNode.getNumChildren(); i++) {
-            JmmNode child = methodNode.getChildren().get(i);
-            if (!child.getKind().equals("VarDeclaration")) {
-                assignmentNodeIndex = i;
-                break;
-            }
-        }
-
-        JmmNodeImpl assignment = new JmmNodeImpl("Statement");
-        assignment.put("col", "-1");
-        assignment.put("line", "-1");
-        methodNode.add(assignment, assignmentNodeIndex);
-
-        JmmNodeImpl var = new JmmNodeImpl("Value");
-        var.put("col", "-1");
-        var.put("line", "-1");
-        var.put("type", node.get("type"));
-        var.put("object", node.get("object"));
-        assignment.add(var);
-
-        if (varType.isArray()) {
-            JmmNodeImpl unaryOp = new JmmNodeImpl("UnaryOp");
-            unaryOp.put("col", "-1");
-            unaryOp.put("line", "-1");
-            unaryOp.put("op", "NEW");
-            assignment.add(unaryOp);
-
-            JmmNodeImpl array = new JmmNodeImpl("Array");
-            array.put("col", "-1");
-            array.put("line", "-1");
-            unaryOp.add(array);
-
-            JmmNodeImpl arraySize = new JmmNodeImpl("Value");
-            arraySize.put("col", "-1");
-            arraySize.put("line", "-1");
-            arraySize.put("type", "int");
-            arraySize.put("object", "0");
-            array.add(arraySize);
-
-            ret = "new int[0]";
-        } else {
-            JmmNodeImpl init = new JmmNodeImpl("Value");
-            init.put("col", "-1");
-            init.put("line", "-1");
-
-            if (varType.getName().equals("boolean")) {
-                init.put("type", "boolean");
-                init.put("object", "false");
-                ret = "false";
-            } else if (varType.getName().equals("int")) {
-                init.put("type", "int");
-                init.put("object", "0");
-                ret = "0";
-            } else {
-                System.err.println("We do not initialize classes");
-            }
-            assignment.add(init);
-        }
-
-        return ret;
     }
 
     private void varDeclarationVisit(JmmNode node) {
@@ -196,17 +114,12 @@ public class InitedVarsVisitor {
     private void methodDeclarationVisit(JmmNode node) {
         Method m = symbolTable.getMethod(node.get("uniqueName"));
 
-        // Init needed vars
-        for (JmmNode n : this.nodesToInit)
-            addInit(n);
+        DeleteUnusedVarVisitor deleteUnusedVarVisitor = new DeleteUnusedVarVisitor();
 
         // Remove unused vars
-        for (Map.Entry<String, VarHolder> entry : initedVars.entrySet()) {
-            if (!entry.getValue().used) {
-                reports.add(new Report(ReportType.WARNING, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
-                        "Local variable <" + entry.getKey() + "> is declared but never used."));
-            }
-        }
+        for (Map.Entry<String, VarHolder> entry : initedVars.entrySet())
+            if (!entry.getValue().used)
+                deleteUnusedVarVisitor.deleteVar(m, entry.getKey(), node, entry.getValue().node);
     }
 
     private void assignmentVisit(JmmNode node) {
