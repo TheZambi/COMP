@@ -13,6 +13,8 @@ public class ConstantPropagationVisitor {
     private final Map<String, Consumer<JmmNode>> visitMap, previsitMap;
     private final Map<String, VarDescriptor> valuesMap;
 
+    private boolean dirty;
+
     private class VarDescriptor{
         String value;
         String type;
@@ -57,8 +59,7 @@ public class ConstantPropagationVisitor {
         VarDescriptor holder = this.valuesMap.get(name);
 
         if (holder != null) {
-            System.out.println(this.valuesMap);
-            System.out.println(holder);
+            this.dirty = true;
             node.put("type", holder.type);
             node.put("object", holder.value);
         }
@@ -81,12 +82,14 @@ public class ConstantPropagationVisitor {
         String type = node.getChildren().get(1).get("type");
 
         switch (type) {
-            case "int", "boolean" -> this.valuesMap.put(name, new VarDescriptor(node.getChildren().get(1).get("object"), node.getChildren().get(1).get("type")));
+            case "int", "boolean" -> {
+                this.valuesMap.put(name, new VarDescriptor(node.getChildren().get(1).get("object"), node.getChildren().get(1).get("type")));
+            }
             default -> this.valuesMap.remove(name);
         }
     }
 
-    public void visit(JmmNode node) {
+    private void visit(JmmNode node) {
         SpecsCheck.checkNotNull(node, () -> "Node should not be null");
 
         Consumer<JmmNode> visit = this.visitMap.get(node.getKind()),
@@ -104,5 +107,11 @@ public class ConstantPropagationVisitor {
         if (visit != null) {
             visit.accept(node);
         }
+    }
+
+    public boolean propagate(JmmNode node) {
+        dirty = false;
+        visit(node);
+        return dirty;
     }
 }

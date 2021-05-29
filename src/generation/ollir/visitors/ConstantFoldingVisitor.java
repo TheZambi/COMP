@@ -53,6 +53,7 @@ public class ConstantFoldingVisitor {
 
     private final Map<String, Consumer<JmmNode>> visitMap, previsitMap;
     private final List<SimplificationHolder> toSimplify = new ArrayList<>();
+    private boolean dirty;
 
     public ConstantFoldingVisitor() {
         this.visitMap = new HashMap<>();
@@ -95,11 +96,13 @@ public class ConstantFoldingVisitor {
     }
 
     private void methodDeclarationVisit(JmmNode node) {
+        if (!this.toSimplify.isEmpty())
+            this.dirty = true;
         for (SimplificationHolder sh : this.toSimplify)
             sh.simplify();
     }
 
-    public void visit(JmmNode node) {
+    private void visit(JmmNode node) {
         SpecsCheck.checkNotNull(node, () -> "Node should not be null");
 
         Consumer<JmmNode> visit = this.visitMap.get(node.getKind()),
@@ -115,5 +118,11 @@ public class ConstantFoldingVisitor {
         // Preorder: then visit the node
         if (visit != null)
             visit.accept(node);
+    }
+
+    public boolean fold(JmmNode node) {
+        dirty = false;
+        visit(node);
+        return dirty;
     }
 }

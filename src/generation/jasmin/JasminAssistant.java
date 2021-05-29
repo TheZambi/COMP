@@ -93,10 +93,9 @@ public class JasminAssistant {
         char prefix = '\t';
 
         StringBuilder tempCode = new StringBuilder();
-        //TODO: change stack and locals limit
 
         int locals_size = method.getVarTable().size();
-        if(method.getVarTable().get("this") == null)
+        if(method.getVarTable().get("this") == null && !method.getMethodName().equals("main"))
             locals_size++;
 
 

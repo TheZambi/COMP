@@ -74,10 +74,12 @@ public class OptimizationStage implements JmmOptimization {
         ConstantPropagationVisitor constantPropagationVisitor = new ConstantPropagationVisitor();
         ConstantFoldingVisitor constantFoldingVisitor = new ConstantFoldingVisitor();
 
-        for (int i = 0; i < 3; i++) {
-            constantPropagationVisitor.visit(root);
-            constantFoldingVisitor.visit(root);
-        }
+        boolean did_stuff;
+        do {
+            did_stuff = constantPropagationVisitor.propagate(root);
+            did_stuff |= constantFoldingVisitor.fold(root);
+        } while (did_stuff);
+
 
         UnusedVarsVisitor unusedVarsVisitor = new UnusedVarsVisitor(symbolTable);
         unusedVarsVisitor.visit(root);

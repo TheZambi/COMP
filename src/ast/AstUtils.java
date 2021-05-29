@@ -93,12 +93,6 @@ public class AstUtils {
     }
 
     public static boolean isInsideConditionalBranch(JmmNode node) {
-        try {
-            if (node.getChildren().get(0).get("object") != null && node.getChildren().get(0).get("object").equals("samples_in_circle")) {
-                System.out.println("Boda : " + node.getChildren().get(0).get("object") + " : " + node.getAncestor("SelectionStatement").isPresent());
-                System.out.println(node.getAncestor("SelectionStatement"));
-            }
-        }catch(Exception e) {}
         return node.getAncestor("SelectionStatement").isPresent() || node.getAncestor("IterationStatement").isPresent();
     }
 
