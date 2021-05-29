@@ -1,6 +1,8 @@
 import analysis.AnalysisStage;
 import com.sun.tools.jconsole.JConsoleContext;
 import generation.ollir.OptimizationStage;
+import pt.up.fe.comp.jmm.ollir.JmmOptimization;
+import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.ReportType;
 import pt.up.fe.comp.jmm.report.Stage;
@@ -24,7 +26,13 @@ public class Main {
             var semanticResult = new AnalysisStage().semanticAnalysis(parserResult);
             checkReports("SEMANTIC", Stage.SEMANTIC, semanticResult.getReports());
 
-            var ollirResult = new OptimizationStage().toOllir(semanticResult, optimize);
+            JmmOptimization optimization = new OptimizationStage();
+            if (optimize)
+                semanticResult = optimization.optimize(semanticResult);
+            OllirResult ollirResult = optimization.toOllir(semanticResult, optimize);
+            if (optimize)
+                ollirResult = optimization.optimize(ollirResult);
+
             checkReports("OLLIR", Stage.LLIR, ollirResult.getReports());
 
             var jasminResult = new generation.jasmin.BackendStage().toJasmin(ollirResult);

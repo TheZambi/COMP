@@ -733,18 +733,21 @@ public class OllirVisitor {
             value.append("Loop").append(whileCounter).append(":\n");
             value.append(compoundStatement.getValue());
 
+
+            if (!childExpression.getAuxCode().equals("")) {
+                for (String s : childExpression.getAuxCode().split("\n")) {
+                    value.append(s).append("\n");
+                }
+            }
             if (childExpression.getType() == OllirAssistantType.VALUE) {
                 value.append("if (");
-                value.append(childExpression.getValue()).append(" &&.bool 1.bool");
-            } else if (childExpression.getType() == OllirAssistantType.METHODCALL) {
+                value.append(childExpression.getValue()).append(" !.bool ").append(childExpression.getValue());
+            } else {
                 StringBuilder auxCode = new StringBuilder();
                 String auxVar = createAux(childExpression.getValue(), childExpression.getVarType(), OllirAssistantType.METHODCALL, auxCode);
                 value.append(auxCode);
                 value.append("if (");
-                value.append(auxVar).append(" &&.bool 1.bool");
-            } else {
-                value.append("if (");
-                value.append(childExpression.getValue());
+                value.append(auxVar).append(" !.bool ").append(auxVar);
             }
 
             value.append(") goto Loop").append(whileCounter).append(";\n");

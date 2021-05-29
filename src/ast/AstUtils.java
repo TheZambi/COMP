@@ -74,9 +74,16 @@ public class AstUtils {
     }
 
     public static boolean isAssignment(JmmNode node) {
-        if (!node.getKind().equals("Statement"))
-            throw new RuntimeException("Node is not a Statement");
-        return node.getNumChildren() == 2;
+        return node.getKind().equals("Statement") && node.getNumChildren() == 2;
+    }
+
+    public static boolean isBeingAssigned(JmmNode node) {
+        Optional<JmmNode> ancestorOpt = node.getAncestor("Statement");
+        if(ancestorOpt.isPresent()) {
+            JmmNode statement = ancestorOpt.get();
+            return isAssignment(statement) && statement.getChildren().get(0) == node;
+        }
+        return false;
     }
 
 
@@ -86,9 +93,26 @@ public class AstUtils {
     }
 
     public static boolean isInsideConditionalBranch(JmmNode node) {
+        try {
+            if (node.getChildren().get(0).get("object") != null && node.getChildren().get(0).get("object").equals("samples_in_circle")) {
+                System.out.println("Boda : " + node.getChildren().get(0).get("object") + " : " + node.getAncestor("SelectionStatement").isPresent());
+                System.out.println(node.getAncestor("SelectionStatement"));
+            }
+        }catch(Exception e) {}
         return node.getAncestor("SelectionStatement").isPresent() || node.getAncestor("IterationStatement").isPresent();
     }
 
+    public static boolean hasMethodCall(JmmNode node) {
+        if (node.getKind().equals("Method") || node.getKind().equals("MethodCall"))
+            return true;
+
+        for (JmmNode child: node.getChildren()) {
+            if (AstUtils.hasMethodCall(child))
+                return true;
+        }
+
+        return false;
+    }
 
     // POST SYMBOL TABLE
     public static boolean isVariable(JmmNode node, MySymbolTable symbolTable)

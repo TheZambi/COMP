@@ -24,25 +24,18 @@ import pt.up.fe.specs.util.SpecsStrings;
 
 import java.util.List;
 
-public class BackendTest {
+public class OptimizedBackendTest {
 
-    private void testBackend(String filename, String desiredOutput) {
-        System.out.println("TEST " + filename);
-
-        JasminResult jasminResult = TestUtils.backend(SpecsIo.getResource(filename));
-
-        printReports(jasminResult.getReports());
-
-        TestUtils.noErrors(jasminResult.getReports());
-
-        var output = jasminResult.run();
-        assertEquals(SpecsStrings.normalizeFileContents(desiredOutput), SpecsStrings.normalizeFileContents(output.trim()));
+    private void testOptimizedBackend(String filename, String desiredOutput) {
+        testOptimizedBackend(filename, desiredOutput, "");
     }
 
-    private void testBackend(String filename, String desiredOutput, String input) {
+    private void testOptimizedBackend(String filename, String desiredOutput, String input) {
         System.out.println("TEST " + filename);
 
-        JasminResult jasminResult = TestUtils.backend(SpecsIo.getResource(filename));
+        var ollirResult = TestUtils.optimize(SpecsIo.getResource(filename), true);
+        TestUtils.noErrors(ollirResult.getReports());
+        JasminResult jasminResult = TestUtils.backend(ollirResult);
 
         printReports(jasminResult.getReports());
 
@@ -62,23 +55,23 @@ public class BackendTest {
 
     @Test
     public void testWhileAndIF() {
-        testBackend("fixtures/public/WhileAndIF.jmm", "10\r\n10\r\n10\r\n10\r\n10\r\n10\r\n10\r\n10\r\n10\r\n10");
+        testOptimizedBackend("fixtures/public/WhileAndIF.jmm", "10\n10\n10\n10\n10\n10\n10\n10\n10\n10");
     }
 
     @Test
     public void testFindMaximum() {
-        testBackend("fixtures/public/FindMaximum.jmm", "Result: 28");
+        testOptimizedBackend("fixtures/public/FindMaximum.jmm", "Result: 28");
     }
 
     @Test
     public void testHelloWorld() {
-        testBackend("fixtures/public/HelloWorld.jmm", "Hello, World!");
+        testOptimizedBackend("fixtures/public/HelloWorld.jmm", "Hello, World!");
     }
 
-//        Requires setting the random seed
+    //        Requires setting the random seed
     @Test
     public void testLazysort() {
-        testBackend("fixtures/public/Lazysort.jmm", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10");
+        testOptimizedBackend("fixtures/public/Lazysort.jmm", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10");
     }
 //
 //    //        Infinite loop
@@ -87,47 +80,47 @@ public class BackendTest {
 //        testBackend("fixtures/public/Life.jmm", "","1");
 //    }
 
-//        Random
+    //        Random
     @Test
     public void testMonteCarloPi() {
-        testBackend("fixtures/public/MonteCarloPi.jmm", "Insert number: Result: 314", "5000000");
+        testOptimizedBackend("fixtures/public/MonteCarloPi.jmm", "Insert number: Result: 314", "5000000");
     }
 
     @Test
     public void testQuickSort() {
-        testBackend("fixtures/public/QuickSort.jmm", "1\r\n2\r\n3\r\n4\r\n5\r\n6\r\n7\r\n8\r\n9\r\n10");
+        testOptimizedBackend("fixtures/public/QuickSort.jmm", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10");
     }
 
     @Test
     public void testSimple() {
-        testBackend("fixtures/public/Simple.jmm", "30");
+        testOptimizedBackend("fixtures/public/Simple.jmm", "30");
     }
 
-//        Requires Input
+    //        Requires Input
     @Test
     public void testTicTacToe() {
-        testBackend("fixtures/public/TicTacToe.jmm",tictactoeString() ,SpecsIo.getResource("fixtures/public/TicTacToe.input"));
+        testOptimizedBackend("fixtures/public/TicTacToe.jmm",tictactoeString() ,SpecsIo.getResource("fixtures/public/TicTacToe.input"));
     }
 
     // CUSTOM TESTS
     @Test
     public void testOverloading() {
-        testBackend("fixtures/custom/Overloading.jmm", "");
+        testOptimizedBackend("fixtures/custom/Overloading.jmm", "");
     }
 
     @Test
     public void testOverloadingWithIncludes() {
-        testBackend("fixtures/custom/OverloadingWithIncludes.jmm", "1\r\n2\r\n3\r\n4");
+        testOptimizedBackend("fixtures/custom/OverloadingWithIncludes.jmm", "1\n2\n3\n4");
     }
 
     @Test
     public void testBinarySearch() {
-        testBackend("fixtures/custom/BinarySearch.jmm", "3");
+        testOptimizedBackend("fixtures/custom/BinarySearch.jmm", "3");
     }
 
     @Test
     public void testUninitializedVar() {
-        testBackend("fixtures/public/testUninitializedVars.jmm", "1");
+        testOptimizedBackend("fixtures/custom/TestUninitializedVars.jmm", "1");
     }
 
     // Until the game ends, basically infinite

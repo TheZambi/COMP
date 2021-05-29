@@ -76,6 +76,13 @@ public class InitedVarsVisitor {
                 holder.used = true;
                 return;
             }
+        } else {
+            ancestorOpt = node.getAncestor("Return");
+            if(ancestorOpt.isPresent())
+            {
+                this.initedVars.put(name, new VarHolder(InitStatus.INITIALIZED, (JmmNodeImpl) node));
+                this.initedVars.get(name).used = true;
+            }
         }
 
         switch (holder.initStatus) {
@@ -193,16 +200,13 @@ public class InitedVarsVisitor {
         for (JmmNode n : this.nodesToInit)
             addInit(n);
 
-//        // Remove unused vars
-//        for (Map.Entry<String, VarHolder> entry : initedVars.entrySet()) {
-//            if (!entry.getValue().used) {
-//                m.removeLocalVar(entry.getKey());
-//                JmmNodeImpl parent = (JmmNodeImpl) entry.getValue().node.getParent();
-//                parent.removeChild(entry.getValue().node);
-//                reports.add(new Report(ReportType.WARNING, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
-//                        "Local variable <" + entry.getKey() + "> is declared but never used."));
-//            }
-//        }
+        // Remove unused vars
+        for (Map.Entry<String, VarHolder> entry : initedVars.entrySet()) {
+            if (!entry.getValue().used) {
+                reports.add(new Report(ReportType.WARNING, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                        "Local variable <" + entry.getKey() + "> is declared but never used."));
+            }
+        }
     }
 
     private void assignmentVisit(JmmNode node) {

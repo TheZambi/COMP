@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import generation.ollir.OllirAssistant;
-import generation.ollir.OllirVisitor;
+import generation.ollir.visitors.ConstantFoldingVisitor;
+import generation.ollir.visitors.ConstantPropagationVisitor;
+import generation.ollir.visitors.UnusedVarsVisitor;
+import ast.MySymbolTable;
 import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
@@ -36,11 +38,11 @@ public class OptimizationStage implements JmmOptimization {
     @Override
     public OllirResult toOllir(JmmSemanticsResult semanticsResult, boolean optimize) {
 
-        JmmNode node = semanticsResult.getRootNode();
+        JmmNode root = semanticsResult.getRootNode();
+        MySymbolTable symbolTable = (MySymbolTable) semanticsResult.getSymbolTable();
 
-        OllirVisitor visitor = new OllirVisitor(semanticsResult.getSymbolTable(), optimize);
-
-        OllirAssistant result = visitor.visit(node);
+        OllirVisitor visitor = new OllirVisitor(symbolTable, optimize);
+        OllirAssistant result = visitor.visit(root);
 
         // Convert the AST to a String containing the equivalent OLLIR code
         String ollirCode = ""; // Convert node ...
@@ -65,7 +67,31 @@ public class OptimizationStage implements JmmOptimization {
 
     @Override
     public JmmSemanticsResult optimize(JmmSemanticsResult semanticsResult) {
-        // THIS IS JUST FOR CHECKPOINT 3
+
+        JmmNode root = semanticsResult.getRootNode();
+        MySymbolTable symbolTable = (MySymbolTable) semanticsResult.getSymbolTable();
+
+        ConstantPropagationVisitor constantPropagationVisitor = new ConstantPropagationVisitor();
+        ConstantFoldingVisitor constantFoldingVisitor = new ConstantFoldingVisitor();
+
+        for (int i = 0; i < 3; i++) {
+            constantPropagationVisitor.visit(root);
+            constantFoldingVisitor.visit(root);
+        }
+
+        UnusedVarsVisitor unusedVarsVisitor = new UnusedVarsVisitor(symbolTable);
+        unusedVarsVisitor.visit(root);
+
+        try {
+            FileWriter myWriter = new FileWriter("./out_optimized.json");
+            myWriter.write(root.toJson());
+            myWriter.close();
+            System.err.println("Successfully wrote to the file.");
+        } catch (IOException e) {
+            System.err.println("An error occurred.");
+            e.printStackTrace();
+        }
+
         return semanticsResult;
     }
 
