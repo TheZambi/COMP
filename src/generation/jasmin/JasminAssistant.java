@@ -176,9 +176,6 @@ public class JasminAssistant {
             case GETFIELD -> {
                 instCode.append(this.generateGetfield(method, (GetFieldInstruction) instruction));
             }
-            case UNARYOPER -> {
-
-            }
             case BINARYOPER -> {
                 instCode.append(this.generateBiOpInstruction(method, (BinaryOpInstruction) instruction));
             }
@@ -431,6 +428,17 @@ public class JasminAssistant {
         Element rightOperand = operands.get(1);
 
         if(opType == OperationType.LTH) {
+
+            if(leftOperand.isLiteral() && rightOperand.isLiteral()) { // 1 < 2
+                int leftValue = Integer.parseInt(((LiteralElement)leftOperand).getLiteral());
+                int rightValue = Integer.parseInt(((LiteralElement)rightOperand).getLiteral());
+
+                if(leftValue < rightValue)
+                    return "iconst_1\n";
+                else
+                    return "iconst_0\n";
+            }
+
             if(rightOperand.isLiteral() && ((LiteralElement)rightOperand).getLiteral().equals("0")) { // n < 0
 
                 // 0 < 0
@@ -522,8 +530,6 @@ public class JasminAssistant {
             case SUB -> opStr = "sub";
             case MUL -> opStr = "mul";
             case DIV -> opStr = "div";
-//            case ANDB -> opStr = "and";
-//            case NOTB -> opStr = "neg";
         }
         instCode.append(opStr).append("\n");
         return instCode.toString();
@@ -551,11 +557,25 @@ public class JasminAssistant {
                 instCode.append(getElement(method, instruction.getRightOperand()));
                 instCode.append("ifeq ").append(firstLabel).append("\n");
             }
-            case OR -> {
-            }
             case LTH -> {
+                Element leftOperand = instruction.getLeftOperand();
+                Element rightOperand = instruction.getRightOperand();
 
-                instCode.append("if_icmpge ").append(firstLabel).append("\n");
+                if(rightOperand.isLiteral() && ((LiteralElement)rightOperand).getLiteral().equals("0")) { // n < 0
+                    instCode = new StringBuilder();
+                    instCode.append(getElement(method, leftOperand));
+                    instCode.append("ifge ");
+
+                } else if(leftOperand.isLiteral() && ((LiteralElement)leftOperand).getLiteral().equals("0")) { // 0 < n
+                    instCode = new StringBuilder();
+                    instCode.append(getElement(method, rightOperand));
+                    instCode.append("ifle ");
+
+                } else {
+                    instCode.append("if_icmpge ");
+                }
+
+                instCode.append(firstLabel).append("\n");
             }
             case NOTB -> {
                 instCode.append("ifne ").append(firstLabel).append("\n");
