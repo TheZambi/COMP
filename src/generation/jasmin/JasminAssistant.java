@@ -12,7 +12,7 @@ public class JasminAssistant {
     private final StringBuilder code;
     private int lthBranch;
     private String superClass;
-    private HashMap<String, Integer> stackLimits;
+    private final HashMap<String, Integer> stackLimits;
     private int currentInstructionLimit;
 
     public JasminAssistant(ClassUnit ollirClass) {
@@ -32,12 +32,11 @@ public class JasminAssistant {
         code.append(".super ");
         if(ollirClass.getSuperClass() == null) {
             superClass = "java/lang/Object";
-            code.append(superClass);
         }
         else {
             superClass = ollirClass.getSuperClass();
-            code.append(superClass);
         }
+        code.append(superClass);
         code.append("\n");
 
         this.generateFields();
@@ -152,7 +151,7 @@ public class JasminAssistant {
             }
             case GOTO -> {
                 GotoInstruction gotoInstruction = (GotoInstruction) instruction;
-                instCode.append(this.generateGoto(method, gotoInstruction));
+                instCode.append(this.generateGoto(gotoInstruction));
             }
             case BRANCH -> {
                 CondBranchInstruction branchInstruction = (CondBranchInstruction) instruction;
@@ -170,15 +169,15 @@ public class JasminAssistant {
                 }
                 instCode.append("return\n");
              }
-            case PUTFIELD -> {
+            case PUTFIELD ->
                 instCode.append(this.generatePutfield(method, (PutFieldInstruction) instruction));
-            }
-            case GETFIELD -> {
+
+            case GETFIELD ->
                 instCode.append(this.generateGetfield(method, (GetFieldInstruction) instruction));
-            }
-            case BINARYOPER -> {
+
+            case BINARYOPER ->
                 instCode.append(this.generateBiOpInstruction(method, (BinaryOpInstruction) instruction));
-            }
+
             case NOPER -> {
                 currentInstructionLimit++;
                 SingleOpInstruction noOperInstruction = (SingleOpInstruction) instruction;
@@ -212,11 +211,10 @@ public class JasminAssistant {
         } else {
             Instruction rightSide = assignInstruction.getRhs();
 
+            // Check iinc cases (a = a + 2)
             String checkIncrement = this.checkIncrementAssign(method, leftOp, rightSide);
             if(checkIncrement != null)
                 return checkIncrement;
-            // Check iinc cases (a = a + 2)
-
 
             boolean isArrayAssign = false;
 
@@ -258,7 +256,7 @@ public class JasminAssistant {
         if(leftElement.getType().getTypeOfElement() != ElementType.INT32 || rightElement.getType().getTypeOfElement() != ElementType.INT32)
             return null;
 
-        int incValue = 0;
+        int incValue;
         if(leftElement instanceof Operand && rightElement.isLiteral()) { // a = a + 1  or  a = a - 1
             incValue = Integer.parseInt(((LiteralElement) rightElement).getLiteral());
             if (opType == OperationType.SUB)
@@ -429,32 +427,34 @@ public class JasminAssistant {
 
         if(opType == OperationType.LTH) {
 
-            if(leftOperand.isLiteral() && rightOperand.isLiteral()) { // 1 < 2
-                int leftValue = Integer.parseInt(((LiteralElement)leftOperand).getLiteral());
-                int rightValue = Integer.parseInt(((LiteralElement)rightOperand).getLiteral());
-
-                if(leftValue < rightValue)
-                    return "iconst_1\n";
-                else
-                    return "iconst_0\n";
-            }
+//            if(leftOperand.isLiteral() && rightOperand.isLiteral()) { // 1 < 2
+//                int leftValue = Integer.parseInt(((LiteralElement)leftOperand).getLiteral());
+//                int rightValue = Integer.parseInt(((LiteralElement)rightOperand).getLiteral());
+//
+//                if(leftValue < rightValue)
+//                    return "iconst_1\n";
+//                else
+//                    return "iconst_0\n";
+//            }
 
             if(rightOperand.isLiteral() && ((LiteralElement)rightOperand).getLiteral().equals("0")) { // n < 0
+                currentInstructionLimit--;
 
                 // 0 < 0
-                if(leftOperand.isLiteral() && ((LiteralElement)leftOperand).getLiteral().equals("0")) {
-                    return "iconst_0\n";
-                }
+//                if(leftOperand.isLiteral() && ((LiteralElement)leftOperand).getLiteral().equals("0")) {
+//                    return "iconst_0\n";
+//                }
                 instCode = new StringBuilder();
                 instCode.append(getElement(method, leftOperand));
                 instCode.append("ifge ");
 
             } else if(leftOperand.isLiteral() && ((LiteralElement)leftOperand).getLiteral().equals("0")) { // 0 < n
+                currentInstructionLimit--;
 
                 // 0 < 0
-                if(rightOperand.isLiteral() && ((LiteralElement)rightOperand).getLiteral().equals("0")) {
-                    return "iconst_0\n";
-                }
+//                if(rightOperand.isLiteral() && ((LiteralElement)rightOperand).getLiteral().equals("0")) {
+//                    return "iconst_0\n";
+//                }
                 instCode = new StringBuilder();
                 instCode.append(getElement(method, rightOperand));
                 instCode.append("ifle ");
@@ -477,12 +477,12 @@ public class JasminAssistant {
         } else if(opType == OperationType.NOTB) {
             currentInstructionLimit--;
 
-            if(leftOperand.isLiteral()) { // !false or !true
-                if(((LiteralElement)leftOperand).getLiteral().equals("0"))
-                    return "iconst_1\n";
-                else
-                    return "iconst_0\n";
-            }
+//            if(leftOperand.isLiteral()) { // !false or !true
+//                if(((LiteralElement)leftOperand).getLiteral().equals("0"))
+//                    return "iconst_1\n";
+//                else
+//                    return "iconst_0\n";
+//            }
             /*
             if a != false goto 0
             -> const true
@@ -498,20 +498,20 @@ public class JasminAssistant {
             return instCode.toString();
         } else if(opType == OperationType.ANDB) {
 
-            if(leftOperand.isLiteral()) {
-                if(rightOperand.isLiteral()) {
-                    if(((LiteralElement)rightOperand).getLiteral().equals("0")) // x && false
-                        return "iconst_0\n";
-                    else if(((LiteralElement)leftOperand).getLiteral().equals("1")) // true && true
-                        return "iconst_1\n";
-                }
-                if(((LiteralElement)leftOperand).getLiteral().equals("0")) // false && x
-                    return "iconst_0\n";
-
-            } else if(rightOperand.isLiteral()) {
-                if(((LiteralElement)rightOperand).getLiteral().equals("0")) // x && false
-                    return "iconst_0\n";
-            }
+//            if(leftOperand.isLiteral()) {
+//                if(rightOperand.isLiteral()) {
+//                    if(((LiteralElement)rightOperand).getLiteral().equals("0")) // x && false
+//                        return "iconst_0\n";
+//                    else if(((LiteralElement)leftOperand).getLiteral().equals("1")) // true && true
+//                        return "iconst_1\n";
+//                }
+//                if(((LiteralElement)leftOperand).getLiteral().equals("0")) // false && x
+//                    return "iconst_0\n";
+//
+//            } else if(rightOperand.isLiteral()) {
+//                if(((LiteralElement)rightOperand).getLiteral().equals("0")) // x && false
+//                    return "iconst_0\n";
+//            }
 
             instCode.append("ifeq ").append(lthBranch).append("\n")
                     .append(getElement(method, operands.get(1)))
@@ -577,22 +577,21 @@ public class JasminAssistant {
 
                 instCode.append(firstLabel).append("\n");
             }
-            case NOTB -> {
+            case NOTB ->
                 instCode.append("ifne ").append(firstLabel).append("\n");
-            }
+
         }
-//        instCode.append(" ").append(processLabelName(instruction.getLabel()));
 
         return instCode.toString();
     }
 
-    private String generateGoto(Method method, GotoInstruction instruction) {
+    private String generateGoto(GotoInstruction instruction) {
         return "goto " + instruction.getLabel() + "\n";
     }
 
     /*Making sure labels have not the same name as Jasmin generated labels (not and lth)*/
     static String processLabelName(String labelName) {
-        labelName.replaceAll("_", "__");
+        labelName = labelName.replaceAll("_", "__");
         if(labelName.matches("^-?\\d+$")) //label name is integer (can be the same name as a generated label, so we add a character)
             labelName += "_";
         return labelName;
@@ -706,14 +705,8 @@ public class JasminAssistant {
             case ARRAYREF -> {
                 return "[" + convertType(((ArrayType) type).getTypeOfElements());
             }
-            case OBJECTREF -> {
+            case OBJECTREF, CLASS -> {
                 return "L" + ((ClassType) type).getName();
-            }
-            case CLASS -> {
-                return "L" + ((ClassType) type).getName();
-            }
-            case THIS -> {
-                return "";
             }
             case STRING -> {
                 return "Ljava/lang/String;";
