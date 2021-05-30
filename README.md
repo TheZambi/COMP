@@ -9,7 +9,7 @@
 
 GLOBAL Grade of the project: 18
 
-## SUMMARY: (Describe what your tool does and its main features.)
+## SUMMARY:
 
 Our tool allows the compilation of Java-- files into a jasmin file compatible with other Java bytecode.  
   
@@ -29,7 +29,9 @@ The third phase is generation of `OLLIR` code.
 This is the code that makes the transition to jasmin code easier. Here we also do some optimizations, for example, using while templates that require one less `goto` instruction.
 
 The last phase is the jasmin code generation phase.  
-TODO
+In this phase, after parsing our `OLLIR` code with the `OLLIR` tool, we use its output to generate the jasmin code. 
+We do this by selecting JVM instructions in jasmin format for each `OLLIR` method and their instructions so it can be translated into Java bytecode classes using the jasmin tool.
+
 #### Main features
 
 - Method overloading
@@ -40,8 +42,6 @@ TODO
 - Initialization of uninitialized variables
 
 ## DEALING WITH SYNTACTIC ERRORS:
-
-(Describe how the syntactic error recovery of your tool works. Does it exit after the first error?)
 
 Whenever the compiler detects a syntactic error, it attempts to recover, in order to find further errors in the code.  
 This error recovery was implemented in the statements (imports, var declarations, assignements, method calls, etc) and while loops.  
@@ -76,8 +76,16 @@ The following semantic rules implemented by our tool.
 
 ## CODE GENERATION:
 
-(describe how the code generation of your tool works and identify the possible problems your tool has regarding code generation.)
+Taking the previously generated `OLLIR` code, it is parsed using the provided `OLLIR` tool and we take its output (ClassUnit object - ollirClass), using it to generate the JVM code in jasmin format.
+We make use of the variable table containing all registers and the list of instructions of each method to select the corresponding JVM instructions.
 
+Lower cost instructions are selected in multiple cases, like *iinc* instructions on variable increments (i = i + 1) instead of *iadd* and *isub*, use of *if\<cond\>* on comparisons with 0
+and the different constant loading instructions ('iconst_m1', 'iconst_n', 'bipush n', 'sipush n', 'ldc') depending on the constant value.
+
+We also use the variable tables given by the `OLLIR` tool to calculate the local variables limit for each method and, throughout the generation of each method, a required stack size is calculated for each instruction and the maximum size in a method is selected as the stack limit.
+
+As an extra optimization to stack size and operations, some operations are replaced by their results in the generation. When generating LTH operations with both operands being literals the result is pushed into the stack, for example, a = 1 < 2 will result in iconst_1; istore_1 (assuming 1 is the register of 'a').
+This is also applied to ANDB operations (cases when at least one of the operands is a False literal or both are True literals) and NOTB operations.
 
 ## TASK DISTRIBUTION: 
 

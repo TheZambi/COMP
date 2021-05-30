@@ -426,23 +426,23 @@ public class JasminAssistant {
 
         if(opType == OperationType.LTH) {
 
-//            if(leftOperand.isLiteral() && rightOperand.isLiteral()) { // 1 < 2
-//                int leftValue = Integer.parseInt(((LiteralElement)leftOperand).getLiteral());
-//                int rightValue = Integer.parseInt(((LiteralElement)rightOperand).getLiteral());
-//
-//                if(leftValue < rightValue)
-//                    return "iconst_1\n";
-//                else
-//                    return "iconst_0\n";
-//            }
+            if(leftOperand.isLiteral() && rightOperand.isLiteral()) { // 1 < 2
+                int leftValue = Integer.parseInt(((LiteralElement)leftOperand).getLiteral());
+                int rightValue = Integer.parseInt(((LiteralElement)rightOperand).getLiteral());
+
+                if(leftValue < rightValue)
+                    return "iconst_1\n";
+                else
+                    return "iconst_0\n";
+            }
 
             if(rightOperand.isLiteral() && ((LiteralElement)rightOperand).getLiteral().equals("0")) { // n < 0
                 currentInstructionLimit--;
 
-                // 0 < 0
-//                if(leftOperand.isLiteral() && ((LiteralElement)leftOperand).getLiteral().equals("0")) {
-//                    return "iconst_0\n";
-//                }
+//                 0 < 0
+                if(leftOperand.isLiteral() && ((LiteralElement)leftOperand).getLiteral().equals("0")) {
+                    return "iconst_0\n";
+                }
                 instCode = new StringBuilder();
                 instCode.append(getElement(method, leftOperand));
                 instCode.append("ifge ");
@@ -451,9 +451,9 @@ public class JasminAssistant {
                 currentInstructionLimit--;
 
                 // 0 < 0
-//                if(rightOperand.isLiteral() && ((LiteralElement)rightOperand).getLiteral().equals("0")) {
-//                    return "iconst_0\n";
-//                }
+                if(rightOperand.isLiteral() && ((LiteralElement)rightOperand).getLiteral().equals("0")) {
+                    return "iconst_0\n";
+                }
                 instCode = new StringBuilder();
                 instCode.append(getElement(method, rightOperand));
                 instCode.append("ifle ");
@@ -476,12 +476,12 @@ public class JasminAssistant {
         } else if(opType == OperationType.NOTB) {
             currentInstructionLimit--;
 
-//            if(leftOperand.isLiteral()) { // !false or !true
-//                if(((LiteralElement)leftOperand).getLiteral().equals("0"))
-//                    return "iconst_1\n";
-//                else
-//                    return "iconst_0\n";
-//            }
+            if(leftOperand.isLiteral()) { // !false or !true
+                if(((LiteralElement)leftOperand).getLiteral().equals("0"))
+                    return "iconst_1\n";
+                else
+                    return "iconst_0\n";
+            }
             /*
             if a != false goto 0
             -> const true
@@ -497,20 +497,20 @@ public class JasminAssistant {
             return instCode.toString();
         } else if(opType == OperationType.ANDB) {
 
-//            if(leftOperand.isLiteral()) {
-//                if(rightOperand.isLiteral()) {
-//                    if(((LiteralElement)rightOperand).getLiteral().equals("0")) // x && false
-//                        return "iconst_0\n";
-//                    else if(((LiteralElement)leftOperand).getLiteral().equals("1")) // true && true
-//                        return "iconst_1\n";
-//                }
-//                if(((LiteralElement)leftOperand).getLiteral().equals("0")) // false && x
-//                    return "iconst_0\n";
-//
-//            } else if(rightOperand.isLiteral()) {
-//                if(((LiteralElement)rightOperand).getLiteral().equals("0")) // x && false
-//                    return "iconst_0\n";
-//            }
+            if(leftOperand.isLiteral()) {
+                if(rightOperand.isLiteral()) {
+                    if(((LiteralElement)rightOperand).getLiteral().equals("0")) // x && false
+                        return "iconst_0\n";
+                    else if(((LiteralElement)leftOperand).getLiteral().equals("1")) // true && true
+                        return "iconst_1\n";
+                }
+                if(((LiteralElement)leftOperand).getLiteral().equals("0")) // false && x
+                    return "iconst_0\n";
+
+            } else if(rightOperand.isLiteral()) {
+                if(((LiteralElement)rightOperand).getLiteral().equals("0")) // x && false
+                    return "iconst_0\n";
+            }
 
             instCode.append("ifeq ").append(lthBranch).append("\n")
                     .append(getElement(method, operands.get(1)))
@@ -561,11 +561,13 @@ public class JasminAssistant {
                 Element rightOperand = instruction.getRightOperand();
 
                 if(rightOperand.isLiteral() && ((LiteralElement)rightOperand).getLiteral().equals("0")) { // n < 0
+                    currentInstructionLimit--;
                     instCode = new StringBuilder();
                     instCode.append(getElement(method, leftOperand));
                     instCode.append("ifge ");
 
                 } else if(leftOperand.isLiteral() && ((LiteralElement)leftOperand).getLiteral().equals("0")) { // 0 < n
+                    currentInstructionLimit--;
                     instCode = new StringBuilder();
                     instCode.append(getElement(method, rightOperand));
                     instCode.append("ifle ");
