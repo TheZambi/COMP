@@ -25,9 +25,9 @@ public class SyntacticPhase implements JmmParser {
 				FileWriter myWriter = new FileWriter("./out.json");
 				myWriter.write(root.toJson());
 				myWriter.close();
-				System.err.println("Successfully wrote to the file.");
+//				System.err.println("Successfully wrote to the file.");
 			} catch (IOException e) {
-				System.err.println("An error occurred.");
+				System.err.println("An error occurred writing log to './out.json'.");
 				e.printStackTrace();
 			}
 

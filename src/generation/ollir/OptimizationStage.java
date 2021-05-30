@@ -50,12 +50,12 @@ public class OptimizationStage implements JmmOptimization {
         ollirCode = result.getValue();
 
         try {
-            FileWriter myWriter = new FileWriter("./ollirCode.ollir");
+            FileWriter myWriter = new FileWriter("./" + semanticsResult.getSymbolTable().getClassName() + ".ollir");
             myWriter.write(ollirCode);
             myWriter.close();
-            System.err.println("Successfully wrote to the file.");
+//            System.err.println("Successfully wrote to the file.");
         } catch (IOException e) {
-            System.err.println("An error occurred.");
+            System.err.println("An error occurred writing log to './" + semanticsResult.getSymbolTable().getClassName() + ".ollir'");
             e.printStackTrace();
         }
 
@@ -88,9 +88,9 @@ public class OptimizationStage implements JmmOptimization {
             FileWriter myWriter = new FileWriter("./out_optimized.json");
             myWriter.write(root.toJson());
             myWriter.close();
-            System.err.println("Successfully wrote to the file.");
+//            System.err.println("Successfully wrote to the file.");
         } catch (IOException e) {
-            System.err.println("An error occurred.");
+            System.err.println("An error occurred writing log to './out_optimized.json'.");
             e.printStackTrace();
         }
 

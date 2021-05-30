@@ -2,34 +2,35 @@ import org.junit.Test;
 
 import pt.up.fe.comp.TestUtils;
 import pt.up.fe.comp.jmm.JmmParserResult;
+import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.specs.util.SpecsIo;
+
+import java.util.List;
 
 public class ParserTest {
 
     private void testParse(String filename) {
-        testParse(filename, false);
-    }
+        System.out.println("TEST " + filename);
 
-    private void testParse(String filename, Boolean print) {
-        var fileContents = SpecsIo.getResource(filename);
-        JmmParserResult parserResult = TestUtils.parse(fileContents);
-
-        if (print)
-            System.out.println(parserResult.getRootNode().getKind());
+        JmmParserResult parserResult = TestUtils.parse(SpecsIo.getResource(filename));
+        printReports(parserResult.getReports());
+        TestUtils.noErrors(parserResult.getReports());
     }
 
     private void testParseFail(String filename) {
-        testParseFail(filename, false);
+        System.out.println("FAIl " + filename);
+
+        JmmParserResult parserResult = TestUtils.parse(SpecsIo.getResource(filename));
+        printReports(parserResult.getReports());
+        TestUtils.mustFail(parserResult.getReports());
     }
 
-    private void testParseFail(String filename, Boolean print) {
-        var fileContents = SpecsIo.getResource(filename);
-        JmmParserResult parserResult = TestUtils.parse(fileContents);
-
-        if (print)
-            System.out.println("Total Reports: " + parserResult.getReports().size());
-
-        TestUtils.mustFail(parserResult.getReports());
+    private static void printReports(List<Report> reports) {
+        if (reports.size() == 0)
+            System.out.println("No errors found");
+        for (Report r: reports) {
+            System.out.println(r);
+        }
     }
 
     @Test

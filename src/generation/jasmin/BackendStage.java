@@ -56,9 +56,9 @@ public class BackendStage implements JasminBackend {
                 FileWriter myWriter = new FileWriter("./" + ollirClass.getClassName() + ".j");
                 myWriter.write(jasminCode);
                 myWriter.close();
-                System.err.println("Successfully wrote to the file.");
+                System.err.println("Successfully wrote final jasmin to './" + ollirClass.getClassName() + ".j'");
             } catch (IOException e) {
-                System.err.println("An error occurred.");
+                System.err.println("An error occurred writing final jasmin to './" + ollirClass.getClassName() + ".j'");
                 e.printStackTrace();
             }
 

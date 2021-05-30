@@ -76,6 +76,7 @@ TOKEN:
         |   < Import: "import" >
         |   < Open_Bracket: "{" >
         |   < Close_Parenthesis: ")" >
+        |   < Semi_Colon: ";" >
         |   < Class: "class" >
         |   < Extends: "extends" >
         |   < Public: "public" >
@@ -101,7 +102,6 @@ TOKEN:
 // ImportDeclaration, ClassDeclaration, EOF
 SimpleNode Program() #Program : {}
 {
-
    ImportDeclarations()
    ClassDeclaration()
    <EOF> {return jjtThis;}
@@ -110,7 +110,16 @@ SimpleNode Program() #Program : {}
 // {"import", Identifier,{”.”,Identifier },";"}
 void ImportDeclarations() #void : {Token t; String acc;}
 {
-   ((<Import> t=<Identifier>{acc = t.image;} ("." t=<Identifier>{acc += "." + t.image;})* ";" {jjtThis.put("import",acc);}) #ImportDeclaration )*
+    try {
+        ((<Import> t=<Identifier>{acc = t.image;} ("." t=<Identifier>{acc += "." + t.image;})* <Semi_Colon> {jjtThis.put("import",acc);}) #ImportDeclaration )*
+    }
+    catch(ParseException e){
+        String exception = e.toString();
+        int line = Integer.parseInt(exception.split("line ")[1].split(",")[0]); //gets error line
+        int column =  Integer.parseInt(exception.split("column ")[1].split("\\.")[0]); //gets error column
+        this.reports.add(new Report(ReportType.ERROR,Stage.SYNTATIC,line,column , "Error parsing import declaration" ));
+        error_skipto(Semi_Colon);
+    }
 }
 
 //"class",Identifier,["extends",Identifier],"{",{VarDeclaration},{MethodDeclarationPublic}"}"
@@ -125,7 +134,16 @@ void ClassDeclaration() #ClassDeclaration : {Token t, t2;}
 //Type,Identifier,";"
 void VarDeclaration() #VarDeclaration : {Token t;}
 {
-   Symbol() ";"
+    try {
+        Symbol() <Semi_Colon>
+    }
+    catch(ParseException e){
+        String exception = e.toString();
+        int line = Integer.parseInt(exception.split("line ")[1].split(",")[0]); //gets error line
+        int column =  Integer.parseInt(exception.split("column ")[1].split("\\.")[0]); //gets error column
+        this.reports.add(new Report(ReportType.ERROR,Stage.SYNTATIC,line,column , "Error parsing var declaration" ));
+        error_skipto(Semi_Colon);
+    }
 }
 
 //Type,Identifier,"(",[Type,Identifier,{",",Type,Identifier},],")","{",{VarDeclaration},{Statement},"return",Expression,";","}"
@@ -133,7 +151,7 @@ void VarDeclaration() #VarDeclaration : {Token t;}
 void MethodDeclaration() #MethodDeclaration : {Token t;}
 {
    ((Symbol() "(" [Symbol() ("," Symbol() )*] ")") #MethodHeader)
-       ("{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* <Return> Expression() #Return ";" "}") #MethodBody
+       ("{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* <Return> Expression() #Return <Semi_Colon>  "}") #MethodBody
    |
    ((<Static> <Void> <Main> "(" <String> "[" "]" t=<Identifier>{jjtThis.put("stringArrayName", t.image);} ")") #Main) ("{" (LOOKAHEAD(2) VarDeclaration())* (Statement())* "}") #MainBody
 }
@@ -148,10 +166,19 @@ void MethodDeclaration() #MethodDeclaration : {Token t;}
 
 void Statement() #void : {Token t;}
 {
+    try {
         CompoundStatement()|
         SelectionStatement()|
         IterationStatement()|
-        ([LOOKAHEAD(2) t=<Identifier>{jjtThis.put("object",t.image); jjtThis.put("type", "object");}#Value ["[" Expression() #Indexing(2)"]"] "=" ]  Expression() ";") #Statement
+        ([LOOKAHEAD(2) t=<Identifier>{jjtThis.put("object",t.image); jjtThis.put("type", "object");}#Value ["[" Expression() #Indexing(2)"]"] "=" ]  Expression() <Semi_Colon> ) #Statement
+    }
+    catch(ParseException e){
+        String exception = e.toString();
+        int line = Integer.parseInt(exception.split("line ")[1].split(",")[0]); //gets error line
+        int column =  Integer.parseInt(exception.split("column ")[1].split("\\.")[0]); //gets error column
+        this.reports.add(new Report(ReportType.ERROR,Stage.SYNTATIC,line,column , "Error parsing statement" ));
+        error_skipto(Semi_Colon);
+    }
 }
 
 void CompoundStatement() #CompoundStatement : {}
