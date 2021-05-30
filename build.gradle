@@ -60,11 +60,15 @@ sourceSets {
 
 // Create JAR with main class
 jar {
-   manifest {
-      attributes 'Main-Class': 'Main'
-   }
-}
+    manifest {
+        attributes 'Main-Class': 'Main'
+    }
 
+    // TODO: Needs strategy for duplicates
+    from {
+        configurations.runtimeClasspath.collect() {it.isDirectory() ? it : zipTree(it) }
+    }
+}
 
 // Copy JAR to root folder
 task copyJar() {

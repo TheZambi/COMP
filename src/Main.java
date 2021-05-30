@@ -1,5 +1,6 @@
 import analysis.AnalysisStage;
 import com.sun.tools.jconsole.JConsoleContext;
+import generation.jasmin.BackendStage;
 import generation.ollir.OptimizationStage;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
@@ -14,38 +15,55 @@ import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
+
+        System.out.println("Executing with args: " + Arrays.toString(args));
+
+        int fileIndex = 0;
+        if (args.length > 1 && args[1].startsWith("-r="))
+            fileIndex++;
+
         boolean optimize = Arrays.asList(args).contains("-o");
+        if (optimize)
+            fileIndex++;
 
-        try {  // TODO: REMOVE THIS BECAUSE INTELLIJ IS BAD :(
-            System.out.println("Executing with args: " + Arrays.toString(args));
+        String filename = null;
+        if (fileIndex < args.length)
+            filename = args[fileIndex];
 
-            var fileContents = SpecsIo.read("./test.txt");
-            var parserResult = new SyntacticPhase().parse(fileContents);
-            checkReports("PARSER", Stage.SYNTATIC, parserResult.getReports());
-
-            var semanticResult = new AnalysisStage().semanticAnalysis(parserResult);
-            checkReports("SEMANTIC", Stage.SEMANTIC, semanticResult.getReports());
-
-            JmmOptimization optimization = new OptimizationStage();
-            if (optimize)
-                semanticResult = optimization.optimize(semanticResult);
-            OllirResult ollirResult = optimization.toOllir(semanticResult, optimize);
-            if (optimize)
-                ollirResult = optimization.optimize(ollirResult);
-
-            checkReports("OLLIR", Stage.LLIR, ollirResult.getReports());
-
-            var jasminResult = new generation.jasmin.BackendStage().toJasmin(ollirResult);
-            checkReports("JASMIN", Stage.GENERATION, jasminResult.getReports());
-
-            List<String> jasminArgs = new ArrayList();
-            List<String> jasminClasspath = new ArrayList();
-            jasminClasspath.add("compiled");
-            jasminResult.run(jasminArgs, jasminClasspath);
+        if (filename == null) {
+            printHelp();
+            return;
         }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+
+        var fileContents = SpecsIo.read(filename);
+        var parserResult = new SyntacticPhase().parse(fileContents);
+        checkReports("PARSER", Stage.SYNTATIC, parserResult.getReports());
+
+        var semanticResult = new AnalysisStage().semanticAnalysis(parserResult);
+        checkReports("SEMANTIC", Stage.SEMANTIC, semanticResult.getReports());
+
+        JmmOptimization optimization = new OptimizationStage();
+        if (optimize)
+            semanticResult = optimization.optimize(semanticResult);
+        OllirResult ollirResult = optimization.toOllir(semanticResult, optimize);
+        if (optimize)
+            ollirResult = optimization.optimize(ollirResult);
+
+        checkReports("OLLIR", Stage.LLIR, ollirResult.getReports());
+
+        var jasminResult = new BackendStage().toJasmin(ollirResult);
+        checkReports("JASMIN", Stage.GENERATION, jasminResult.getReports());
+
+//        List<String> jasminArgs = new ArrayList();
+//        List<String> jasminClasspath = new ArrayList();
+//        jasminClasspath.add("compiled");
+//        jasminResult.run(jasminArgs, jasminClasspath);
+    }
+
+    public static void printHelp() {
+        System.out.println("java Main [-r=<num>] [-o] <input_file.jmm>");
+        System.out.println("   or");
+        System.out.println("java -jar COMP2021-1D.jar [-r=<num>] [-o] <input_file.jmm>");
     }
 
     public static void checkReports(String phase, Stage stage, List<Report> reports) {

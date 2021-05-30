@@ -53,7 +53,7 @@ public class BackendStage implements JasminBackend {
             String jasminCode = jasminAssistant.getCode();; // Convert node ...
 
             try {
-                FileWriter myWriter = new FileWriter("./jasminCode.jasmin");
+                FileWriter myWriter = new FileWriter("./" + ollirClass.getClassName() + ".j");
                 myWriter.write(jasminCode);
                 myWriter.close();
                 System.err.println("Successfully wrote to the file.");
