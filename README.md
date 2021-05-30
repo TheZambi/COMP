@@ -18,15 +18,15 @@ After that, we run one of the following the commands:
 - `java Main [-r=<num>] [-o] <input_file.jmm>`
 - `java -jar COMP2021-1D.jar [-r=<num>] [-o] <input_file.jmm>`
 
-We start by making a syntactic analysis of the provided file to check if it's according to our grammar.  
+We start by making a syntactic analysis of the provided file to check if it respects our grammar.  
 During this phase, any error made in a while expression, when declaring variables, assigning variables and calling methods are reported with an error message.  
   
-The second phase is a semantic analysis. This checks if what it's written in the file makes sense.  
-Here we report mismatches of variable assignments, returns values and many other things. We also try to "clean" up the code a bit by, for example, deleting files that are not being used anywhere.
+The second phase is a semantic analysis. This checks if what is written in the file makes sense and is consistent.  
+Here we report mismatches of variable assignments, returns values and many other things. We also try to "clean" up the code a bit by, for example, deleting variables that are not being used anywhere.
 We also do some optimizations in this phase such as constant propagation and folding, making the code more efficient.  
   
 The third phase is generation of `OLLIR` code.  
-This is code that makes the transition to jasmin code easier. Here we also do some optimizations, for example, using while templates that require one less `goto` instruction.
+This is the code that makes the transition to jasmin code easier. Here we also do some optimizations, for example, using while templates that require one less `goto` instruction.
 
 The last phase is the jasmin code generation phase.  
 TODO
@@ -45,7 +45,7 @@ TODO
 
 Whenever the compiler detects a syntactic error, it attempts to recover, in order to find further errors in the code.  
 This error recovery was implemented in the statements (imports, var declarations, assignements, method calls, etc) and while loops.  
-These errors are added to a list called `reports` and latter shown to the user.
+These errors are added to a list called `reports` and later shown to the user.
   
 These errors are detected inside a `try` statement and dealt with inside the `catch`statement.  
 To deal with these errors we created a `error_skipto` function that receives as a parameter a token value, and skips all tokens until it reaches the one received as parameter.
