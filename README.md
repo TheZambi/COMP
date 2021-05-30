@@ -50,7 +50,7 @@ The following semantic rules implemented by our tool.
 - Instantiation of literal types using `new`
 - Invalid use of `this` inside `static Main`
 - Conflicting method signatures
-- TODO: Return type mismatch
+- Return type mismatch
 
 **Warnings:**
 - Uninitialized variables

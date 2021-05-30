@@ -33,6 +33,7 @@ public class TypeVerificationVisitor {
     public TypeVerificationVisitor(MySymbolTable symbolTable, List<Report> reports) {
         this.symbolTable = symbolTable;
         this.reports = reports;
+
         this.visitMap = new HashMap<>();
         this.visitMap.put("BinaryOp", this::binaryOpVisit);
         this.visitMap.put("Statement", this::assignmentVisit);
@@ -44,6 +45,7 @@ public class TypeVerificationVisitor {
         this.visitMap.put("ClassObj", this::classObjVisit);
         this.visitMap.put("Array", this::arrayVisit);
         this.visitMap.put("Type", this::typeVisit);
+        this.visitMap.put("Return", this::returnVisit);
 
         this.typesToCheck = new HashSet<>();
         this.typesToCheck.add("BinaryOp");
@@ -53,12 +55,35 @@ public class TypeVerificationVisitor {
         this.typesToCheck.add("Length");
         this.typesToCheck.add("Indexing");
         this.typesToCheck.add("Array");
+        this.typesToCheck.add("Return");
 
         this.validTypes = new HashSet<>();
         this.validTypes.add("int");
         this.validTypes.add("boolean");
         this.validTypes.add(symbolTable.getClassName());
         this.validTypes.addAll(symbolTable.getImports());
+    }
+
+    private Type returnVisit(JmmNode node) {
+        if (this.types.isEmpty()) {
+            this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                    "Methods cannot have an empty return"));
+            return null;
+        }
+
+        Type retType = this.types.get(0);
+        if (retType == ignore)
+            return null;
+
+        Optional<JmmNode> ancestorOpt = node.getAncestor("MethodDeclaration");
+        if (ancestorOpt.isPresent()) {
+            Method m = symbolTable.getMethod(ancestorOpt.get().get("uniqueName"));
+            if (!m.getReturnType().equals(retType))
+                this.reports.add(new Report(ReportType.ERROR, Stage.SEMANTIC, Integer.parseInt(node.get("line")), Integer.parseInt(node.get("col")),
+                        "Return type mismatch: Expected <" + m.getReturnType().getName() + (m.getReturnType().isArray() ? "[]" : "")+ "> but received <" + retType.getName() + (retType.isArray() ? "[]" : "") + ">"));
+        }
+
+        return null;
     }
 
     private Type typeVisit(JmmNode node) {
