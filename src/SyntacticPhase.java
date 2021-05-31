@@ -1,4 +1,5 @@
 
+import pt.up.fe.comp.jmm.JmmNode;
 import pt.up.fe.comp.jmm.JmmParser;
 import pt.up.fe.comp.jmm.JmmParserResult;
 import pt.up.fe.comp.jmm.report.Report;
@@ -21,13 +22,22 @@ public class SyntacticPhase implements JmmParser {
 
 //    		root.dump(""); // prints the tree on the screen
 
+			String name = "out";
 			try {
-				FileWriter myWriter = new FileWriter("./out.json");
+				for(JmmNode jn : root.getChildren())
+				{
+					if(jn.getKind().equals("ClassDeclaration")) {
+						name = jn.get("name");
+						break;
+					}
+				}
+
+				FileWriter myWriter = new FileWriter("./" + name + ".json");
 				myWriter.write(root.toJson());
 				myWriter.close();
 //				System.err.println("Successfully wrote to the file.");
 			} catch (IOException e) {
-				System.err.println("An error occurred writing log to './out.json'.");
+				System.err.println("An error occurred writing log to '." + name + ".json'.");
 				e.printStackTrace();
 			}
 

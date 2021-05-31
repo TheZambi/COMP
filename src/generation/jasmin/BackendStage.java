@@ -1,5 +1,6 @@
 package generation.jasmin;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -13,6 +14,7 @@ import org.specs.comp.ollir.OllirErrorException;
 
 import pt.up.fe.comp.jmm.jasmin.JasminBackend;
 import pt.up.fe.comp.jmm.jasmin.JasminResult;
+import pt.up.fe.comp.jmm.jasmin.JasminUtils;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
 import pt.up.fe.comp.jmm.report.Stage;
@@ -61,6 +63,11 @@ public class BackendStage implements JasminBackend {
                 System.err.println("An error occurred writing final jasmin to './" + ollirClass.getClassName() + ".j'");
                 e.printStackTrace();
             }
+
+
+            JasminUtils.assemble(new File("./" + ollirClass.getClassName() + ".j"), new File("."));
+            System.err.println("Successfully wrote final class to './" + ollirClass.getClassName() + ".class'");
+
 
             // More reports from this stage
             List<Report> reports = new ArrayList<>();

@@ -14,3 +14,7 @@ test.txt
 /*.dot
 /*.j
 /*.ollir
+*.j
+*.symbols.txt
+*.json
+*.class
