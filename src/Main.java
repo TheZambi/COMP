@@ -19,7 +19,7 @@ public class Main {
         System.out.println("Executing with args: " + Arrays.toString(args));
 
         int fileIndex = 0;
-        if (args.length > 1 && args[1].startsWith("-r="))
+        if (args.length > 1 && args[0].startsWith("-r="))
             fileIndex++;
 
         boolean optimize = Arrays.asList(args).contains("-o");
