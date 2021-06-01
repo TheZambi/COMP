@@ -79,12 +79,12 @@ The following semantic rules implemented by our tool.
 ### Ollir
 
 Using the AST created during the semantic phase we create a string containing all `OLLIR` code needed to generate the JVM code.  
-Here we use a post order visitor, generating firstly the code needed for the inner instruction. This way we can create auxiliary variables with ease, without having to iterate all children nodes of the current node.  
-
-It's also during this phase we make optimizations to while expressions. This optimization consists of removing one unnecessary `goto` instruction making our jasmin code more optimized.
-
-In our implementation, in order to make things easier to parse and create JVM code, we considered every `if` statement to be a `if not` statement instead. 
-
+Here we use a post order visitor, generating firstly the code needed for the inner instruction. This way we can create auxiliary variables with ease, without having to iterate all children nodes of the current node.   
+  
+It's also during this phase we make optimizations to while expressions. This optimization consists of removing one unnecessary `goto` instruction making our jasmin code more optimized.  
+  
+In our implementation, in order to make things easier to parse and create JVM code, we considered every `if` statement to be a `if not` statement instead.   
+  
 ### Jasmin
 
 Taking the previously generated `OLLIR` code, it is parsed using the provided `OLLIR` tool and we take its output (ClassUnit object - ollirClass), using it to generate the JVM code in jasmin format.
