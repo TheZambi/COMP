@@ -44,7 +44,7 @@ We do this by selecting JVM instructions in jasmin format for each `OLLIR` metho
 ## DEALING WITH SYNTACTIC ERRORS:
 
 Whenever the compiler detects a syntactic error, it attempts to recover, in order to find further errors in the code.  
-This error recovery was implemented in the statements (imports, var declarations, assignements, method calls, etc) and while loops.  
+This error recovery was implemented in the statements (imports, var declarations, assignments, method calls, etc) and while loops.  
 These errors are added to a list called `reports` and later shown to the user.
   
 These errors are detected inside a `try` statement and dealt with inside the `catch`statement.  
@@ -79,24 +79,24 @@ The following semantic rules implemented by our tool.
 ### Ollir
 
 Using the AST created during the semantic phase we create a string containing all `OLLIR` code needed to generate the JVM code.  
-Here we use a post order visitor, generating firstly the code needed for the inner instruction. This way we can create auxiliary variables with ease, without having to iterate all children nodes of the current node.   
+Here we use a post order visitor, starting by generating the necessary code for the inner instructions. This way, we can create auxiliary variables with ease, without having to iterate through all the children of the current node.   
+
+It's also during this phase that we make optimizations to while expressions. This optimization consists of removing one unnecessary `goto` instruction from each loop, making our final jasmin code more optimized.  
   
-It's also during this phase we make optimizations to while expressions. This optimization consists of removing one unnecessary `goto` instruction making our jasmin code more optimized.  
-  
-In our implementation, in order to make things easier to parse and create JVM code, we considered every `if` statement to be a `if not` statement instead.   
+In our implementation, in order to facilitate the creation of JVM code, we considered every `if` statement to be an `if not` statement instead.   
   
 ### Jasmin
 
-Taking the previously generated `OLLIR` code, it is parsed using the provided `OLLIR` tool and we take its output (ClassUnit object - ollirClass), using it to generate the JVM code in jasmin format.
-We make use of the variable table containing all registers and the list of instructions of each method to select the corresponding JVM instructions.
+Taking the previously generated `OLLIR` code, parsed using the provided `OLLIR` tool, we take its output (ClassUnit object - ollirClass), using it to generate the JVM code in jasmin format.
+We make use of the variable table containing both all the registers and the list of instructions of each method to select the corresponding JVM instructions.
 
-Lower cost instructions are selected in multiple cases, like *iinc* instructions on variable increments (i = i + 1) instead of *iadd* and *isub*, use of *if\<cond\>* on comparisons with 0
-and the different constant loading instructions ('iconst_m1', 'iconst_n', 'bipush n', 'sipush n', 'ldc') depending on the constant value.
+Lower cost instructions are selected in multiple cases, such as `iinc` instructions on variable increments `(i = i + 1)` instead of `iadd` and `isub`, the use of `if\<cond\>` on comparisons with 0
+and also the different constant loading instructions (`iconst_m1`, `iconst_n`, `bipush n`, `sipush n`, `ldc`), depending on the constant value.
 
-We also use the variable tables given by the `OLLIR` tool to calculate the local variables limit for each method and, throughout the generation of each method, a required stack size is calculated for each instruction and the maximum size in a method is selected as the stack limit.
+We also use the variable tables given by the `OLLIR` tool to calculate the local variable limit for each method and, throughout the generation of each method, a required stack size is calculated for each instruction, and the maximum size in a method is selected as the stack limit.
 
-As an extra optimization to stack size and operations, some operations are replaced by their results in the generation. When generating LTH operations with both operands being literals the result is pushed into the stack, for example, a = 1 < 2 will result in iconst_1; istore_1 (assuming 1 is the register of 'a').
-This is also applied to ANDB operations (cases when at least one of the operands is a False literal or both are True literals) and NOTB operations.
+As an extra optimization to stack size and operations, some operations are replaced by their results in the generation. When generating `LTH` operations with both operands being literals the result is pushed into the stack, for example, `a = 1 < 2` will result in `iconst_1; istore_1` (assuming 1 is the register of 'a').
+This is also applied to `ANDB` operations (cases when at least one of the operands is a `False` literal or both are `True` literals) and `NOTB` operations.
 
 ## TASK DISTRIBUTION: 
 
@@ -116,10 +116,10 @@ This is also applied to ANDB operations (cases when at least one of the operands
   - Due to the lack of knowledge of external method's signatures, we only support external calls made inside internal (own class) calls
   - If the return type is known by the user, attributing the method call to a variable will make the call successful
 - Method overloading with method resolution
-    - Finds the closest match to the paramenters and uses it if there are not conflicting signatures
+    - Finds the closest match to the parameters and uses it if there are not conflicting signatures
     - Useful when combined with external method calls whose return type is unknown
 - Good error recovery
-- Descriptive error reports
+- Descriptive error & warning reports
 - Constant propagation & folding
 - Removal of unused variables (after all other optimizations)
 - Initialization of uninitialized variables
@@ -131,3 +131,5 @@ This is also applied to ANDB operations (cases when at least one of the operands
 - No register allocation
 - Some errors bypass our error recovery
     - `a = 2; = 3;` would stop the syntactic analysis
+- Multiple useless consecutive attributions will not be removed if the variable being attributed is used elsewhere
+- Does not fold constant sub-expressions such as `(1 + 2) * a` to `3 * a`
