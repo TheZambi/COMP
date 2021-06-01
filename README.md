@@ -76,6 +76,12 @@ The following semantic rules implemented by our tool.
 
 ## CODE GENERATION:
 
+### Ollir
+
+
+
+### Jasmin
+
 Taking the previously generated `OLLIR` code, it is parsed using the provided `OLLIR` tool and we take its output (ClassUnit object - ollirClass), using it to generate the JVM code in jasmin format.
 We make use of the variable table containing all registers and the list of instructions of each method to select the corresponding JVM instructions.
 
@@ -101,7 +107,9 @@ This is also applied to ANDB operations (cases when at least one of the operands
 
 ## PROS:
 
-- Method calls respect the rules of Java (inside ifs, whiles or even other method calls)
+- Method calls can be called anywhere
+  - Due to the lack of knowledge of external method's signatures, we only support external calls made inside internal (own class) calls
+  - If the return type is known by the user, attributing the method call to a variable will make the call successful
 - Method overloading with method resolution
     - Finds the closest match to the paramenters and uses it if there are not conflicting signatures
     - Useful when combined with external method calls whose return type is unknown

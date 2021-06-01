@@ -314,91 +314,32 @@ public class OllirVisitor {
 
         OllirAssistant.addAllAuxCode(auxCode, childrenResults);
 
-        Type methodVarType = childrenResults.get(1).getVarType();
-
-
-        boolean checker = childrenResults.get(0).getType() == OllirAssistantType.VALUE;
-        checker = checker && methodVarType == null;
-        checker = checker && symbolTable.getImports().contains(childrenResults.get(0).getValue());
-
-
-        if (checker) // method does not exist. Is imported or from super
-        {
-            value.append("invokestatic(");
-        } else
-            value.append("invokevirtual(");
-        if (methodVarType == null) {
-            Optional<JmmNode> ancestorOpt = node.getAncestor("Statement");
-
-            if (ancestorOpt.isEmpty()) {
-                throw new RuntimeException("Value not inside method");
-            }
-
-            JmmNode ancestor = ancestorOpt.get();
-
-
-            if (ancestor.getChildren().size() == 1) {
-                try {
-                    methodVarType = new Type(node.get("ret_type"), node.get("ret_type_array").equals("true"));
-                } catch (NullPointerException e) {
-                    methodVarType = new Type("void", false);
-                }
-            }
-            else {
-                Optional<JmmNode> ancestorOptMethod = node.getAncestor("MethodDeclaration");
-
-                if (ancestorOptMethod.isEmpty()) {
-                    throw new RuntimeException("Value not inside method");
-                }
-                Method method = symbolTable.getMethod(ancestorOptMethod.get().get("uniqueName"));
-
-                String varName;
-                boolean notIndex = true;
-                if (ancestor.getChildren().get(0).getKind().equals("Value"))
-                    varName = ancestor.getChildren().get(0).get("object"); //variable
-                else {//indexing
-                    varName = ancestor.getChildren().get(0).getChildren().get(0).get("object");
-                    notIndex = false;
-                }
-
-                List<Symbol> symbolList = new ArrayList<>();
-
-                symbolList.addAll(method.getLocalVariables());
-                symbolList.addAll(method.getParameters());
-
-
-                for (Symbol s : symbolList) {
-                    if (s.getName().equals(varName)) {
-                        methodVarType = new Type(s.getType().getName(), s.getType().isArray() && notIndex);
-                        break;
-                    }
-                }
-                if (methodVarType == null) {
-                    List<Symbol> fieldList = symbolTable.getFields();
-                    for (Symbol s : fieldList) {
-                        if (s.getName().equals(varName)) {
-                            methodVarType = new Type(s.getType().getName(), s.getType().isArray() && notIndex);
-                            break;
-                        }
-                    }
-                }
-            }
+        Type methodVarType;
+        try {
+            methodVarType = new Type(node.get("ret_type"), node.get("ret_type_array").equals("true"));
+        } catch (NullPointerException e) {
+            methodVarType = new Type("void", false);
         }
 
+        boolean checker = childrenResults.get(0).getType() == OllirAssistantType.VALUE
+            && symbolTable.getImports().contains(childrenResults.get(0).getValue());
+
+        if (checker) // method does not exist. Is imported or from super
+            value.append("invokestatic(");
+        else
+            value.append("invokevirtual(");
+
         switch (childrenResults.get(0).getType()) {
-            case FIELD:
+            case FIELD -> {
                 String auxVarF = createGetFieldAux(childrenResults.get(0), auxCode);
                 value.append(auxVarF);
-                break;
-            case VALUE:
-                value.append(childrenResults.get(0).getValue());
-                break;
-            case UN_OP_NEW_OBJ:
-            case METHODCALL:
+            }
+            case VALUE -> value.append(childrenResults.get(0).getValue());
+            case UN_OP_NEW_OBJ, METHODCALL -> {
                 String auxVar = createAux(childrenResults.get(0).getValue(),
                         childrenResults.get(0).getVarType(), childrenResults.get(0).getType(), auxCode);
                 value.append(auxVar);
-                break;
+            }
         }
         value.append(childrenResults.get(1).getValue()).append(")").append(convertTypeToString(methodVarType));
 
