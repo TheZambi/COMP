@@ -119,6 +119,8 @@ public class MethodReturnExtractor {
                 }
             }
 
+            case "SelectionStatement", "IterationStatement" -> new Type("boolean", false);
+
             default -> null;
         };
 

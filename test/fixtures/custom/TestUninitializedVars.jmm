@@ -6,6 +6,7 @@ class UninitializedVar {
 		int a;
 		int b;
         int c;
+        int e;
 
         boolean d;
 
@@ -17,9 +18,11 @@ class UninitializedVar {
 		a = 1;
 		a = a + b;
 
-        b = 5 + a;
+        b = 5 + 99 * e + a;
 
 		c = a * a * b;
+
+        if (OverloadingTest.retBool()) {} else {}
 
         b = myClass.test(OverloadingTest.retInt(), OverloadingTest.retInt()) + OverloadingTest.retInt();
 
