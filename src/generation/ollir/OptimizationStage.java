@@ -54,12 +54,12 @@ public class OptimizationStage implements JmmOptimization {
             ollirCode = result.getValue();
 
             try {
-                FileWriter myWriter = new FileWriter("./" + semanticsResult.getSymbolTable().getClassName() + ".symbols.txt");
+                FileWriter myWriter = new FileWriter("./" + symbolTable.getClassName() + ".symbols.txt");
                 myWriter.write(semanticsResult.getSymbolTable().print());
                 myWriter.close();
 //            System.err.println("Successfully wrote to the file.");
             } catch (IOException e) {
-                System.err.println("An error occurred writing symbol table to './" + semanticsResult.getSymbolTable().getClassName() + ".symbols.txt'");
+                System.err.println("An error occurred writing symbol table to './" + symbolTable.getClassName() + ".symbols.txt'");
                 e.printStackTrace();
             }
 
