@@ -14,6 +14,8 @@ import pt.up.fe.comp.jmm.analysis.JmmSemanticsResult;
 import pt.up.fe.comp.jmm.ollir.JmmOptimization;
 import pt.up.fe.comp.jmm.ollir.OllirResult;
 import pt.up.fe.comp.jmm.report.Report;
+import pt.up.fe.comp.jmm.report.ReportType;
+import pt.up.fe.comp.jmm.report.Stage;
 
 /**
  * Copyright 2021 SPeCS.
@@ -42,37 +44,46 @@ public class OptimizationStage implements JmmOptimization {
         MySymbolTable symbolTable = (MySymbolTable) semanticsResult.getSymbolTable();
 
         OllirVisitor visitor = new OllirVisitor(symbolTable, optimize);
-        OllirAssistant result = visitor.visit(root);
-
-        // Convert the AST to a String containing the equivalent OLLIR code
-        String ollirCode = ""; // Convert node ...
-
-        ollirCode = result.getValue();
 
         try {
-            FileWriter myWriter = new FileWriter("./" + semanticsResult.getSymbolTable().getClassName() + ".symbols.txt");
-            myWriter.write(semanticsResult.getSymbolTable().print());
-            myWriter.close();
+            OllirAssistant result = visitor.visit(root);
+
+            // Convert the AST to a String containing the equivalent OLLIR code
+            String ollirCode = ""; // Convert node ...
+
+            ollirCode = result.getValue();
+
+            try {
+                FileWriter myWriter = new FileWriter("./" + semanticsResult.getSymbolTable().getClassName() + ".symbols.txt");
+                myWriter.write(semanticsResult.getSymbolTable().print());
+                myWriter.close();
 //            System.err.println("Successfully wrote to the file.");
-        } catch (IOException e) {
-            System.err.println("An error occurred writing symbol table to './" + semanticsResult.getSymbolTable().getClassName() + ".symbols.txt'");
+            } catch (IOException e) {
+                System.err.println("An error occurred writing symbol table to './" + semanticsResult.getSymbolTable().getClassName() + ".symbols.txt'");
+                e.printStackTrace();
+            }
+
+            try {
+                FileWriter myWriter = new FileWriter("./" + semanticsResult.getSymbolTable().getClassName() + ".ollir");
+                myWriter.write(ollirCode);
+                myWriter.close();
+//            System.err.println("Successfully wrote to the file.");
+            } catch (IOException e) {
+                System.err.println("An error occurred writing log to './" + semanticsResult.getSymbolTable().getClassName() + ".ollir'");
+                e.printStackTrace();
+            }
+
+            // More reports from this stage
+            List<Report> reports = new ArrayList<>();
+
+            return new OllirResult(semanticsResult, ollirCode, reports);
+        } catch (Exception e) {
             e.printStackTrace();
+            semanticsResult.getReports().add(new Report(ReportType.ERROR, Stage.SEMANTIC, -1, -1,
+                    "Internal parser error on OllirVisitor"));
         }
 
-        try {
-            FileWriter myWriter = new FileWriter("./" + semanticsResult.getSymbolTable().getClassName() + ".ollir");
-            myWriter.write(ollirCode);
-            myWriter.close();
-//            System.err.println("Successfully wrote to the file.");
-        } catch (IOException e) {
-            System.err.println("An error occurred writing log to './" + semanticsResult.getSymbolTable().getClassName() + ".ollir'");
-            e.printStackTrace();
-        }
-
-        // More reports from this stage
-        List<Report> reports = new ArrayList<>();
-
-        return new OllirResult(semanticsResult, ollirCode, reports);
+        return null;
     }
 
     @Override
@@ -95,12 +106,12 @@ public class OptimizationStage implements JmmOptimization {
         unusedVarsVisitor.visit(root);
 
         try {
-            FileWriter myWriter = new FileWriter("./out_optimized.json");
+            FileWriter myWriter = new FileWriter("./" + semanticsResult.getSymbolTable().getClassName() + "_optimized.json");
             myWriter.write(root.toJson());
             myWriter.close();
 //            System.err.println("Successfully wrote to the file.");
         } catch (IOException e) {
-            System.err.println("An error occurred writing log to './out_optimized.json'.");
+            System.err.println("./" + semanticsResult.getSymbolTable().getClassName() + "_optimized.json");
             e.printStackTrace();
         }
 

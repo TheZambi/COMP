@@ -73,9 +73,7 @@ public class UnusedVarsVisitor {
         if (ancestorOpt.isPresent()) {
             JmmNode ancestor = ancestorOpt.get();
             // Skip when this is the value being attributed
-            // or it being used in a method call
-            if (AstUtils.hasMethodCall(ancestor)
-                || ancestor.getChildren().get(0) != node && AstUtils.isAssignment(ancestor)) {
+            if (!AstUtils.isAssignment(ancestor) || ancestor.getChildren().get(0) != node) {
                 holder.used = true;
                 return;
             }

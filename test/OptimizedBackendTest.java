@@ -120,7 +120,7 @@ public class OptimizedBackendTest {
 
     @Test
     public void testUninitializedVar() {
-        testOptimizedBackend("fixtures/custom/TestUninitializedVars.jmm", "1");
+        testOptimizedBackend("fixtures/custom/TestUninitializedVars.jmm", "144");
     }
 
     // Until the game ends, basically infinite

@@ -316,6 +316,7 @@ public class OllirVisitor {
 
         Type methodVarType = childrenResults.get(1).getVarType();
 
+
         boolean checker = childrenResults.get(0).getType() == OllirAssistantType.VALUE;
         checker = checker && methodVarType == null;
         checker = checker && symbolTable.getImports().contains(childrenResults.get(0).getValue());
@@ -336,8 +337,13 @@ public class OllirVisitor {
             JmmNode ancestor = ancestorOpt.get();
 
 
-            if (ancestor.getChildren().size() == 1)
-                methodVarType = new Type("void", false);
+            if (ancestor.getChildren().size() == 1) {
+                try {
+                    methodVarType = new Type(node.get("ret_type"), node.get("ret_type_array").equals("true"));
+                } catch (NullPointerException e) {
+                    methodVarType = new Type("void", false);
+                }
+            }
             else {
                 Optional<JmmNode> ancestorOptMethod = node.getAncestor("MethodDeclaration");
 
@@ -368,8 +374,8 @@ public class OllirVisitor {
                     }
                 }
                 if (methodVarType == null) {
-                    List<Symbol> filedList = symbolTable.getFields();
-                    for (Symbol s : filedList) {
+                    List<Symbol> fieldList = symbolTable.getFields();
+                    for (Symbol s : fieldList) {
                         if (s.getName().equals(varName)) {
                             methodVarType = new Type(s.getType().getName(), s.getType().isArray() && notIndex);
                             break;
@@ -652,7 +658,7 @@ public class OllirVisitor {
     }
 
     private OllirAssistant handleStatement(JmmNode node, List<OllirAssistant> childrenResults) {
-        OllirAssistantType statementType;
+        OllirAssistantType statementType = null;
         StringBuilder value = new StringBuilder();
         StringBuilder auxCode = new StringBuilder();
 
